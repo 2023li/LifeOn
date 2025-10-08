@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee0d7bbd2c16ce946bace0e1275c196f, type: 3}
+  m_Name: "BD_\u6D4B\u8BD5_LV0"
+  m_EditorClassIdentifier: 
+  BuildingOnlyID: test_lv0
+  BuildingName: "\u6D4B\u8BD5LV0"
+  BuildingInfoPanel: {fileID: 0}
+  ProvidePopulation: 0
+  MaxPopulation: 0
+  ProvideInventory: 0
+  ProvideSupplyAndDemand: 1
+  SupplyStacks:
+  - Type: 0
+    Need: 0
+  ProvideEmployment: 0
+  MaxEmployment: 0
+  BasicSalary: 0
+  ProvideHaloEffect: 0
+  HaloEffectValues:
+  - Type: 0
+    Range: 0
+    Value: 0
+  ProvideUpgradable: 1
+  Upgradable_EXPCondition:
+    Condition: 0
+    BaseValue: 1
+  NeedEXP: 2
+  NextLevel: {fileID: 11400000, guid: 786f75cb196b0ca4e993361efeb8f404, type: 2}

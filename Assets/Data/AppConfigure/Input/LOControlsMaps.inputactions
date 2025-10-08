@@ -1,0 +1,158 @@
+{
+    "name": "LOControlsMaps",
+    "maps": [
+        {
+            "name": "GamePlay",
+            "id": "6bbfc787-7db4-4f68-a313-9f53a9526d3c",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "65e78664-ae97-4a2b-ac1d-65541f77fbaf",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "7d664e9c-25f0-45a6-bb78-575cc44b051d",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "UI",
+            "id": "d801d8c9-05ad-45bc-9b19-cd4e4abb1c22",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "f2ed592b-c02e-4872-b68d-70367edcbefa",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "ce95ad3e-699b-4dde-b34f-65af9cafa147",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Building",
+            "id": "53e8dde2-50bd-4a5c-8dec-ff1adcfc713b",
+            "actions": [
+                {
+                    "name": "ConfirmPlacement",
+                    "type": "Button",
+                    "id": "99d90692-898e-4cd4-b992-33109b4f4c24",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ConfirmConstruction",
+                    "type": "Button",
+                    "id": "db6cb01c-dccd-4bb4-b656-df400be366c5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Press(behavior=1)",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "e9058c1e-aa67-4ab3-88fd-8060fb1b93b1",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ConfirmPlacement",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aa9d2805-64cd-431c-afe6-79f6d21e361c",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ConfirmConstruction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Global",
+            "id": "1b1d950e-8aa1-4c73-897b-68de5b53714c",
+            "actions": [
+                {
+                    "name": "MousePostionChange",
+                    "type": "PassThrough",
+                    "id": "cc610a03-6c03-4542-b70e-14f2c98d729b",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Back",
+                    "type": "Button",
+                    "id": "543ed556-24bd-4887-82c9-1c67b4fb98fa",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c211fcf5-bb50-4d74-bf4f-a26beeac9d35",
+                    "path": "<Pointer>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MousePostionChange",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f5d485da-b623-4c9e-acb9-0f4a03af8ce2",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Back",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
