@@ -6,16 +6,16 @@ using System.Collections;
 using System;
 
 
-public class VisualFieldController : MonoBehaviour,ISlideHandler
+public class VisualFieldController : MonoBehaviour, ISlideHandler
 {
-  
+
 
     #region 字段与属性
 
-   
 
-    [Header("相机控制引用")]
-    [SerializeField] private CinemachineVirtualCamera virtualCamera; // 用于平移的虚拟相机或相机父物体
+
+
+    private CinemachineVirtualCamera virtualCamera; // 用于平移的虚拟相机或相机父物体
     private Camera realCamera; // 主相机引用
 
     [Header("屏幕边缘平移设置")]
@@ -35,16 +35,18 @@ public class VisualFieldController : MonoBehaviour,ISlideHandler
     private Vector3 targetPanVelocity = Vector3.zero;
     private bool isPanning = false;
 
-  
+
+
+    private Vector3 manualControl = new Vector3(0, 0, -999);
 
     #endregion
 
     #region Unity生命周期方法
 
     // 在编辑器中重置组件时自动绑定字段
-  
 
-  
+
+
 
     private void Start()
     {
@@ -79,16 +81,26 @@ public class VisualFieldController : MonoBehaviour,ISlideHandler
     // LateUpdate用于处理相机相关的逻辑，确保在所有Update之后执行
     private void LateUpdate()
     {
-        if (InputManager.Instance.IsGamePlayMap())
+
+        if (lookToTargetPos.z == 0)
         {
-
-
-
-            HandleScreenEdgePan();
-            ApplySmoothZoom(); // 在这里应用平滑缩放
+            HandleLookTo();
         }
 
-
+        if (InputManager.Instance.IsGamePlayMap())
+        {
+            if (manualControl.z == 0)
+            {
+                Debug.Log("手动控制逻辑没实现");
+            }
+            else
+            {
+                //没有任何输入的时候才会直执行这个
+                HandleScreenEdgePan();
+            }
+            //即使手动控制也可以缩放
+            ApplySmoothZoom();
+        }
     }
 
     #endregion
@@ -107,7 +119,6 @@ public class VisualFieldController : MonoBehaviour,ISlideHandler
 
 
     #region 相机控制逻辑
-
     private void HandleScreenEdgePan()
     {
 
@@ -122,30 +133,30 @@ public class VisualFieldController : MonoBehaviour,ISlideHandler
         isPanning = false;
 
         float horizontalFactor = 0;
-        if (mousePosition.x < screenEdgeThreshold_Hor && mousePosition.x >= 0)
+        if (mousePosition.x < screenEdgeThreshold_Hor)
         {
             horizontalFactor = -(1 - (mousePosition.x / screenEdgeThreshold_Hor));
             isPanning = true;
         }
-        else if (mousePosition.x > Screen.width - screenEdgeThreshold_Hor && mousePosition.x <= Screen.width)
+        else if (mousePosition.x > Screen.width - screenEdgeThreshold_Hor)
         {
             horizontalFactor = 1 - ((Screen.width - mousePosition.x) / screenEdgeThreshold_Hor);
             isPanning = true;
         }
 
         float verticalFactor = 0;
-        if (mousePosition.y < screenEdgeThreshold_Vert && mousePosition.y >= 0)
+        if (mousePosition.y < screenEdgeThreshold_Vert)
         {
             verticalFactor = -(1 - (mousePosition.y / screenEdgeThreshold_Vert));
             isPanning = true;
         }
-        else if (mousePosition.y > Screen.height - screenEdgeThreshold_Vert && mousePosition.y <= Screen.height)
+        else if (mousePosition.y > Screen.height - screenEdgeThreshold_Vert)
         {
             verticalFactor = 1 - ((Screen.height - mousePosition.y) / screenEdgeThreshold_Vert);
             isPanning = true;
         }
 
-        
+
         horizontalFactor = Mathf.Clamp(horizontalFactor, -1, 1);
         verticalFactor = Mathf.Clamp(verticalFactor, -1, 1);
 
@@ -171,10 +182,6 @@ public class VisualFieldController : MonoBehaviour,ISlideHandler
 
     }
 
-
- 
-
-
     /// <summary>
     /// 【新增】在LateUpdate中平滑地应用视野缩放
     /// </summary>
@@ -194,11 +201,49 @@ public class VisualFieldController : MonoBehaviour,ISlideHandler
         }
     }
 
-   
+
+
 
     #endregion
 
-  
+    #region API
+
+    private Vector3 lookToTargetPos = new Vector3(0, 0, -999);
+    public void LookTo(Vector3 worldPos)
+    {
+        lookToTargetPos = worldPos;
+    }
+    private void HandleLookTo()
+    {
+
+        // 目标与相机的XY向量（Z清零）
+        var cur = CommonTools.Vector3NoZ(realCamera.transform.position);
+        var target = CommonTools.Vector3NoZ(lookToTargetPos);
+        var dir = target - cur;
+
+        // 用平方模比较更省
+        if (dir.sqrMagnitude > 0.05f * 0.05f)
+        {
+            // 每帧朝目标推进一小步（世界坐标，不会越过目标）
+            var step = maxPanSpeed * Time.deltaTime;
+            var next = Vector3.MoveTowards(cur, target, step);
+            // 只改XY，保留原Z
+            realCamera.transform.position = new Vector3(next.x, next.y, realCamera.transform.position.z);
+        }
+        else
+        {
+            // 直接吸附到目标XY，避免残余误差抖动
+            realCamera.transform.position = new Vector3(target.x, target.y, realCamera.transform.position.z);
+            // 清空目标（建议别用魔法数，见下方建议）
+            lookToTargetPos = new Vector3(0, 0, -999);
+        }
+    }
+
+
+
+
+    #endregion
+
 
     #region 调试与可视化
 
@@ -302,7 +347,7 @@ public class VisualFieldController : MonoBehaviour,ISlideHandler
         GUI.Label(new Rect(10, 10, 300, 120), debugText, style);
     }
 
- 
+
 
     #endregion
 

@@ -2,11 +2,79 @@
     "name": "LOControlsMaps",
     "maps": [
         {
+            "name": "Global",
+            "id": "1b1d950e-8aa1-4c73-897b-68de5b53714c",
+            "actions": [
+                {
+                    "name": "MousePostionChange",
+                    "type": "PassThrough",
+                    "id": "cc610a03-6c03-4542-b70e-14f2c98d729b",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MouseWheelChanges",
+                    "type": "PassThrough",
+                    "id": "d2f8fabe-1fc4-4f17-b5a0-d4e9d71d2d6f",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Back",
+                    "type": "Button",
+                    "id": "543ed556-24bd-4887-82c9-1c67b4fb98fa",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c211fcf5-bb50-4d74-bf4f-a26beeac9d35",
+                    "path": "<Pointer>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MousePostionChange",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fa1c9b05-6a49-4a34-aab4-f908665770a0",
+                    "path": "<Pointer>/scroll",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MouseWheelChanges",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f5d485da-b623-4c9e-acb9-0f4a03af8ce2",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Back",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
             "name": "GamePlay",
             "id": "6bbfc787-7db4-4f68-a313-9f53a9526d3c",
             "actions": [
                 {
-                    "name": "New action",
+                    "name": "MoveCamera",
                     "type": "Button",
                     "id": "65e78664-ae97-4a2b-ac1d-65541f77fbaf",
                     "expectedControlType": "",
@@ -23,7 +91,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "MoveCamera",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -100,54 +168,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "ConfirmConstruction",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                }
-            ]
-        },
-        {
-            "name": "Global",
-            "id": "1b1d950e-8aa1-4c73-897b-68de5b53714c",
-            "actions": [
-                {
-                    "name": "MousePostionChange",
-                    "type": "PassThrough",
-                    "id": "cc610a03-6c03-4542-b70e-14f2c98d729b",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
-                    "name": "Back",
-                    "type": "Button",
-                    "id": "543ed556-24bd-4887-82c9-1c67b4fb98fa",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                }
-            ],
-            "bindings": [
-                {
-                    "name": "",
-                    "id": "c211fcf5-bb50-4d74-bf4f-a26beeac9d35",
-                    "path": "<Pointer>/position",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "MousePostionChange",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "f5d485da-b623-4c9e-acb9-0f4a03af8ce2",
-                    "path": "<Keyboard>/escape",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Back",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

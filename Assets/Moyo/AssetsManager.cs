@@ -5,6 +5,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sirenix.OdinInspector;
 using Moyo.Unity;
+
+
+
+
+
+
 public class AssetsManager : MonoSingleton<AssetsManager>
 {
     [System.Serializable]
@@ -12,81 +18,80 @@ public class AssetsManager : MonoSingleton<AssetsManager>
     {
         public bool AutoRelease = true;
         [LabelText("超时延迟")]
-        public int Timeout = 1000;
+        public int Timeout = 0; // 0 or below disables the timeout
         public int Priority = 0;
     }
 
-    private Dictionary<string, AsyncOperationHandle> handles;
-    private Dictionary<string, int> referenceCount;
+    private readonly Dictionary<string, AsyncOperationHandle> assetHandles = new();
+    private readonly Dictionary<string, int> referenceCount = new();
 
     protected override void Initialize()
     {
-        handles = new Dictionary<string, AsyncOperationHandle>();
-        referenceCount = new Dictionary<string, int>();
+        assetHandles.Clear();
+        referenceCount.Clear();
     }
 
 
     // 异步加载资源
     public async Task<T> LoadAssetAsync<T>(string address, LoadOptions options = null) where T : class
     {
-        if (referenceCount.ContainsKey(address))
+        if (assetHandles.TryGetValue(address, out var existing))
         {
             referenceCount[address]++;
-            return handles[address].Result as T;
+            if (!existing.IsDone)
+                await existing.Task; // 确保完成后再取 Result
+
+
+            Debug.Log("使用了已加载的资源");
+            return existing.Result as T; // 若第一次用 object 预热，这里 as T 仍可能 null
         }
 
-        var operation = Addressables.LoadAssetAsync<T>(address);
-        handles[address] = operation;
+        var op = Addressables.LoadAssetAsync<T>(address);
+        assetHandles[address] = op;
         referenceCount[address] = 1;
 
-        // 设置超时
-        var timeoutTask = Task.Delay(options?.Timeout ?? 1000);
-        var completedTask = await Task.WhenAny(operation.Task, timeoutTask);
-
-        if (completedTask == timeoutTask)
+        var timeout = options?.Timeout ?? 0;
+        if (timeout > 0)
         {
-            Debug.LogError($"加载资源超时: {address}");
-            Addressables.Release(operation);
-            return null;
-        }
-
-        if (operation.Status == AsyncOperationStatus.Succeeded)
-        {
-            return operation.Result;
-        }
-        else
-        {
-            // 输出具体的异常信息
-            if (operation.OperationException != null)
+            var completed = await Task.WhenAny(op.Task, Task.Delay(timeout));
+            if (completed != op.Task)
             {
-                Debug.LogError($"加载资源失败: {address}。错误: {operation.OperationException}");
-            }
-            else
-            {
-                Debug.LogError($"加载资源失败: {address}，状态: {operation.Status}");
-            }
-            // 确保失败时释放句柄并清理字典
-            if (handles.ContainsKey(address))
-            {
-                handles.Remove(address);
+                Debug.LogError($"加载资源超时: {address}");
+                Addressables.Release(op);
+                assetHandles.Remove(address);
                 referenceCount.Remove(address);
+                return null;
             }
-            Addressables.Release(operation);
-            return null;
         }
+
+        await op.Task;
+
+        if (op.Status == AsyncOperationStatus.Succeeded)
+            return op.Result;
+
+        Debug.LogError(op.OperationException != null
+            ? $"加载资源失败: {address}。错误: {op.OperationException}"
+            : $"加载资源失败: {address}，状态: {op.Status}");
+
+        if (assetHandles.ContainsKey(address))
+        {
+            assetHandles.Remove(address);
+            referenceCount.Remove(address);
+        }
+        Addressables.Release(op);
+        return null;
     }
 
-    // 实例化游戏对象
     public async Task<GameObject> InstantiateAsync(string address, Vector3 position, Quaternion rotation, Transform parent = null)
     {
-        var operation = Addressables.InstantiateAsync(address, position, rotation, parent);
-        handles[address] = operation;
+        // 不再覆盖 assetHandles，实例化本身返回的句柄无需缓存（或用单独字典）
+        var op = Addressables.InstantiateAsync(address, position, rotation, parent);
 
         if (!referenceCount.ContainsKey(address))
             referenceCount[address] = 0;
         referenceCount[address]++;
 
-        return await operation.Task;
+        return await op.Task;
     }
 
     // 释放资源
@@ -97,10 +102,10 @@ public class AssetsManager : MonoSingleton<AssetsManager>
         referenceCount[address]--;
         if (referenceCount[address] <= 0)
         {
-            if (handles.ContainsKey(address))
+            if (assetHandles.TryGetValue(address, out var h))
             {
-                Addressables.Release(handles[address]);
-                handles.Remove(address);
+                Addressables.Release(h);
+                assetHandles.Remove(address);
             }
             referenceCount.Remove(address);
         }

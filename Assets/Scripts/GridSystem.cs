@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Moyo.Unity;
 using Sirenix.OdinInspector;
 using Unity.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -61,28 +62,7 @@ public class GridSystem : MonoSingleton<GridSystem>
         }
     }
 
-    private void Update()
-    {
-        //Test();
-
-
-    }
-
-    public int r = 4;
-
-    public void Test()
-    {
-        ClearHighlight();
-        var c = GetScreenPointCoordinates(Input.mousePosition);
-
-        var cs = CoordinateCalculator.GetBuildingCells(c, r);
-
-        //SetTile(Layer.特效, cs, visualizationTile);
-
-        SetHighlight(cs);
-
-
-    }
+   
 
     //------------------------------------读写坐标-------------------------------------
     //获取鼠标/移动端为点击位置
@@ -121,9 +101,52 @@ public class GridSystem : MonoSingleton<GridSystem>
         return mapGrid.CellToWorld(coor);
     }
 
+    [Button]
+    void Test()
+    {
+        List<Vector3Int> gridPositions = new List<Vector3Int>()
+        {
+            new Vector3Int(0,0,0),
+            new Vector3Int(1,0,0),
+            new Vector3Int(0,1,0),
+            new Vector3Int(1,1,0),
+        };
+
+        SetHighlight(gridPositions);
+
+        Debug.Log
+              (GetCenterFromCellCenters(gridPositions));
+    }
+
+
+    /// <summary>
+    /// 更精确的方法：考虑网格对齐
+    /// </summary>
+    /// <param name="gridPositions">网格坐标列表</param>
+    /// <returns>精确对齐网格的中心点世界坐标</returns>
+    public Vector3 GetCenterFromCellCenters(List<Vector3Int> gridPositions)
+    {
+        if (gridPositions == null || gridPositions.Count == 0)
+        {
+            Debug.LogWarning("网格坐标列表为空");
+            return Vector3.zero;
+        }
+
+        // 获取每个格子的中心世界坐标并累加
+        Vector3 sumWorld = Vector3.zero;
+        foreach (Vector3Int gridPos in gridPositions)
+        {
+            // 获取每个格子的中心世界坐标
+            Vector3 cellCenterWorld = mapGrid.GetCellCenterWorld(gridPos);
+            sumWorld += cellCenterWorld;
+        }
+
+        // 计算平均值
+        return CommonTools.Vector3NoZ(sumWorld / gridPositions.Count);
+    }
 
     //------------------------------------坐标属性-------------------------------------
-   
+
 
     public bool IsOccupy(Vector3Int coor)
     {

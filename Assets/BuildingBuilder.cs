@@ -8,9 +8,9 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
 {
     private enum ConstructionProcess
     {
-        无,
-        放置,
-        等待确认,
+        None,
+        Placing,
+        AwaitingConfirmation,
     }
 
     [ShowInInspector, ReadOnly]
@@ -23,9 +23,10 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
     [SerializeField] private TileBase green;
     [SerializeField] private TileBase red;
     [SerializeField] private TileBase crimson; // 深红：占用
-    [LabelText("确认条预制体")] public RectTransform confirmBarPrefab;
+    [LabelText("确认面板地址")] [SerializeField] private string confirmPanelAddress = "BuildingConfirmPanel";
+    [SerializeField] private UIManager.UILayer confirmPanelLayer = UIManager.UILayer.Popup;
 
-    private RectTransform _confirmBarRT;
+    private BuildingConfirmPanel confirmPanelInstance;
     private bool lastPlacementValid;
     private readonly List<Vector3Int> tempBuildingCells = new List<Vector3Int>(256);
     private Vector3 _confirmAnchorWorld;
@@ -49,7 +50,8 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
 
     private void OnDisable()
     {
-        if (InputManager.Instance == null) return;
+        if (!InputManager.HasInstance) return;
+
 
         InputManager.Instance.Building_OnChangeCoordinates -= Handle_放置;
         InputManager.Instance.Building_OnConfirmPlacement -= Handle_确认放置;
@@ -72,7 +74,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
         GridSystem.Instance.ClearHighlight();
         HideConfirmBar();
 
-        process = ConstructionProcess.放置;
+        process = ConstructionProcess.Placing;
 
         // 打开建造输入
         InputManager.Instance?.EnableBuildingMap();
@@ -82,7 +84,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
     [Button]
     public void ExitBuildMode()
     {
-        process = ConstructionProcess.无;
+        process = ConstructionProcess.None;
         currentBuildDef = null;
         tempBuildingCells.Clear();
         GridSystem.Instance.ClearHighlight();
@@ -98,7 +100,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
     // 鼠标移动时（来自 InputManager 的转发）
     private void Handle_放置(Vector2 screenMousePos)
     {
-        if (process != ConstructionProcess.放置 || currentBuildDef == null) return;
+        if (process != ConstructionProcess.Placing || currentBuildDef == null) return;
 
         // 等距网格中的连续坐标（中心）
         var center = GridSystem.Instance.GetScreenPointInGridPos(screenMousePos);
@@ -138,13 +140,13 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
 
     private void Handle_确认放置()
     {
-        if (process != ConstructionProcess.放置 || currentBuildDef == null) return;
+        if (process != ConstructionProcess.Placing || currentBuildDef == null) return;
 
         if (!lastPlacementValid) return;
         foreach (var cell in tempBuildingCells)
             if (GridSystem.Instance.IsOccupy(cell)) return;
 
-        process = ConstructionProcess.等待确认;
+        process = ConstructionProcess.AwaitingConfirmation;
 
         // 计算确认条锚点（优先用占地中心，兜底用鼠标格）
         _confirmAnchorWorld = GetWorldAnchorFromCells(tempBuildingCells);
@@ -153,6 +155,11 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
 
     public bool TryHandleBack()
     {
+        if (process == ConstructionProcess.None)
+        {
+            return false; 
+        }
+
         Handle_取消();
         return true;
     }
@@ -160,14 +167,14 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
     {
         switch (process)
         {
-            case ConstructionProcess.放置:
+            case ConstructionProcess.Placing:
                 // 放置态：彻底退出建造
                 ExitBuildMode();
                 break;
 
-            case ConstructionProcess.等待确认:
+            case ConstructionProcess.AwaitingConfirmation:
                 // 等待确认：退回放置
-                process = ConstructionProcess.放置;
+                process = ConstructionProcess.Placing;
                 HideConfirmBar();
                 GridSystem.Instance.ClearHighlight();
                 break;
@@ -180,7 +187,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
 
     private void Handle_完成建造()
     {
-        if (process != ConstructionProcess.等待确认 || currentBuildDef == null) return;
+        if (process != ConstructionProcess.AwaitingConfirmation || currentBuildDef == null) return;
 
         // 二次占用校验（避免竞态）
         foreach (var cell in tempBuildingCells)
@@ -188,7 +195,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
             if (GridSystem.Instance.IsOccupy(cell))
             {
                 Debug.LogWarning("目标区域已被占用，建造失败，返回放置状态。");
-                process = ConstructionProcess.放置;
+                process = ConstructionProcess.Placing;
                 HideConfirmBar();
                 return;
             }
@@ -207,7 +214,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
         b.Construction(currentBuildDef);
 
         Debug.Log("完成建造");
-        process = ConstructionProcess.无;
+        process = ConstructionProcess.None;
         HideConfirmBar();
         GridSystem.Instance.ClearHighlight();
 
@@ -217,9 +224,9 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
 
     private void Handle_取消建造()
     {
-        if (process != ConstructionProcess.等待确认) return;
+        if (process != ConstructionProcess.AwaitingConfirmation) return;
 
-        process = ConstructionProcess.放置;
+        process = ConstructionProcess.Placing;
         HideConfirmBar();
         GridSystem.Instance.ClearHighlight();
         // 保持在建造模式中，仍允许继续放置
@@ -229,38 +236,34 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
 
     #region UI：确认条
 
-    private void ShowConfirmBarAt(Vector3 anchorWorldPos)
+    private async void ShowConfirmBarAt(Vector3 anchorWorldPos)
     {
-        var canvas = UIManager.Instance.GetMainCanvas();
-        var cam = InputManager.Instance.RealCamera;
+        if (UIManager.Instance == null) return;
 
-        if (_confirmBarRT == null)
+        var args = new BuildingConfirmPanel.Args
         {
-            _confirmBarRT = Instantiate(confirmBarPrefab, canvas.transform);
-            var buttons = _confirmBarRT.GetComponentsInChildren<UnityEngine.UI.Button>(true);
-            foreach (var btn in buttons)
-            {
-                if (btn.name.Contains("Confirm")) btn.onClick.AddListener(Handle_完成建造);
-                else if (btn.name.Contains("Cancel")) btn.onClick.AddListener(Handle_取消建造);
-            }
-        }
+            OnConfirm = Handle_完成建造,
+            OnCancel = Handle_取消建造
+        };
 
-        _confirmBarRT.gameObject.SetActive(true);
-        var cg = _confirmBarRT.GetComponent<CanvasGroup>();
-        if (cg) { cg.alpha = 1f; cg.interactable = true; cg.blocksRaycasts = true; }
+        var address = string.IsNullOrWhiteSpace(confirmPanelAddress) ? null : confirmPanelAddress;
+        var panel = await UIManager.Instance.ShowPanel<BuildingConfirmPanel>(confirmPanelLayer, address, args);
+        if (panel == null) return;
 
-        var sp = cam.WorldToScreenPoint(anchorWorldPos + new Vector3(0, GridSystem.Instance.mapGrid.cellSize.y * 0.6f, 0));
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvas.GetComponent<RectTransform>(), sp, canvas.worldCamera, out var lp);
-        _confirmBarRT.anchoredPosition = lp;
+        confirmPanelInstance = panel;
+        confirmPanelInstance.SetWorldAnchor(anchorWorldPos);
     }
 
     private void HideConfirmBar()
     {
-        if (_confirmBarRT == null) return;
-        var cg = _confirmBarRT.GetComponent<CanvasGroup>();
-        if (cg) { cg.alpha = 0f; cg.interactable = false; cg.blocksRaycasts = false; }
-        _confirmBarRT.gameObject.SetActive(false);
+        if (UIManager.Instance == null) return;
+
+        if (UIManager.Instance.IsPanelLoaded<BuildingConfirmPanel>())
+        {
+            UIManager.Instance.HidePanel<BuildingConfirmPanel>();
+        }
+
+        confirmPanelInstance = null;
     }
 
     #endregion

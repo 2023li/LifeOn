@@ -160,9 +160,12 @@ namespace Moyo.Unity
         private UILayer? currentModalLayer = null;
 
         [LabelText("参考分辨率")]
-        [SerializeField] private Vector2 canvasReferenceResolution = new Vector2(1920,1080);
+        [SerializeField] private Vector2 canvasReferenceResolution = new Vector2(1920, 1080);
 
 
+
+        [LabelText("同层仅显示一个面板")]
+        [SerializeField] private bool enforceSinglePanelPerLayer = true;
         private Canvas mainCanvas;
 
         public Canvas GetMainCanvas()
@@ -186,7 +189,7 @@ namespace Moyo.Unity
             {
                 CreateUILayer(config);
             }
-           
+
         }
 
         private void SetupMainCanvas()
@@ -229,47 +232,81 @@ namespace Moyo.Unity
         // --- 改进 ---：添加了`args`参数用于向面板传递数据。
         public async Task<T> ShowPanel<T>(UILayer layer, string address = null, params object[] args) where T : PanelBase
         {
+            // 1) 基础校验：目标层必须已初始化
             if (!layerParents.ContainsKey(layer))
             {
-                Debug.LogError($"层级{layer}未初始化！");
+                Debug.LogError($"层级 {layer} 未初始化！");
                 return null;
             }
 
             Type panelType = typeof(T);
+
+            // 2) 面板已加载：复用并切层、传参、显示
             if (loadedPanels.TryGetValue(panelType, out var existingPanel) && existingPanel != null)
             {
-                // 面板已加载，直接显示
+                // 若已加载但父节点不是目标层，先归层
                 if (existingPanel.transform.parent != layerParents[layer])
                 {
                     existingPanel.transform.SetParent(layerParents[layer], false);
                     UpdatePanelLayer(existingPanel, layer);
                 }
 
-                // --- 改进 ---：即使是已存在的面板也传递新数据。
+                // 即使已存在也传入最新数据
                 existingPanel.OnPanelCreated(args);
-                existingPanel.Show();
 
+                // 同层只留一个激活面板
+                if (enforceSinglePanelPerLayer)
+                {
+                    EnsureSinglePanelInLayer(layer, existingPanel);
+                }
+                else
+                {
+                    if (!activePanels[layer].Contains(existingPanel))
+                        activePanels[layer].Add(existingPanel);
+                }
+
+                // 显示（携带参数）
+                existingPanel.Show(args);
+
+                // 模态层处理
                 if (IsModalLayer(layer))
                 {
                     SetModalLayer(layer);
                 }
+
                 return existingPanel as T;
             }
 
-            // 面板未加载，现在加载
+            // 3) 面板未加载：异步加载、挂载到层、记录、显示
             var newPanel = await LoadAndCreatePanel<T>(address, args);
             if (newPanel != null)
             {
+                // 设置父节点为目标层
                 newPanel.transform.SetParent(layerParents[layer], false);
-                activePanels[layer].Add(newPanel);
+
+                // 同层只留一个激活面板
+                if (enforceSinglePanelPerLayer)
+                {
+                    EnsureSinglePanelInLayer(layer, newPanel);
+                }
+                else
+                {
+                    activePanels[layer].Add(newPanel);
+                }
+
+                // 记录已加载
                 loadedPanels[panelType] = newPanel;
 
+                // 模态层处理
                 if (IsModalLayer(layer))
                 {
                     SetModalLayer(layer);
                 }
-                newPanel.Show();
+
+                // 显示（携带参数）
+                newPanel.Show(args);
             }
+
             return newPanel;
         }
 
@@ -277,28 +314,23 @@ namespace Moyo.Unity
         {
             address ??= typeof(T).Name;
 
-            try
-            {
-                var panelAsset = await AssetsManager.Instance.LoadAssetAsync<GameObject>(address);
-                if (panelAsset == null)
-                {
-                    Debug.LogError($"加载UI面板预制体失败：{address}");
-                    return null;
-                }
-                var panelObj = Instantiate(panelAsset);
-                panelObj.name = typeof(T).Name;
-                var panelComponent = panelObj.GetComponent<T>() ?? panelObj.AddComponent<T>();
 
-                // --- 改进 ---：调用创建生命周期方法。
-                panelComponent.OnPanelCreated(args);
-
-                return panelComponent;
-            }
-            catch (Exception e)
+            var panelAsset = await AssetsManager.Instance.LoadAssetAsync<GameObject>(address);
+            if (panelAsset == null)
             {
-                Debug.LogError($"加载UI面板{typeof(T).Name}时出错：{e.Message}");
+                Debug.LogError($"加载UI面板预制体失败：{address}");
                 return null;
             }
+            var panelObj = Instantiate(panelAsset);
+            panelObj.name = typeof(T).Name;
+            var panelComponent = panelObj.GetComponent<T>() ?? panelObj.AddComponent<T>();
+
+            // --- 改进 ---：调用创建生命周期方法。
+            panelComponent.OnPanelCreated(args);
+
+            return panelComponent;
+
+
         }
 
         public void HidePanel<T>() where T : PanelBase
@@ -311,15 +343,7 @@ namespace Moyo.Unity
             }
         }
 
-        public void HidePanelImmediate<T>() where T : PanelBase
-        {
-            if (loadedPanels.TryGetValue(typeof(T), out var panel) && panel != null && panel.gameObject.activeSelf)
-            {
-                panel.ImmediateHide();
-                RemovePanelFromActiveList(panel);
-                UpdateModalLayerState();
-            }
-        }
+
 
         public void DestroyPanel<T>() where T : PanelBase
         {
@@ -460,6 +484,31 @@ namespace Moyo.Unity
             {
                 SetLayerInteractable(config.layerType, true);
             }
+        }
+
+
+
+        /// <summary>
+        /// 确保同一 UILayer 仅保留一个激活面板（keep），其他全部隐藏并从活跃列表移除。
+        /// 不会销毁面板对象，便于之后快速重新显示。
+        /// </summary>
+        private void EnsureSinglePanelInLayer(UILayer layer, PanelBase keep = null)
+        {
+            if (!activePanels.TryGetValue(layer, out var list)) return;
+
+            // 拷贝一份，避免遍历时修改集合
+            var snapshot = list.ToList();
+            foreach (var p in snapshot)
+            {
+                if (p == null) continue;
+                if (p == keep) continue;
+
+                // 隐藏并从该层活跃列表移除
+                p.Hide();
+            }
+
+            list.Clear();
+            if (keep != null) list.Add(keep);
         }
 
         #endregion

@@ -24,11 +24,79 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
     ""name"": ""LOControlsMaps"",
     ""maps"": [
         {
+            ""name"": ""Global"",
+            ""id"": ""1b1d950e-8aa1-4c73-897b-68de5b53714c"",
+            ""actions"": [
+                {
+                    ""name"": ""MousePostionChange"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""cc610a03-6c03-4542-b70e-14f2c98d729b"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""MouseWheelChanges"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""d2f8fabe-1fc4-4f17-b5a0-d4e9d71d2d6f"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Back"",
+                    ""type"": ""Button"",
+                    ""id"": ""543ed556-24bd-4887-82c9-1c67b4fb98fa"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""c211fcf5-bb50-4d74-bf4f-a26beeac9d35"",
+                    ""path"": ""<Pointer>/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MousePostionChange"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fa1c9b05-6a49-4a34-aab4-f908665770a0"",
+                    ""path"": ""<Pointer>/scroll"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MouseWheelChanges"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f5d485da-b623-4c9e-acb9-0f4a03af8ce2"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Back"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
             ""name"": ""GamePlay"",
             ""id"": ""6bbfc787-7db4-4f68-a313-9f53a9526d3c"",
             ""actions"": [
                 {
-                    ""name"": ""New action"",
+                    ""name"": ""MoveCamera"",
                     ""type"": ""Button"",
                     ""id"": ""65e78664-ae97-4a2b-ac1d-65541f77fbaf"",
                     ""expectedControlType"": """",
@@ -45,7 +113,7 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""New action"",
+                    ""action"": ""MoveCamera"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -126,61 +194,18 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
-        },
-        {
-            ""name"": ""Global"",
-            ""id"": ""1b1d950e-8aa1-4c73-897b-68de5b53714c"",
-            ""actions"": [
-                {
-                    ""name"": ""MousePostionChange"",
-                    ""type"": ""PassThrough"",
-                    ""id"": ""cc610a03-6c03-4542-b70e-14f2c98d729b"",
-                    ""expectedControlType"": ""Vector2"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""Back"",
-                    ""type"": ""Button"",
-                    ""id"": ""543ed556-24bd-4887-82c9-1c67b4fb98fa"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                }
-            ],
-            ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""c211fcf5-bb50-4d74-bf4f-a26beeac9d35"",
-                    ""path"": ""<Pointer>/position"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MousePostionChange"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""f5d485da-b623-4c9e-acb9-0f4a03af8ce2"",
-                    ""path"": ""<Keyboard>/escape"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Back"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                }
-            ]
         }
     ],
     ""controlSchemes"": []
 }");
+        // Global
+        m_Global = asset.FindActionMap("Global", throwIfNotFound: true);
+        m_Global_MousePostionChange = m_Global.FindAction("MousePostionChange", throwIfNotFound: true);
+        m_Global_MouseWheelChanges = m_Global.FindAction("MouseWheelChanges", throwIfNotFound: true);
+        m_Global_Back = m_Global.FindAction("Back", throwIfNotFound: true);
         // GamePlay
         m_GamePlay = asset.FindActionMap("GamePlay", throwIfNotFound: true);
-        m_GamePlay_Newaction = m_GamePlay.FindAction("New action", throwIfNotFound: true);
+        m_GamePlay_MoveCamera = m_GamePlay.FindAction("MoveCamera", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Newaction = m_UI.FindAction("New action", throwIfNotFound: true);
@@ -188,18 +213,14 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
         m_Building = asset.FindActionMap("Building", throwIfNotFound: true);
         m_Building_ConfirmPlacement = m_Building.FindAction("ConfirmPlacement", throwIfNotFound: true);
         m_Building_ConfirmConstruction = m_Building.FindAction("ConfirmConstruction", throwIfNotFound: true);
-        // Global
-        m_Global = asset.FindActionMap("Global", throwIfNotFound: true);
-        m_Global_MousePostionChange = m_Global.FindAction("MousePostionChange", throwIfNotFound: true);
-        m_Global_Back = m_Global.FindAction("Back", throwIfNotFound: true);
     }
 
     ~@LOControlsMaps()
     {
+        UnityEngine.Debug.Assert(!m_Global.enabled, "This will cause a leak and performance issues, LOControlsMaps.Global.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_GamePlay.enabled, "This will cause a leak and performance issues, LOControlsMaps.GamePlay.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_UI.enabled, "This will cause a leak and performance issues, LOControlsMaps.UI.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Building.enabled, "This will cause a leak and performance issues, LOControlsMaps.Building.Disable() has not been called.");
-        UnityEngine.Debug.Assert(!m_Global.enabled, "This will cause a leak and performance issues, LOControlsMaps.Global.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -258,15 +279,77 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
         return asset.FindBinding(bindingMask, out action);
     }
 
+    // Global
+    private readonly InputActionMap m_Global;
+    private List<IGlobalActions> m_GlobalActionsCallbackInterfaces = new List<IGlobalActions>();
+    private readonly InputAction m_Global_MousePostionChange;
+    private readonly InputAction m_Global_MouseWheelChanges;
+    private readonly InputAction m_Global_Back;
+    public struct GlobalActions
+    {
+        private @LOControlsMaps m_Wrapper;
+        public GlobalActions(@LOControlsMaps wrapper) { m_Wrapper = wrapper; }
+        public InputAction @MousePostionChange => m_Wrapper.m_Global_MousePostionChange;
+        public InputAction @MouseWheelChanges => m_Wrapper.m_Global_MouseWheelChanges;
+        public InputAction @Back => m_Wrapper.m_Global_Back;
+        public InputActionMap Get() { return m_Wrapper.m_Global; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(GlobalActions set) { return set.Get(); }
+        public void AddCallbacks(IGlobalActions instance)
+        {
+            if (instance == null || m_Wrapper.m_GlobalActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GlobalActionsCallbackInterfaces.Add(instance);
+            @MousePostionChange.started += instance.OnMousePostionChange;
+            @MousePostionChange.performed += instance.OnMousePostionChange;
+            @MousePostionChange.canceled += instance.OnMousePostionChange;
+            @MouseWheelChanges.started += instance.OnMouseWheelChanges;
+            @MouseWheelChanges.performed += instance.OnMouseWheelChanges;
+            @MouseWheelChanges.canceled += instance.OnMouseWheelChanges;
+            @Back.started += instance.OnBack;
+            @Back.performed += instance.OnBack;
+            @Back.canceled += instance.OnBack;
+        }
+
+        private void UnregisterCallbacks(IGlobalActions instance)
+        {
+            @MousePostionChange.started -= instance.OnMousePostionChange;
+            @MousePostionChange.performed -= instance.OnMousePostionChange;
+            @MousePostionChange.canceled -= instance.OnMousePostionChange;
+            @MouseWheelChanges.started -= instance.OnMouseWheelChanges;
+            @MouseWheelChanges.performed -= instance.OnMouseWheelChanges;
+            @MouseWheelChanges.canceled -= instance.OnMouseWheelChanges;
+            @Back.started -= instance.OnBack;
+            @Back.performed -= instance.OnBack;
+            @Back.canceled -= instance.OnBack;
+        }
+
+        public void RemoveCallbacks(IGlobalActions instance)
+        {
+            if (m_Wrapper.m_GlobalActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IGlobalActions instance)
+        {
+            foreach (var item in m_Wrapper.m_GlobalActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_GlobalActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public GlobalActions @Global => new GlobalActions(this);
+
     // GamePlay
     private readonly InputActionMap m_GamePlay;
     private List<IGamePlayActions> m_GamePlayActionsCallbackInterfaces = new List<IGamePlayActions>();
-    private readonly InputAction m_GamePlay_Newaction;
+    private readonly InputAction m_GamePlay_MoveCamera;
     public struct GamePlayActions
     {
         private @LOControlsMaps m_Wrapper;
         public GamePlayActions(@LOControlsMaps wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Newaction => m_Wrapper.m_GamePlay_Newaction;
+        public InputAction @MoveCamera => m_Wrapper.m_GamePlay_MoveCamera;
         public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -276,16 +359,16 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_GamePlayActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_GamePlayActionsCallbackInterfaces.Add(instance);
-            @Newaction.started += instance.OnNewaction;
-            @Newaction.performed += instance.OnNewaction;
-            @Newaction.canceled += instance.OnNewaction;
+            @MoveCamera.started += instance.OnMoveCamera;
+            @MoveCamera.performed += instance.OnMoveCamera;
+            @MoveCamera.canceled += instance.OnMoveCamera;
         }
 
         private void UnregisterCallbacks(IGamePlayActions instance)
         {
-            @Newaction.started -= instance.OnNewaction;
-            @Newaction.performed -= instance.OnNewaction;
-            @Newaction.canceled -= instance.OnNewaction;
+            @MoveCamera.started -= instance.OnMoveCamera;
+            @MoveCamera.performed -= instance.OnMoveCamera;
+            @MoveCamera.canceled -= instance.OnMoveCamera;
         }
 
         public void RemoveCallbacks(IGamePlayActions instance)
@@ -403,63 +486,15 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
         }
     }
     public BuildingActions @Building => new BuildingActions(this);
-
-    // Global
-    private readonly InputActionMap m_Global;
-    private List<IGlobalActions> m_GlobalActionsCallbackInterfaces = new List<IGlobalActions>();
-    private readonly InputAction m_Global_MousePostionChange;
-    private readonly InputAction m_Global_Back;
-    public struct GlobalActions
+    public interface IGlobalActions
     {
-        private @LOControlsMaps m_Wrapper;
-        public GlobalActions(@LOControlsMaps wrapper) { m_Wrapper = wrapper; }
-        public InputAction @MousePostionChange => m_Wrapper.m_Global_MousePostionChange;
-        public InputAction @Back => m_Wrapper.m_Global_Back;
-        public InputActionMap Get() { return m_Wrapper.m_Global; }
-        public void Enable() { Get().Enable(); }
-        public void Disable() { Get().Disable(); }
-        public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(GlobalActions set) { return set.Get(); }
-        public void AddCallbacks(IGlobalActions instance)
-        {
-            if (instance == null || m_Wrapper.m_GlobalActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_GlobalActionsCallbackInterfaces.Add(instance);
-            @MousePostionChange.started += instance.OnMousePostionChange;
-            @MousePostionChange.performed += instance.OnMousePostionChange;
-            @MousePostionChange.canceled += instance.OnMousePostionChange;
-            @Back.started += instance.OnBack;
-            @Back.performed += instance.OnBack;
-            @Back.canceled += instance.OnBack;
-        }
-
-        private void UnregisterCallbacks(IGlobalActions instance)
-        {
-            @MousePostionChange.started -= instance.OnMousePostionChange;
-            @MousePostionChange.performed -= instance.OnMousePostionChange;
-            @MousePostionChange.canceled -= instance.OnMousePostionChange;
-            @Back.started -= instance.OnBack;
-            @Back.performed -= instance.OnBack;
-            @Back.canceled -= instance.OnBack;
-        }
-
-        public void RemoveCallbacks(IGlobalActions instance)
-        {
-            if (m_Wrapper.m_GlobalActionsCallbackInterfaces.Remove(instance))
-                UnregisterCallbacks(instance);
-        }
-
-        public void SetCallbacks(IGlobalActions instance)
-        {
-            foreach (var item in m_Wrapper.m_GlobalActionsCallbackInterfaces)
-                UnregisterCallbacks(item);
-            m_Wrapper.m_GlobalActionsCallbackInterfaces.Clear();
-            AddCallbacks(instance);
-        }
+        void OnMousePostionChange(InputAction.CallbackContext context);
+        void OnMouseWheelChanges(InputAction.CallbackContext context);
+        void OnBack(InputAction.CallbackContext context);
     }
-    public GlobalActions @Global => new GlobalActions(this);
     public interface IGamePlayActions
     {
-        void OnNewaction(InputAction.CallbackContext context);
+        void OnMoveCamera(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
@@ -469,10 +504,5 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
     {
         void OnConfirmPlacement(InputAction.CallbackContext context);
         void OnConfirmConstruction(InputAction.CallbackContext context);
-    }
-    public interface IGlobalActions
-    {
-        void OnMousePostionChange(InputAction.CallbackContext context);
-        void OnBack(InputAction.CallbackContext context);
     }
 }

@@ -18,106 +18,86 @@ namespace Moyo.Unity
             {
                 if (_isApplicationQuitting)
                 {
+                    // 正在退出：不要再创建
                     Debug.LogWarning($"[MonoSingleton] 应用程序正在退出，无法获取 {typeof(T)} 实例");
                     return null;
                 }
 
-                if (_instance == null)
+                if (_instance != null) return _instance;
+
+                lock (_lock)
                 {
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            // 在场景中查找已存在的实例
-                            _instance = FindObjectOfType<T>();
+                    if (_instance != null) return _instance;
 
-                            if (_instance == null)
-                            {
-                                // 创建新的GameObject并添加组件
-                                GameObject singletonObject = new GameObject($"{typeof(T).Name} (Singleton)");
-                                _instance = singletonObject.AddComponent<T>();
+                    // 先找场景里已有的
+                    _instance = FindObjectOfType<T>();
+                    if (_instance != null) return _instance;
 
-                                // 如果标记为持久化，在场景切换时不销毁
-                                if (_instance.IsDontDestroyOnLoad)
-                                {
-                                    DontDestroyOnLoad(singletonObject);
-                                }
-                            }
-                        }
-                    }
+                    // 仅在运行态允许自动创建；编辑器/退出阶段不建
+                    if (!Application.isPlaying) return null;
+
+                    var singletonObject = new GameObject($"{typeof(T).Name} (Singleton)");
+                    _instance = singletonObject.AddComponent<T>();
+
+                    if (_instance.IsDontDestroyOnLoad)
+                        DontDestroyOnLoad(singletonObject);
+
+                    return _instance;
                 }
-                return _instance;
             }
         }
 
-        /// <summary>
-        /// 是否在场景切换时不销毁（默认为true）
-        /// </summary>
+        /// <summary>是否在场景切换时不销毁（默认为true）</summary>
         protected virtual bool IsDontDestroyOnLoad => true;
 
-        /// <summary>
-        /// 是否自动初始化（默认为true）
-        /// </summary>
+        /// <summary>是否自动初始化（默认为true）</summary>
         protected virtual bool AutoInitialize => true;
 
         protected virtual void Awake()
         {
-            if (_instance == null)
+            if (_instance != null && _instance != this)
             {
-                _instance = this as T;
-
-                if (IsDontDestroyOnLoad&transform.parent==null)
-                {
-                    DontDestroyOnLoad(gameObject);
-                }
-
-                if (AutoInitialize)
-                {
-                    Initialize();
-                }
-            }
-            else if (_instance != this)
-            {
-                // 如果已存在实例，销毁新创建的实例
                 Debug.LogWarning($"[MonoSingleton] 检测到重复的 {typeof(T)} 实例，销毁新实例");
                 Destroy(gameObject);
+                return;
             }
+
+            _instance = (T)this;
+
+            if (IsDontDestroyOnLoad && transform.parent == null)
+                DontDestroyOnLoad(gameObject);
+
+            if (AutoInitialize)
+                Initialize();
         }
 
         protected virtual void OnApplicationQuit()
         {
-            _isApplicationQuitting = true;
+            _isApplicationQuitting = true;   // 🔒 退出标记：阻止后续任何自动创建
         }
 
         protected virtual void OnDestroy()
         {
+            // ⚠️ 不要把 _isApplicationQuitting 复位！
             if (_instance == this)
-            {
                 _instance = null;
-                _isApplicationQuitting = false;
-            }
         }
 
-        /// <summary>
-        /// 初始化方法（子类可重写）
-        /// </summary>
+        /// <summary>初始化方法（子类可重写）</summary>
         protected virtual void Initialize() { }
 
-        /// <summary>
-        /// 销毁单例
-        /// </summary>
+        /// <summary>销毁单例</summary>
         public static void DestroyInstance()
         {
             if (_instance != null)
             {
                 Destroy(_instance.gameObject);
                 _instance = null;
+                // 这里不要动 _isApplicationQuitting；否则外部访问 Instance 可能又把它建回来
             }
         }
 
-        /// <summary>
-        /// 单例是否存在
-        /// </summary>
+        /// <summary>单例是否存在</summary>
         public static bool HasInstance => _instance != null && !_isApplicationQuitting;
     }
 }

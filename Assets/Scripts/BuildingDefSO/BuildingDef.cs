@@ -17,6 +17,12 @@ public class BuildingDef: ScriptableObject
     [LabelText("建筑名称")]
     public string BuildingName;
 
+
+    [BoxGroup("基础")]
+    [LabelText("唯一性")]
+    public BuildingClassify classification = BuildingClassify.基础;
+
+
     [BoxGroup("基础")]
     [LabelText("建筑尺寸")]
     public byte Size = 2;
@@ -24,6 +30,11 @@ public class BuildingDef: ScriptableObject
     [BoxGroup("基础")]
     [LabelText("建筑信息UI预制体")]
     public BuildingInfoPanelBase BuildingInfoPanel;
+
+    [BoxGroup("基础")]
+    [LabelText("唯一性")]
+    public int QuantityLimit = 999;
+
 
 
 
@@ -34,7 +45,14 @@ public class BuildingDef: ScriptableObject
     [FoldoutGroup("提供人口")]
     [LabelText("最大人口")]
     [ShowIf(nameof(ProvidePopulation), true)]
-    public short MaxPopulation;
+    public int MaxPopulation;
+
+
+    [FoldoutGroup("提供人口")]
+    [LabelText("基础工作人口比例")]
+    [ShowIf(nameof(ProvidePopulation), true)]
+    public float BaseProportionWorkingPopulation = 0.7f;
+
 
     //---------------------------------------库存-------------------------------------------
     [FoldoutGroup("库存")]
