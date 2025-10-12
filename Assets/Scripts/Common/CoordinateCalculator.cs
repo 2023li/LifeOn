@@ -4,7 +4,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum DistanceMetric { Chebyshev, Manhattan, Euclidean }
+public enum DistanceMetric
+{
+    Chebyshev,
+
+    Manhattan,
+    Euclidean
+}
 public static class CoordinateCalculator
 {
 
@@ -52,7 +58,7 @@ public static class CoordinateCalculator
     /// 由占地格集合反推出中心、尺寸与中心类型。
     /// 要求：集合为轴对齐、无空洞的实心正方形。
     /// </summary>
-    public static bool TryGetCenterFromCells(IReadOnlyCollection<Vector3Int> cells,out Vector2 center, out bool centerIsCorner, out int size)
+    public static bool TryGetCenterFromCells(IReadOnlyCollection<Vector3Int> cells, out Vector2 center, out bool centerIsCorner, out int size)
     {
         center = default;
         centerIsCorner = default;
@@ -103,7 +109,7 @@ public static class CoordinateCalculator
     /// includeEdge=true：包含边缘；false：严格内部。
     /// 对 Euclidean，可设置 useEuclideanPlusHalf=true 使用（≤ R + 0.5）的视觉/逻辑更圆润的判定。
     /// </summary>
-    public static List<Vector3Int> CellsInRadius(Vector2 center, int radius, DistanceMetric metric, bool centerIsCorner,bool includeEdge = true, bool useEuclideanPlusHalf = true,int safetyPadding = 1)
+    public static List<Vector3Int> CellsInRadius(Vector3 center, int radius, bool centerIsCorner, DistanceMetric metric = DistanceMetric.Manhattan, bool includeEdge = true, bool useEuclideanPlusHalf = true, int safetyPadding = 1)
     {
         radius = Mathf.Max(0, radius);
 
@@ -182,4 +188,49 @@ public static class CoordinateCalculator
 
         return result;
     }
+
+
+    public static List<Vector3Int> CellsInRadius(IEnumerable<Vector3Int> vector3Ints, int radius,
+    DistanceMetric metric = DistanceMetric.Manhattan,
+    bool includeEdge = true,
+    bool useEuclideanPlusHalf = true,
+    int safetyPadding = 1)
+{
+    if (vector3Ints == null)
+        return new List<Vector3Int>();
+
+    // 聚合：以“格心”为基准计算质心（x+0.5, y+0.5）
+    long count = 0;
+    double sumX = 0, sumY = 0;
+
+    foreach (var v in vector3Ints)
+    {
+        sumX += (double)v.x + 0.5;
+        sumY += (double)v.y + 0.5;
+        count++;
+    }
+
+    if (count == 0)
+        return new List<Vector3Int>();
+
+    float cx = (float)(sumX / count);
+    float cy = (float)(sumY / count);
+    var center = new Vector3(cx, cy, 0f);
+
+    // 自动推断是否为格点拐角：
+    // 若质心刚好落在整点（整数坐标）上，则认为 centerIsCorner = true
+    // 允许极小数值误差
+    bool IsNearlyInteger(float v)
+    {
+        const float eps = 1e-5f;
+        return Mathf.Abs(v - Mathf.Round(v)) <= eps;
+    }
+
+    bool centerIsCorner = IsNearlyInteger(cx) && IsNearlyInteger(cy);
+
+    // 复用原有实现
+    return CellsInRadius(center, radius, centerIsCorner, metric, includeEdge, useEuclideanPlusHalf, safetyPadding);
+}
+
+
 }

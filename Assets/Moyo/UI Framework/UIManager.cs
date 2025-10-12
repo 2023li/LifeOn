@@ -268,6 +268,8 @@ namespace Moyo.Unity
                 // 显示（携带参数）
                 existingPanel.Show(args);
 
+                
+
                 // 模态层处理
                 if (IsModalLayer(layer))
                 {

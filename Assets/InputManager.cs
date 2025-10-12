@@ -87,7 +87,7 @@ public class InputManager : MonoSingleton<InputManager>
         // 确认/取消：只订 performed；确认前做 UI 命中过滤
         inputActionMap.Building.ConfirmPlacement.performed += ctx =>
         {
-            if (IsPointerOverUI()) return;
+          
             Building_OnConfirmPlacement?.Invoke();
         };
 
@@ -95,7 +95,7 @@ public class InputManager : MonoSingleton<InputManager>
 
         inputActionMap.Building.ConfirmConstruction.performed += ctx =>
         {
-            if (IsPointerOverUI()) return;
+            
             Building_OnConfirmConstruction?.Invoke();
         };
 
@@ -108,10 +108,7 @@ public class InputManager : MonoSingleton<InputManager>
 
     }
 
-    private bool IsPointerOverUI()
-    {
-        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
-    }
+ 
 
     // 供外部开关建造 map
     public void EnableBuildingMap() => inputActionMap.Building.Enable();
@@ -160,24 +157,6 @@ public class InputManager : MonoSingleton<InputManager>
         if (handler == null) return;
         _mouseWheelHandlers.Remove(handler);
     }
-
-
-
-
-    public Vector3 ScreenToWorldPointNoZ()
-    {
-        var pos = RealCamera.ScreenToWorldPoint(MousePos);
-        return new Vector3(pos.x, pos.y, 0);
-
-
-    }
-
-
-
-
-
-   
-
 
 
 }

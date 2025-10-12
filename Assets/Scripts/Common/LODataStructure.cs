@@ -3,8 +3,12 @@ using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
+
+
+[Serializable]
 public struct StructKV<T1,T2>
 {
+ 
     public T1 Value1;
     public T2 Value2;
 }

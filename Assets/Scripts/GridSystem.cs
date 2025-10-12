@@ -7,6 +7,7 @@ using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Linq;
 
 public class GridSystem : MonoSingleton<GridSystem>
 {
@@ -25,7 +26,35 @@ public class GridSystem : MonoSingleton<GridSystem>
     public Tilemap tilemap_道路;
     public Tilemap tilemap_特效;
 
+    [FoldoutGroup("可视化瓦片")]
+    [LabelText("默认瓦片")]
     public Tile visualizationTile;
+
+    [FoldoutGroup("可视化瓦片")]
+    [LabelText("测试瓦片1")]
+    public Tile tile1;
+
+
+    [FoldoutGroup("可视化瓦片")]
+    [LabelText("测试瓦片2")]
+    public Tile tile2;
+
+
+    [FoldoutGroup("可视化瓦片")]
+    [LabelText("测试瓦片3")]
+    public Tile tile3;
+
+
+    [FoldoutGroup("可视化瓦片")]
+    [LabelText("测试瓦片4")]
+    public Tile tile4;
+
+
+
+
+
+
+
 
 
     private Dictionary<Layer, Tilemap> dic_LayerMap;
@@ -62,7 +91,7 @@ public class GridSystem : MonoSingleton<GridSystem>
         }
     }
 
-   
+
 
     //------------------------------------读写坐标-------------------------------------
     //获取鼠标/移动端为点击位置
@@ -101,22 +130,6 @@ public class GridSystem : MonoSingleton<GridSystem>
         return mapGrid.CellToWorld(coor);
     }
 
-    [Button]
-    void Test()
-    {
-        List<Vector3Int> gridPositions = new List<Vector3Int>()
-        {
-            new Vector3Int(0,0,0),
-            new Vector3Int(1,0,0),
-            new Vector3Int(0,1,0),
-            new Vector3Int(1,1,0),
-        };
-
-        SetHighlight(gridPositions);
-
-        Debug.Log
-              (GetCenterFromCellCenters(gridPositions));
-    }
 
 
     /// <summary>
@@ -154,7 +167,7 @@ public class GridSystem : MonoSingleton<GridSystem>
     }
     public void SetOccupy(Vector3Int coor)
     {
-        dic_LayerMap[Layer.障碍].SetTile(coor,visualizationTile);
+        dic_LayerMap[Layer.障碍].SetTile(coor, visualizationTile);
     }
 
 
@@ -244,54 +257,118 @@ public class GridSystem : MonoSingleton<GridSystem>
 
 
 
-    public HaloSystem Halo {  get;private set; }
-   
+    public HaloSystem Halo { get; private set; }
+
 
 
     public class HaloSystem
     {
         public HaloSystem()
         {
-            dic_HaloEffectMap = new Dictionary<HaloEffectType, Dictionary<Vector3Int, short>>()
+            dic_HaloEffectMap = new Dictionary<HaloEffectType, Dictionary<Vector3Int, int>>()
             {
-                {HaloEffectType.医疗, new Dictionary<Vector3Int, short>() },
-                {HaloEffectType.环境, new Dictionary<Vector3Int, short>() },
-                {HaloEffectType.治安, new Dictionary<Vector3Int, short>() },
+                {HaloEffectType.医疗, new Dictionary<Vector3Int, int>() },
+                {HaloEffectType.环境, new Dictionary<Vector3Int, int>() },
+                {HaloEffectType.治安, new Dictionary<Vector3Int, int>() },
             };
 
         }
-        private Dictionary<HaloEffectType, Dictionary<Vector3Int, short>> dic_HaloEffectMap;
+        //第一层字典：类型   第二层字典  坐标数值
+        private Dictionary<HaloEffectType, Dictionary<Vector3Int, int>> dic_HaloEffectMap;
 
-        //public void AddHaloEffect(IEnumerable<Vector3Int> vector3Ints, HaloEffectRangeValue values) => ModifyEffect(vector3Ints, values, true);
+        public void AddHaloEffect(IEnumerable<Vector3Int> vector3Ints, HaloEffectRangeValue values) => ModifyEffect(vector3Ints, values, true);
 
-        //public void RemoveEffect(IEnumerable<Vector3Int> vector3Ints, HaloEffectRangeValue values) => ModifyEffect(vector3Ints, values, false);
+        public void RemoveEffect(IEnumerable<Vector3Int> vector3Ints, HaloEffectRangeValue values) => ModifyEffect(vector3Ints, values, false);
 
-        //private void ModifyEffect(IEnumerable<Vector3Int> vector3Ints, HaloEffectRangeValue values, bool add)
-        //{
-        //    var coors = CoordinateCalculator.GetCellsWithinRadius(vector3Ints, values.Range);
-        //    var dic = dic_HaloEffectMap[values.Type];
-
-        //    foreach (var c in coors)
-        //    {
-        //        if (Instance.allCells.Contains(c))
-        //        {
-        //            short delta = (short)(add ? values.Value : -values.Value);
-        //            if (!dic.ContainsKey(c))
-        //                dic[c] = delta;
-        //            else
-        //                dic[c] += delta;
-
-        //            if (dic[c] == 0)
-        //                dic.Remove(c);
-        //        }
-        //    }
-        //}
-
-
-        public short GetHaloValue(HaloEffectType haloEffectType,Vector3Int coor)
+        private void ModifyEffect(IEnumerable<Vector3Int> vector3Ints, HaloEffectRangeValue values, bool add)
         {
-            return dic_HaloEffectMap[haloEffectType][coor];
+            var coors = CoordinateCalculator.CellsInRadius(vector3Ints, values.Range);
+            var dic = dic_HaloEffectMap[values.Type];
+
+            foreach (var c in coors)
+            {
+                if (!Instance.allCells.Contains(c)) continue;
+
+                if (add)
+                {
+                    dic[c] = (short)((dic.TryGetValue(c, out var cur) ? cur : 0) + values.Value);
+                }
+                else
+                {
+                    if (!dic.TryGetValue(c, out var cur)) continue; // 没有就不用减
+                    var newVal = (short)(cur - values.Value);
+                    if (newVal == 0) dic.Remove(c);
+                    else dic[c] = newVal;
+                }
+            }
         }
+
+        private IEnumerable<Vector3Int> ActiveHaloCells() => dic_HaloEffectMap.Values.SelectMany(d => d.Keys).Distinct();
+
+        public int GetHaloValue(HaloEffectType haloEffectType, Vector3Int coor)
+        {
+            Dictionary<Vector3Int, int> map = dic_HaloEffectMap[haloEffectType];
+            return map.TryGetValue(coor, out int v) ? v : 0;
+        }
+
+
+        //大于最小值
+        public Func<Vector3Int, bool> HaloAtLeast(HaloEffectType type, short min) => c => GetHaloValue(type, c) >= min;
+        //小于最大值
+        public Func<Vector3Int, bool> HaloAtMost(HaloEffectType type, short max) => c => GetHaloValue(type, c) <= max;
+        //等于
+        public Func<Vector3Int, bool> HaloEquals(HaloEffectType type, short value) => c => GetHaloValue(type, c) == value;
+
+
+
+
+        public void ShowHaloByType(HaloEffectType type)
+        {
+            IEnumerable<Vector3Int> level1 = GetCoordinatesSatisfyingAuraConditionFast(HaloAtLeast(type,1));
+            IEnumerable<Vector3Int> level2 = GetCoordinatesSatisfyingAuraConditionFast(HaloAtLeast(type, 2));
+            IEnumerable<Vector3Int> level3 = GetCoordinatesSatisfyingAuraConditionFast(HaloAtLeast(type, 3));
+
+            HighlightSpec spec1 = new HighlightSpec(level1,Instance.tile1);
+            HighlightSpec spec2 = new HighlightSpec(level1, Instance.tile1);
+            HighlightSpec spec3 = new HighlightSpec(level1, Instance.tile1);
+
+
+            Instance.SetHighlight(spec1, spec2, spec3);
+        }
+
+
+        public IEnumerable<Vector3Int> GetCoordinatesSatisfyingAuraConditionFast(params Func<Vector3Int, bool>[] conditions)
+        {
+            if (conditions == null || conditions.Length == 0)
+                yield break;
+
+            foreach (var c in ActiveHaloCells())
+            {
+                bool pass = true;
+                for (int i = 0; i < conditions.Length; i++)
+                {
+                    Func<Vector3Int, bool> cond = conditions[i];
+                    if (cond == null)
+                    {
+                        continue;
+                    }
+                    if (!cond(c))
+                    {
+                        pass = false;
+                        break;
+                    }
+                }
+                if (pass)
+                {
+                    yield return c;
+                }
+            }
+        }
+
     }
+
+
+  
+
 
 }

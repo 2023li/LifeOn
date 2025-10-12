@@ -160,9 +160,11 @@ public class UIItem_BuildingSelection : MonoBehaviour
     }
 
     public void BuildBuilding(BuildingDef def)
-    {
-        Debug.Log($"[UIItem_BuildingSelection] 准备建造：{def.BuildingName} (ID: {def.BuildingOnlyID})");
+    {       
         // TODO: 你的建造逻辑
+
+        BuildingBuilder.BuildingEvent.Trigger(def);
+    
     }
 
     /// <summary>

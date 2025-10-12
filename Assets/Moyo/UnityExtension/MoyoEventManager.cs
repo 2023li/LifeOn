@@ -51,8 +51,8 @@ namespace Moyo.Unity
     ///
     /// 要从任何类开始监听一个事件，你必须做三件事：
     ///
-    /// 1 - 声明你的类为该类型的事件实现了 MoyoEventListener 接口。
-    /// 例如：public class GUIManager : Singleton<GUIManager>, MoyoEventListener<MoyoGameEvent>
+    /// 1 - 声明你的类为该类型的事件实现了 IMoyoEventListener 接口。
+    /// 例如：public class GUIManager : Singleton<GUIManager>, IMoyoEventListener<MoyoGameEvent>
     /// 你可以有多个这样的声明（每种事件类型一个）。
     ///
     /// 2 - 在启用和禁用时，分别开始和停止监听该事件：
@@ -65,7 +65,7 @@ namespace Moyo.Unity
     /// this.MoyoEventStopListening<MoyoGameEvent>();
     /// }
     ///
-    /// 3 - 为该事件实现 MoyoEventListener 接口。例如：
+    /// 3 - 为该事件实现 IMoyoEventListener 接口。例如：
     ///public void OnMoyoEvent (MoyoGameEvent gameEvent)
     /// {
     /// if (gameEvent.EventName == "GameOver")
@@ -96,7 +96,7 @@ namespace Moyo.Unity
 		/// </summary>
 		/// <param name="listener">listener.</param>
 		/// <typeparam name="MoyoEvent">The event name.</typeparam>
-		public static void AddListener<MoyoEvent>( MoyoEventListener<MoyoEvent> listener ) where MoyoEvent : struct
+		public static void AddListener<MoyoEvent>( IMoyoEventListener<MoyoEvent> listener ) where MoyoEvent : struct
 		{
 			Type eventType = typeof( MoyoEvent );
 
@@ -116,7 +116,7 @@ namespace Moyo.Unity
 		/// </summary>
 		/// <param name="listener">listener.</param>
 		/// <typeparam name="MoyoEvent">The event name.</typeparam>
-		public static void RemoveListener<MoyoEvent>( MoyoEventListener<MoyoEvent> listener ) where MoyoEvent : struct
+		public static void RemoveListener<MoyoEvent>( IMoyoEventListener<MoyoEvent> listener ) where MoyoEvent : struct
 		{
 			Type eventType = typeof( MoyoEvent );
 
@@ -178,7 +178,7 @@ namespace Moyo.Unity
 			
 			for (int i=list.Count-1; i >= 0; i--)
 			{
-				( list[i] as MoyoEventListener<MoyoEvent> ).OnMoyoEvent( newEvent );
+				( list[i] as IMoyoEventListener<MoyoEvent> ).OnMoyoEvent( newEvent );
 			}
 		}
 
@@ -217,12 +217,12 @@ namespace Moyo.Unity
 	{
 		public delegate void Delegate<T>( T eventType );
 
-		public static void MoyoEventStartListening<EventType>( this MoyoEventListener<EventType> caller ) where EventType : struct
+		public static void MoyoEventStartListening<EventType>( this IMoyoEventListener<EventType> caller ) where EventType : struct
 		{
 			MoyoEventManager.AddListener<EventType>( caller );
 		}
 
-		public static void MoyoEventStopListening<EventType>( this MoyoEventListener<EventType> caller ) where EventType : struct
+		public static void MoyoEventStopListening<EventType>( this IMoyoEventListener<EventType> caller ) where EventType : struct
 		{
           
             MoyoEventManager.RemoveListener<EventType>( caller );
@@ -237,12 +237,12 @@ namespace Moyo.Unity
 	/// <summary>
 	/// A public interface you'll need to implement for each name of event you want to listen to.
 	/// </summary>
-	public interface MoyoEventListener<T> : MoyoEventListenerBase
+	public interface IMoyoEventListener<T> : MoyoEventListenerBase
 	{
 		void OnMoyoEvent( T eventType );
 	}
 
-	public class MoyoEventListenerWrapper<TOwner, TTarget, TEvent> : MoyoEventListener<TEvent>, IDisposable
+	public class MoyoEventListenerWrapper<TOwner, TTarget, TEvent> : IMoyoEventListener<TEvent>, IDisposable
 		where TEvent : struct
 	{
 		private Action<TTarget> _callback;

@@ -10,6 +10,8 @@ public class UIPanel_GameMain : PanelBase
 
     [AutoBind] public Button btn_打开建造;
 
+    [AutoBind] public Button btn_下回合;
+
     [AutoBind("建造选择")] public UIItem_BuildingSelection item_建造选择;
 
 
@@ -20,19 +22,12 @@ public class UIPanel_GameMain : PanelBase
 
     protected override void Awake()
     {
-        btn_打开建造.onClick.AddListener(() =>
-        {
-            item_建造选择.Show();
-        });
+        btn_打开建造.onClick.AddListener(() => { item_建造选择.Show(); });
+        
+        btn_下回合.onClick.AddListener(() => { TurnSystem.Instance.NextTurun(); });
     }
 
 
 
-    [Button]
-    public void Test()
-    {
-        item_建造选择.Show();
-
-    }
 
 }

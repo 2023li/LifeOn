@@ -47,6 +47,12 @@ public class BuildingConfirmPanel : PanelBase
         SetInteractable(true);
     }
 
+    public override void Show(params object[] args)
+    {
+        base.Show(args);
+        SetInteractable(true);
+    }
+
     public override void Hide()
     {
     

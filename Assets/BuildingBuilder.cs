@@ -3,9 +3,36 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using Sirenix.OdinInspector;
 using Moyo.Unity;
+using static BuildingBuilder;
 
-public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
+public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyoEventListener<BuildingEvent>
 {
+
+
+    public struct BuildingEvent
+    {
+        static BuildingEvent e;
+
+        public BuildingDef def;
+
+        public static void Trigger(BuildingDef buildingDef)
+        {
+            e.def = buildingDef;
+            MoyoEventManager.TriggerEvent(e);
+        }
+
+    }
+
+    public void OnMoyoEvent(BuildingEvent eventType)
+    {
+
+        this.EnterBuildMode(eventType.def);
+
+    }
+
+
+
+
     private enum ConstructionProcess
     {
         None,
@@ -37,6 +64,8 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
 
     private void OnEnable()
     {
+        this.MoyoEventStartListening();
+
         if (InputManager.Instance == null) return;
 
         InputManager.Instance.Register(this);
@@ -50,6 +79,8 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
 
     private void OnDisable()
     {
+        this.MoyoEventStopListening();
+
         if (!InputManager.HasInstance) return;
 
 
@@ -298,7 +329,9 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler
         return GridSystem.Instance.CellToWorld(cell);
     }
 
-   
+  
+
+
 
     #endregion
 }
