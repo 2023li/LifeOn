@@ -1,26 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIItem_HaloPanel : MonoBehaviour
 {
+    public Toggle toggle;
+
     
-
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-    
-
-    private void ShowHalo()
-    {
-        
-    }
 }

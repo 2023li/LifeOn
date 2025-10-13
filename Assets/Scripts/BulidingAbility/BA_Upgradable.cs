@@ -8,7 +8,7 @@ public class BA_Upgradable : BulidingAbility
     int currentEXP;
     protected override void OnAdd()
     {
-        TurnSystem.Instance.OnTrunEnd += HandleEXP;
+        
 
     }
 

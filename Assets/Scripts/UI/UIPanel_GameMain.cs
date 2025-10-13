@@ -23,8 +23,9 @@ public class UIPanel_GameMain : PanelBase
     protected override void Awake()
     {
         btn_打开建造.onClick.AddListener(() => { item_建造选择.Show(); });
+
         
-        btn_下回合.onClick.AddListener(() => { TurnSystem.Instance.NextTurun(); });
+        btn_下回合.onClick.AddListener(() => { TurnSystem.Instance.NextTurn(); });
     }
 
 
