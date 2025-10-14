@@ -649,6 +649,18 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5669405373787078910, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
+      propertyPath: tile1
+      value: 
+      objectReference: {fileID: 11400000, guid: 4e398cdac4bf60c499a77608871cf670, type: 2}
+    - target: {fileID: 5669405373787078910, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
+      propertyPath: tile2
+      value: 
+      objectReference: {fileID: 11400000, guid: 353b9a08c9ced914bab7b919671adc74, type: 2}
+    - target: {fileID: 5669405373787078910, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
+      propertyPath: tile3
+      value: 
+      objectReference: {fileID: 11400000, guid: 59e9b8ebfa7b7194b9c292d0f89f128f, type: 2}
     - target: {fileID: 8123488984481321654, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

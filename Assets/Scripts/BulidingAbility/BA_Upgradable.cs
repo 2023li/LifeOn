@@ -8,14 +8,14 @@ public class BA_Upgradable : BulidingAbility
     int currentEXP;
     protected override void OnAdd()
     {
-        
+        TurnSystem.Instance.OnPhaseProgress += HandleEXP;
 
     }
 
     public override void Remove()
     {
-        
 
+        TurnSystem.Instance.OnPhaseProgress -= HandleEXP;
 
         Destroy(this);
     }

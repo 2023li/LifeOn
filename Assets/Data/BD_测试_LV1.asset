@@ -14,22 +14,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BuildingOnlyID: test_lv1
   BuildingName: "\u6D4B\u8BD5LV1"
+  classification: 0
+  Size: 2
   BuildingInfoPanel: {fileID: 0}
-  ProvidePopulation: 1
+  QuantityLimit: 999
+  ProvidePopulation: 0
   MaxPopulation: 0
-  ProvideInventory: 1
-  ProvideSupplyAndDemand: 1
+  BaseProportionWorkingPopulation: 0.7
+  ProvideInventory: 0
+  ProvideSupplyAndDemand: 0
   SupplyStacks:
   - Type: 0
     Need: 0
-  ProvideEmployment: 1
+  ProvideEmployment: 0
   MaxEmployment: 1
   BasicSalary: 5
   ProvideHaloEffect: 1
   HaloEffectValues:
   - Type: 0
-    Range: 0
+    Range: 5
     Value: 1
+  - Type: 0
+    Range: 3
+    Value: 2
   ProvideUpgradable: 0
   Upgradable_EXPCondition:
     Condition: 0

@@ -321,7 +321,7 @@ public class GridSystem : MonoSingleton<GridSystem>
 
 
 
-
+        
         public void ShowHaloByType(HaloEffectType type)
         {
             IEnumerable<Vector3Int> level1 = GetCoordinatesSatisfyingAuraConditionFast(HaloAtLeast(type,1));
@@ -329,8 +329,8 @@ public class GridSystem : MonoSingleton<GridSystem>
             IEnumerable<Vector3Int> level3 = GetCoordinatesSatisfyingAuraConditionFast(HaloAtLeast(type, 3));
 
             HighlightSpec spec1 = new HighlightSpec(level1,Instance.tile1);
-            HighlightSpec spec2 = new HighlightSpec(level1, Instance.tile1);
-            HighlightSpec spec3 = new HighlightSpec(level1, Instance.tile1);
+            HighlightSpec spec2 = new HighlightSpec(level2, Instance.tile2);
+            HighlightSpec spec3 = new HighlightSpec(level3, Instance.tile3);
 
 
             Instance.SetHighlight(spec1, spec2, spec3);
@@ -365,10 +365,47 @@ public class GridSystem : MonoSingleton<GridSystem>
             }
         }
 
+        public IEnumerable<Vector3Int> GetCoordinatesSatisfyingAuraConditionFast(List<Func<Vector3Int, bool>> conditions)
+        {
+            if (conditions == null || conditions.Count == 0)
+                yield break;
+
+            foreach (var c in ActiveHaloCells())
+            {
+                bool pass = true;
+                for (int i = 0; i < conditions.Count; i++)
+                {
+                    Func<Vector3Int, bool> cond = conditions[i];
+                    if (cond == null)
+                    {
+                        continue;
+                    }
+                    if (!cond(c))
+                    {
+                        pass = false;
+                        break;
+                    }
+                }
+                if (pass)
+                {
+                    yield return c;
+                }
+            }
+        }
+
+
+
+
     }
 
 
-  
 
+
+
+    [Button]
+    private void Test(HaloEffectType t)
+    {
+        Halo.ShowHaloByType(t);
+    }
 
 }
