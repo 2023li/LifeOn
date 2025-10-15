@@ -17,9 +17,14 @@ public class BuildingDef: ScriptableObject
     [LabelText("建筑名称")]
     public string BuildingName;
 
+    [BoxGroup("基础")]
+    [LabelText("建筑体")]
+    [AssetsOnly]
+    public Building BuildingPrefab;
+
 
     [BoxGroup("基础")]
-    [LabelText("唯一性")]
+    [LabelText("分类")]
     public BuildingClassify classification = BuildingClassify.基础;
 
 
@@ -32,7 +37,7 @@ public class BuildingDef: ScriptableObject
     public BuildingInfoPanelBase BuildingInfoPanel;
 
     [BoxGroup("基础")]
-    [LabelText("唯一性")]
+    [LabelText("数量限制")]
     public int QuantityLimit = 999;
 
 
@@ -43,9 +48,9 @@ public class BuildingDef: ScriptableObject
     [LabelText("提供人口")]
     public bool ProvidePopulation=false;
     [FoldoutGroup("提供人口")]
-    [LabelText("最大人口")]
+    [LabelText("基础最大人口")]
     [ShowIf(nameof(ProvidePopulation), true)]
-    public int MaxPopulation;
+    public int BaseMaxPopulation;
 
 
     [FoldoutGroup("提供人口")]
@@ -58,14 +63,25 @@ public class BuildingDef: ScriptableObject
     [FoldoutGroup("库存")]
     public bool ProvideInventory = false;
 
+    [FoldoutGroup("库存")]
+    [LabelText("库存容量")]
+    [ShowIf(nameof(ProvideInventory), true)]
+    public int Inventory_Capacity = 100;
+
+
 
 
     //---------------------------------------供需-------------------------------------------
     [FoldoutGroup("供需")]
     public bool ProvideSupplyAndDemand = false;
+
     [FoldoutGroup("供需")]
     [ShowIf(nameof(ProvideSupplyAndDemand), true)]
-    public SupplyStack[] SupplyStacks;
+    [LabelText("取料距离")]
+    public int BaseMaterialFetchingRadius = 5;
+    [FoldoutGroup("供需")]
+    [ShowIf(nameof(ProvideSupplyAndDemand), true)]
+    public SupplyChange[] SupplyStacks;
 
 
     //---------------------------------------就业-------------------------------------------

@@ -21,9 +21,35 @@ public struct EXPConditionValue
 }
 
 
+public  class EXPCalculateFactory
+{
+
+    public static IEXPCalculate GetEXPCalculate(string buildingID)
+    {
+        switch (buildingID)
+        {
+            default:
+                break;
+        }
+
+        throw new NotImplementedException();
+    }
+}
+
+
 public interface IEXPCalculate
 {
-    public bool AcquisitionEXP();
+    public bool AcquisitionEXP(Building building);
+}
+
+
+public class JuMinFangEXP : IEXPCalculate
+{
+    public bool AcquisitionEXP(Building building)
+    {
+        
+        return true;   
+    }
 }
 
 

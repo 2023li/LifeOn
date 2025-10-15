@@ -46,7 +46,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
     [ShowInInspector, ReadOnly]
     private BuildingDef currentBuildDef;
 
-    [SerializeField] private Building buildingPrefab;
+   
     [SerializeField] private TileBase green;
     [SerializeField] private TileBase red;
     [SerializeField] private TileBase crimson; // 深红：占用
@@ -240,7 +240,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
             GridSystem.Instance.SetOccupy(cell);
 
         // 实例化 & 定位（若你的 Building.Construction 内部会定位，可省略下面两行）
-        var b = Instantiate(buildingPrefab);
+        var b = Instantiate(currentBuildDef.BuildingPrefab);
         b.transform.position = anchor;
         b.Construction(currentBuildDef);
 

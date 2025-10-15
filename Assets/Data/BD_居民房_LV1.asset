@@ -10,34 +10,34 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ee0d7bbd2c16ce946bace0e1275c196f, type: 3}
-  m_Name: "BD_\u6D4B\u8BD5_LV0"
+  m_Name: "BD_\u5C45\u6C11\u623F_LV1"
   m_EditorClassIdentifier: 
-  BuildingOnlyID: test_lv0
-  BuildingName: "\u6D4B\u8BD5LV0"
+  BuildingOnlyID: "\u5C45\u6C11\u623F_LV1"
+  BuildingName: "\u5C45\u6C11\u623FLV1"
+  BuildingPrefab: {fileID: 0}
   classification: 0
   Size: 2
   BuildingInfoPanel: {fileID: 0}
   QuantityLimit: 999
-  ProvidePopulation: 0
-  BaseMaxPopulation: 0
+  ProvidePopulation: 1
+  BaseMaxPopulation: 5
   BaseProportionWorkingPopulation: 0.7
   ProvideInventory: 0
-  ProvideSupplyAndDemand: 0
+  Inventory_Capacity: 100
+  ProvideSupplyAndDemand: 1
+  BaseMaterialFetchingRadius: 5
   SupplyStacks:
   - Operation: 0
     Type: 0
-    Amount: 0
+    Amount: 2
   ProvideEmployment: 0
   MaxEmployment: 0
   BasicSalary: 0
   ProvideHaloEffect: 0
-  HaloEffectValues:
-  - Type: 0
-    Range: 0
-    Value: 0
+  HaloEffectValues: []
   ProvideUpgradable: 1
   Upgradable_EXPCondition:
     Condition: 0
     BaseValue: 1
   NeedEXP: 1
-  NextLevel: {fileID: 11400000, guid: 786f75cb196b0ca4e993361efeb8f404, type: 2}
+  NextLevel: {fileID: 0}

@@ -18,13 +18,10 @@ public class Building : MonoBehaviour
     public void Construction(BuildingDef data)
     {
         if (!data) { Debug.LogWarning("传入建筑定义非法"); return; }
-        
-
-
 
         Def = data;
 
-        AddAbility();
+        RefreshAbility();
     }
 
 
@@ -34,7 +31,7 @@ public class Building : MonoBehaviour
     private BA_SupplyAndDemand ba_SupplyAndDemand;
     private BA_Inventory ba_Inventory;
     private BA_HaloEffect ba_HaloEffect;
-    private void AddAbility()
+    private void RefreshAbility()
     {
         if (ba_Population) { ba_Population.Remove(); }
         if (ba_ProvideEmployment) { ba_ProvideEmployment.Remove(); }
@@ -52,4 +49,17 @@ public class Building : MonoBehaviour
         if (Def.ProvideInventory) { ba_Inventory = BulidingAbility.Add<BA_Inventory>(this); }
         if (Def.ProvideHaloEffect) { ba_HaloEffect =  BulidingAbility.Add<BA_HaloEffect>(this); }
     }
+
+
+    public virtual bool Condition_EXP()
+    {
+        return true;
+    }
+    public virtual bool Condition_Produce()
+    {
+        return false;
+    }
+
+
+
 }
