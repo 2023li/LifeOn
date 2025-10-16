@@ -12,7 +12,7 @@ public abstract class Effect
 [Serializable]
 public class ConsumeFromAssignedStorage : Effect
 {
-    public ResourceAmount[] Costs;
+    public SupplyAmount[] Costs;
     public override void Apply(BuildingInstance self, IGameContext ctx)
     {
         var inv = ctx.ResourceNetwork.GetAssignedStorage(self);
@@ -39,7 +39,11 @@ public class AddExp : Effect
     public override void Apply(BuildingInstance self, IGameContext ctx)
     {
         self.Exp += Amount;
+
+        Debug.Log("增加经验");
     }
+
+
 }
 
 [Serializable]
@@ -70,3 +74,47 @@ public class UpgradeToNextLevel : Effect
 //        ctx.Environment.RemoveAura(self.InstanceId);
 //    }
 //}
+
+
+[Serializable]
+public class AddToSelfStorage : Effect
+{
+    public SupplyAmount[] Items;
+    public override void Apply(BuildingInstance self, IGameContext ctx)
+    {
+        if (self.Storage == null) return;
+        self.Storage.Add(Items);
+    }
+}
+
+[Serializable]
+public class AddToAssignedStorage : Effect
+{
+    public SupplyAmount[] Items;
+    public override void Apply(BuildingInstance self, IGameContext ctx)
+    {
+        var inv = ctx.ResourceNetwork.GetAssignedStorage(self);
+        if (inv == null) return;
+        inv.Add(Items);
+    }
+}
+
+// 可选：把自仓部分转运到绑定仓库（每回合）
+[Serializable]
+public class TransferSelfToAssigned : Effect
+{
+    public SupplyDef Resource; public int Amount = 10;
+    public override void Apply(BuildingInstance self, IGameContext ctx)
+    {
+        if (self.Storage == null) return;
+        var dst = ctx.ResourceNetwork.GetAssignedStorage(self);
+        if (dst == null) return;
+
+        int available = self.Storage.GetAmount(Resource);
+        int move = Mathf.Min(Amount, available);
+        if (move <= 0) return;
+
+        self.Storage.Consume(new[] { new SupplyAmount { Resource = Resource, Amount = move } });
+        dst.Add(Resource, move);
+    }
+}

@@ -475,8 +475,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   teest:
-  - {fileID: 11400000, guid: 8e09ad12e121c8e44ae8786c67e61446, type: 2}
-  - {fileID: 11400000, guid: 786f75cb196b0ca4e993361efeb8f404, type: 2}
+  - {fileID: 11400000, guid: 13268503ca98be6468aaa4a2be917d2a, type: 2}
 --- !u!1 &1669619324
 GameObject:
   m_ObjectHideFlags: 0
@@ -645,6 +644,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Game
       objectReference: {fileID: 0}
+    - target: {fileID: 843467556053640134, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
+      propertyPath: BuildingPrefab
+      value: 
+      objectReference: {fileID: 2875451913886811603, guid: a513625fd8d200b459bca1715f2959b4, type: 3}
     - target: {fileID: 2365099169444760557, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
       propertyPath: m_IsActive
       value: 1

@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee61fcc490adb154f95c02cb2ab70f9a, type: 3}
+  m_Name: "BA_\u6D4B\u8BD5"
+  m_EditorClassIdentifier: 
+  Id: "BA_\u6D4B\u8BD5"
+  DisplayName: "\u6D4B\u8BD5\u5EFA\u7B51"
+  Size: 2
+  ViewPrefab: {fileID: 0}
+  Levels:
+  - Level: 0
+    BaseMaxPopulation: 0
+    StorageCapacity: 0
+    ExpToNext: 2
+    MaxJobs: 0
+    ConditionalStatModifiers: []
+    Rules:
+    - rid: 1546075352994676739
+  - Level: 1
+    BaseMaxPopulation: 0
+    StorageCapacity: 0
+    ExpToNext: -1
+    MaxJobs: 0
+    ConditionalStatModifiers: []
+    Rules: []
+  classification: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 1546075352994676739
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 3
+        Conditions: []
+        OnSuccess:
+        - rid: 1546075352994676740
+        OnFailure: []
+    - rid: 1546075352994676740
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1

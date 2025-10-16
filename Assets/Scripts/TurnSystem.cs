@@ -1,5 +1,6 @@
 using System;
 using Moyo.Unity;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -7,12 +8,25 @@ using UnityEngine;
 
 
 
-public enum TriggerPhase
+public enum TurnPhase
 {
-    TurnEnd,
-    OnConstructionComplete,
-    OnPlaced,
-    OnRemoved
+
+    //
+    结束准备阶段,
+
+    //消耗资源
+    资源消耗阶段,
+
+    //生产资源
+    资源生产阶段,
+
+    //数据结算
+    回合结束阶段,
+
+
+
+
+    开始准备阶段
 }
 
 
@@ -28,11 +42,26 @@ public enum TriggerPhase
 [AddComponentMenu("LifeOn/Turn System")]
 public class TurnSystem : MonoSingleton<TurnSystem>
 {
-    public static event Action OnTurnEnd;
+    public static event Action<TurnPhase> OnTurnEnd;
+
+    TurnPhase[] phases;
+    protected override void Initialize()
+    {
+        base.Initialize();
+        phases = (TurnPhase[])Enum.GetValues(typeof(TurnPhase));
+    }
 
     // 供 UI 或系统调用：结束本回合
     public void EndTurn()
     {
-        OnTurnEnd?.Invoke();
+        foreach (TurnPhase Phase in phases)
+        {
+            OnTurnEnd?.Invoke(Phase);
+        }
+
+
     }
+
+    
+
 }

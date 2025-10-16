@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 [Serializable]
@@ -10,10 +11,12 @@ public abstract class Condition
 
 
 
+
+
 [Serializable]
 public class HasResourcesInAssignedStorage : Condition
 {
-    public ResourceAmount[] Costs;
+    public SupplyAmount[] Costs;
 
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
     {
@@ -96,3 +99,31 @@ public class FillPercentOver : Condition
         return fill > Threshold;
     }
 }
+
+
+// Rules/Conditions.cs ——追加
+[Serializable]
+public class WorkersAtLeast : Condition
+{
+    public int Min;
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    { why = ""; return self.WorkersAssigned >= Min; }
+}
+
+[Serializable]
+public class WorkersLessThan : Condition
+{
+    public int MaxExclusive;
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    { why = ""; return self.WorkersAssigned < MaxExclusive; }
+}
+
+[Serializable]
+public class WorkersEquals : Condition
+{
+    public int Count;
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    { why = ""; return self.WorkersAssigned == Count; }
+}
+
+

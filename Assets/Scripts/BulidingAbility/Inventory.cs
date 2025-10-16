@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 public class Inventory
 {
-    [Serializable] private class Entry { public ResourceDef R; public int Amount; }
+    [Serializable] private class Entry { public SupplyDef R; public int Amount; }
     [SerializeField] private List<Entry> entries = new List<Entry>();
     public int Capacity;
 
@@ -15,25 +15,29 @@ public class Inventory
         get { int t = 0; foreach (var e in entries) t += e.Amount; return t; }
     }
 
-    public int GetAmount(ResourceDef r)
+    public int GetAmount(SupplyDef r)
     {
         var e = entries.Find(x => x.R == r);
         return e == null ? 0 : e.Amount;
     }
 
-    public void Add(ResourceAmount[] items)
+    public void Add(SupplyAmount[] items)
     {
         foreach (var it in items) Add(it.Resource, it.Amount);
     }
 
-    public void Add(ResourceDef r, int amount)
+    public void Add(SupplyDef r, int amount)
     {
+        int free = Mathf.Max(0, Capacity - TotalQuantity);
+        int add = Mathf.Min(amount, free);
+        if (add <= 0) return;
+
         var e = entries.Find(x => x.R == r);
         if (e == null) { e = new Entry { R = r, Amount = 0 }; entries.Add(e); }
-        e.Amount = Mathf.Clamp(e.Amount + amount, 0, Capacity);
+        e.Amount += add;
     }
 
-    public void Consume(ResourceAmount[] costs)
+    public void Consume(SupplyAmount[] costs)
     {
         foreach (var c in costs)
         {

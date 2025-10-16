@@ -9,7 +9,9 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-
+/// <summary>
+/// 场景转移脚本
+/// </summary>
 
 public class LoadTransition : MonoBehaviour
 {

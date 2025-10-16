@@ -246,7 +246,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
 
         BuildingInstance b = Instantiate(BuildingPrefab);
         b.transform.position = anchor;
-      //  b.Initialize(currentBuildDef);
+        b.Initialize(currentBuildDef);
 
         Debug.Log("完成建造");
         process = ConstructionProcess.None;
