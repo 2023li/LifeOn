@@ -90,14 +90,14 @@ public class UIItem_BuildingSelection : MonoBehaviour
         item.SetOnClick(() => ShowBuilingClasss(captured));
     }
 
-    private void CreateBuildingButton(BuildingDef buildingDef)
+    private void CreateBuildingButton(BuildingArchetype buildingDef)
     {
         IconTextButton item = LeanPool.Spawn(btnPrefabs, BuildBuildingBtnContent);
 
         var rt = (RectTransform)item.transform;
         rt.localScale = Vector3.one;
         rt.anchoredPosition3D = Vector3.zero;
-        item.gameObject.name = $"Btn_Build_{buildingDef.BuildingOnlyID}";
+        item.gameObject.name = $"Btn_Build_{buildingDef.BuildingID}";
 
         item.SetContent(buildingDef.BuildingName, null);
 
@@ -159,7 +159,7 @@ public class UIItem_BuildingSelection : MonoBehaviour
         Debug.Log($"[UIItem_BuildingSelection] 分类 {classify} 的建筑列表已生成。");
     }
 
-    public void BuildBuilding(BuildingDef def)
+    public void BuildBuilding(BuildingArchetype def)
     {       
         // TODO: 你的建造逻辑
 

@@ -4,17 +4,18 @@ using UnityEngine;
 using Moyo.Unity;
 public class ResourceRouting:MonoSingleton<ResourceRouting>
 {
+
     public ResourceRouting()
     {
-        allBuildingDef = new Dictionary<string, BuildingDef>();
+        allBuildingDef = new Dictionary<string, BuildingArchetype>();
     }
 
-    Dictionary<string, BuildingDef> allBuildingDef;
+    Dictionary<string, BuildingArchetype> allBuildingDef;
 
 
-    public List<BuildingDef> teest;
+    public List<BuildingArchetype> teest;
 
-    public List<BuildingDef> GetClassAllBuildingDef(BuildingClassify classify)
+    public List<BuildingArchetype> GetClassAllBuildingDef(BuildingClassify classify)
     {
 
 
@@ -22,7 +23,7 @@ public class ResourceRouting:MonoSingleton<ResourceRouting>
 
 
 
-        var list = new List<BuildingDef>();
+        var list = new List<BuildingArchetype>();
         foreach (var item in allBuildingDef.Values)
         {
             if (item.classification == classify)

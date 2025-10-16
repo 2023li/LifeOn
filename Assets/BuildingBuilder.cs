@@ -13,9 +13,9 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
     {
         static BuildingEvent e;
 
-        public BuildingDef def;
+        public BuildingArchetype def;
 
-        public static void Trigger(BuildingDef buildingDef)
+        public static void Trigger(BuildingArchetype buildingDef)
         {
             e.def = buildingDef;
             MoyoEventManager.TriggerEvent(e);
@@ -44,8 +44,9 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
     private ConstructionProcess process;
 
     [ShowInInspector, ReadOnly]
-    private BuildingDef currentBuildDef;
+    private BuildingArchetype currentBuildDef;
 
+    public Building BuildingPrefab;
    
     [SerializeField] private TileBase green;
     [SerializeField] private TileBase red;
@@ -95,7 +96,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
     #region 外部 API
 
     [Button]
-    public void EnterBuildMode(BuildingDef buildingDef)
+    public void EnterBuildMode(BuildingArchetype buildingDef)
     {
         if (buildingDef == null) return;
 
@@ -237,12 +238,15 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
 
         // 标记占用
         foreach (var cell in tempBuildingCells)
+        {
             GridSystem.Instance.SetOccupy(cell);
+        }
 
         // 实例化 & 定位（若你的 Building.Construction 内部会定位，可省略下面两行）
-        var b = Instantiate(currentBuildDef.BuildingPrefab);
+
+        Building b = Instantiate(BuildingPrefab);
         b.transform.position = anchor;
-        b.Construction(currentBuildDef);
+        b.Initialize(currentBuildDef);
 
         Debug.Log("完成建造");
         process = ConstructionProcess.None;
