@@ -148,7 +148,7 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
             ]
         },
         {
-            ""name"": ""Building"",
+            ""name"": ""BuildingInstance"",
             ""id"": ""53e8dde2-50bd-4a5c-8dec-ff1adcfc713b"",
             ""actions"": [
                 {
@@ -209,8 +209,8 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Newaction = m_UI.FindAction("New action", throwIfNotFound: true);
-        // Building
-        m_Building = asset.FindActionMap("Building", throwIfNotFound: true);
+        // BuildingInstance
+        m_Building = asset.FindActionMap("BuildingInstance", throwIfNotFound: true);
         m_Building_ConfirmPlacement = m_Building.FindAction("ConfirmPlacement", throwIfNotFound: true);
         m_Building_ConfirmConstruction = m_Building.FindAction("ConfirmConstruction", throwIfNotFound: true);
     }
@@ -220,7 +220,7 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_Global.enabled, "This will cause a leak and performance issues, LOControlsMaps.Global.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_GamePlay.enabled, "This will cause a leak and performance issues, LOControlsMaps.GamePlay.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_UI.enabled, "This will cause a leak and performance issues, LOControlsMaps.UI.Disable() has not been called.");
-        UnityEngine.Debug.Assert(!m_Building.enabled, "This will cause a leak and performance issues, LOControlsMaps.Building.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Building.enabled, "This will cause a leak and performance issues, LOControlsMaps.BuildingInstance.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -433,7 +433,7 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
     }
     public UIActions @UI => new UIActions(this);
 
-    // Building
+    // BuildingInstance
     private readonly InputActionMap m_Building;
     private List<IBuildingActions> m_BuildingActionsCallbackInterfaces = new List<IBuildingActions>();
     private readonly InputAction m_Building_ConfirmPlacement;

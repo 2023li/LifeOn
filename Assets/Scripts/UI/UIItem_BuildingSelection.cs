@@ -4,13 +4,7 @@ using UnityEngine.UI;
 using Lean.Pool; // LeanPool
 using Moyo.Unity;
 
-public enum BuildingClassify
-{
-    基础,
-    市政,
-    工业类,
-    农业类,
-}
+
 
 public class UIItem_BuildingSelection : MonoBehaviour
 {
@@ -97,9 +91,9 @@ public class UIItem_BuildingSelection : MonoBehaviour
         var rt = (RectTransform)item.transform;
         rt.localScale = Vector3.one;
         rt.anchoredPosition3D = Vector3.zero;
-        item.gameObject.name = $"Btn_Build_{buildingDef.BuildingID}";
+        item.gameObject.name = $"Btn_Build_{buildingDef.Id}";
 
-        item.SetContent(buildingDef.BuildingName, null);
+        item.SetContent(buildingDef.DisplayName, null);
 
         var captured = buildingDef;
         item.SetOnClick(() => BuildBuilding(captured));

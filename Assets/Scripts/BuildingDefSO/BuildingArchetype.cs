@@ -1,38 +1,43 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
-[CreateAssetMenu(fileName = "BuildingArchetype", menuName = "LO/Building Archetype")]
-public class BuildingArchetype : ScriptableObject
+
+public enum BuildingClassify
 {
-    [Header("基础信息")]
-    public string BuildingID;               // 建筑唯一ID
-    public string BuildingName;             // 建筑名称
-    public GameObject BuildingPrefab;       // 建筑实体预制件（可选，不依赖于规则系统）
-    public BuildingClassify classification; // 建筑分类（如果有定义枚举）
-    public int Size = 1;                    // 占地尺寸（例如网格大小）
-    [Header("等级定义列表")]
-    public List<BuildingLevelDef> levels;
+    基础,
+    市政,
+    工业类,
+    农业类,
 }
 
-[System.Serializable]
+
+[CreateAssetMenu(fileName = "BuildingArchetype", menuName = "Game/BuildingInstance/Archetype")]
+public class BuildingArchetype : ScriptableObject
+{
+    public string Id;                // "residence", "warehouse", "garden"
+    public string DisplayName;       // "居民房"
+    public int Size;
+    public GameObject ViewPrefab;    // Addressables/Prefab
+    public int BuildTimeTurns = 1;   // 施工回合数
+    public List<BuildingLevelDef> Levels = new List<BuildingLevelDef>();
+    public BuildingClassify classification = BuildingClassify.基础;
+
+}
+
+[Serializable]
 public class BuildingLevelDef
 {
-    [Header("等级基本属性")]
-    public int level;                       // 等级序号（0为初始等级）
- 
-    public int InventoryCapacity = 0;       // 库存容量（0表示此等级无库存）
-    public int BaseMaxPopulation = 0;       // 提供的最大人口容量
-    public float BaseProportionWorkingPopulation = 0f; // 基础工作人口比例（适用于住宅）
-    public short MaxEmployment = 0;         // 提供的最大就业岗位
-    public int BasicSalary = 0;             // 基础薪资（如果适用）
-    public int MaterialFetchingRadius = 0;  // 获取原料的半径范围
+    [Min(1)] public int Level = 1;
 
-    [Header("供需配置")]
-    public SupplyChange[] SupplyChanges;    // 物资供需列表（消耗或产出）
+    // —— 基础属性（根据建筑不同使用其子集）——
+    public int BaseMaxPopulation;   // 人口上限基础值（居民类）
+    public int StorageCapacity;     // 仓库容量（仓库类）
+    public int ExpToNext = -1;      // 升级需要经验；-1 表示最高级
 
-    [Header("升级配置")]
-    public int RequiredExp = 0;             // 升级到下一级所需经验值
+    // 条件化属性修饰：例如“环境>1则人口上限+3”
+    [SerializeReference] public List<StatModifier> ConditionalStatModifiers = new();
 
-    [Header("规则列表")]
-    public List<Rule> rules;               // 本等级的规则集合（触发-条件-效果）
+    // 规则：回合末拉取资源、人口增减、经验与升级等
+    [SerializeReference] public List<Rule> Rules = new();
 }

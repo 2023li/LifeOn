@@ -15,7 +15,7 @@ public class InputManager : MonoSingleton<InputManager>
     /// <summary>全局指针位置变更（无状态限制，用于别处需要）</summary>
     public event Action<Vector2> OnMouseMove;
 
-    // —— 建造流程专用事件（与 .inputactions: Building map 对齐）——
+    // —— 建造流程专用事件（与 .inputactions: BuildingInstance map 对齐）——
     public event Action<Vector2> Building_OnChangeCoordinates;
     public event Action Building_OnConfirmPlacement;
     public event Action Building_OnConfirmConstruction;
@@ -44,7 +44,7 @@ public class InputManager : MonoSingleton<InputManager>
             MousePos = ctx.ReadValue<Vector2>();
             OnMouseMove?.Invoke(MousePos);
 
-            // 仅当 Building map 已启用时，转发为“建造坐标改变”
+            // 仅当 BuildingInstance map 已启用时，转发为“建造坐标改变”
             if (inputActionMap.Building.enabled)
             {
                 Building_OnChangeCoordinates?.Invoke(MousePos);
@@ -81,7 +81,7 @@ public class InputManager : MonoSingleton<InputManager>
         };
 
 
-        // Building 默认关闭，进入建造模式时再打开
+        // BuildingInstance 默认关闭，进入建造模式时再打开
         inputActionMap.Building.Disable();
 
         // 确认/取消：只订 performed；确认前做 UI 命中过滤

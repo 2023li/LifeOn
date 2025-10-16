@@ -25,7 +25,7 @@ public class UIPanel_GameMain : PanelBase
         btn_打开建造.onClick.AddListener(() => { item_建造选择.Show(); });
 
         
-        btn_下回合.onClick.AddListener(() => { TurnSystem.Instance.NextTurn(); });
+        btn_下回合.onClick.AddListener(() => { TurnSystem.Instance.EndTurn(); });
     }
 
 
