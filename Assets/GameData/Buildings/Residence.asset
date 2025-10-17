@@ -1,0 +1,251 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee61fcc490adb154f95c02cb2ab70f9a, type: 3}
+  m_Name: Residence
+  m_EditorClassIdentifier: 
+  Id: residence
+  DisplayName: "\u5C45\u6C11\u623F"
+  Size: 2
+  ViewPrefab: {fileID: 0}
+  Levels:
+  - Level: 0
+    BaseMaxPopulation: 0
+    BaseStorageCapacity: 0
+    ExpToNext: 2
+    BaseMaxJobs: 0
+    ConditionalStatModifiers: []
+    Rules:
+    - rid: 1546075376088252487
+  - Level: 1
+    BaseMaxPopulation: 5
+    BaseStorageCapacity: 0
+    ExpToNext: 10
+    BaseMaxJobs: 0
+    ConditionalStatModifiers: []
+    Rules:
+    - rid: 1546075376088252488
+    - rid: 1546075376088252489
+  - Level: 2
+    BaseMaxPopulation: 10
+    BaseStorageCapacity: 0
+    ExpToNext: 20
+    BaseMaxJobs: 0
+    ConditionalStatModifiers:
+    - rid: 1546075376088252490
+    Rules:
+    - rid: 1546075376088252491
+    - rid: 1546075376088252492
+  - Level: 3
+    BaseMaxPopulation: 20
+    BaseStorageCapacity: 0
+    ExpToNext: -1
+    BaseMaxJobs: 0
+    ConditionalStatModifiers:
+    - rid: 1546075376088252493
+    Rules:
+    - rid: 1546075376088252494
+    - rid: 1546075376088252495
+  classification: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 1546075376088252487
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 3
+        Conditions: []
+        OnSuccess:
+        - rid: 1546075376088252496
+        OnFailure: []
+    - rid: 1546075376088252488
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 1
+        Conditions:
+        - rid: 1546075376088252497
+        - rid: 1546075376088252498
+        OnSuccess:
+        - rid: 1546075376088252499
+        - rid: 1546075376088252500
+        OnFailure:
+        - rid: 1546075376088252501
+    - rid: 1546075376088252489
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 3
+        Conditions:
+        - rid: 1546075376088252502
+        OnSuccess:
+        - rid: 1546075376088252503
+        OnFailure: []
+    - rid: 1546075376088252490
+      type: {class: EnvironmentBonus, ns: , asm: Assembly-CSharp}
+      data:
+        Requirements:
+        - Category: 2
+          MinValue: 1
+        - Category: 0
+          MinValue: 1
+        Bonus: 5
+    - rid: 1546075376088252491
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 1
+        Conditions:
+        - rid: 1546075376088252504
+        - rid: 1546075376088252505
+        OnSuccess:
+        - rid: 1546075376088252506
+        - rid: 1546075376088252507
+        OnFailure:
+        - rid: 1546075376088252508
+    - rid: 1546075376088252492
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 3
+        Conditions:
+        - rid: 1546075376088252509
+        OnSuccess:
+        - rid: 1546075376088252510
+        OnFailure: []
+    - rid: 1546075376088252493
+      type: {class: EnvironmentBonus, ns: , asm: Assembly-CSharp}
+      data:
+        Requirements:
+        - Category: 2
+          MinValue: 2
+        - Category: 0
+          MinValue: 2
+        - Category: 1
+          MinValue: 2
+        Bonus: 10
+    - rid: 1546075376088252494
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 1
+        Conditions:
+        - rid: 1546075376088252511
+        - rid: 1546075376088252512
+        OnSuccess:
+        - rid: 1546075376088252513
+        - rid: 1546075376088252514
+        OnFailure:
+        - rid: 1546075376088252515
+    - rid: 1546075376088252495
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 3
+        Conditions:
+        - rid: 1546075376088252516
+        OnSuccess:
+        - rid: 1546075376088252517
+        OnFailure: []
+    - rid: 1546075376088252496
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1
+    - rid: 1546075376088252497
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 1
+    - rid: 1546075376088252498
+      type: {class: HasResourceForPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075376088252499
+      type: {class: ConsumeResourcePerPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075376088252500
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: 2
+    - rid: 1546075376088252501
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: -2
+    - rid: 1546075376088252502
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 5
+    - rid: 1546075376088252503
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1
+    - rid: 1546075376088252504
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 1
+    - rid: 1546075376088252505
+      type: {class: HasResourceForPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075376088252506
+      type: {class: ConsumeResourcePerPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075376088252507
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: 2
+    - rid: 1546075376088252508
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: -2
+    - rid: 1546075376088252509
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 10
+    - rid: 1546075376088252510
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1
+    - rid: 1546075376088252511
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 1
+    - rid: 1546075376088252512
+      type: {class: HasResourceForPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075376088252513
+      type: {class: ConsumeResourcePerPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075376088252514
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: 2
+    - rid: 1546075376088252515
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: -2
+    - rid: 1546075376088252516
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 15
+    - rid: 1546075376088252517
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1

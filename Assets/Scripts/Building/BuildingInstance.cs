@@ -17,12 +17,14 @@ public class BuildingInstance : MonoBehaviour
     public Vector3Int[] Occupy { get; private set; } // 由放置系统设置
 
     public Vector3 CenterInGrid { get; private set; }
+    public bool CenterIsCorner { get; private set; }
+    public int FootprintSize { get; private set; }
 
     private IGameContext _ctx;
 
     public int WorkersAssigned; // 当前分配在该建筑的工人数量
 
-    
+
 
     public void Initialize(BuildingArchetype def)
     {
@@ -39,20 +41,45 @@ public class BuildingInstance : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.OnTurnEnd -= FireRules;
-        if (Storage != null) _ctx.ResourceNetwork.UnregisterStorage(Storage);
+        if (_ctx != null && _ctx.ResourceNetwork != null && Storage != null)
+        {
+            _ctx.ResourceNetwork.UnregisterStorage(Storage);
+        }
+
+        if (_ctx != null && _ctx.Environment != null)
+        {
+            _ctx.Environment.RemoveAura(InstanceId);
+        }
     }
 
     void TryInitStorageIfAny()
     {
-        var lvl = Def.Levels[LevelIndex];
-        if (lvl.BaseStorageCapacity > 0)
+        if (Def == null)
         {
-            Storage = new Inventory { Capacity = lvl.BaseStorageCapacity };
-            _ctx.ResourceNetwork.RegisterStorage(Storage);
+            return;
+        }
+
+        BuildingLevelDef level = Def.Levels[LevelIndex];
+        if (level.BaseStorageCapacity > 0)
+        {
+            Storage = new Inventory { Capacity = level.BaseStorageCapacity };
+            if (_ctx != null && _ctx.ResourceNetwork != null)
+            {
+                _ctx.ResourceNetwork.RegisterStorage(Storage);
+            }
         }
     }
 
-   
+    /// <summary>由建造器配置占地信息，便于环境计算。</summary>
+    public void ConfigurePlacement(Vector3Int[] occupyCells, Vector3 center, bool centerIsCorner, int footprintSize)
+    {
+        Occupy = occupyCells ?? Array.Empty<Vector3Int>();
+        CenterInGrid = center;
+        CenterIsCorner = centerIsCorner;
+        FootprintSize = footprintSize;
+    }
+
+
 
     public void FireRules(TurnPhase trigger)
     {
@@ -70,7 +97,7 @@ public class BuildingInstance : MonoBehaviour
             }
             List<Effect> effects = ok ? r.OnSuccess : r.OnFailure;
 
-            foreach (var e in effects)
+            foreach (Effect e in effects)
             {
                 e.Apply(this, _ctx);
             }
@@ -100,29 +127,50 @@ public class BuildingInstance : MonoBehaviour
         if (cur.ExpToNext <= 0) return false; // 无可升
         if (Exp < cur.ExpToNext) return false;
 
+        int previousIndex = LevelIndex;
         LevelIndex = Mathf.Min(LevelIndex + 1, Def.Levels.Count - 1);
         Exp = 0;
 
         // 重新初始化等级相关组件（例如容量变化）
-        if (Storage != null)
+        if (_ctx != null && _ctx.ResourceNetwork != null && Storage != null)
         {
-            ctx.ResourceNetwork.UnregisterStorage(Storage);
+            _ctx.ResourceNetwork.UnregisterStorage(Storage);
         }
 
         TryInitStorageIfAny();
+
+        OnLevelChanged(previousIndex, LevelIndex, ctx);
 
         // 等级变化后的瞬时触发（可选）
         return true;
     }
 
 
+    private void OnLevelChanged(int previousIndex, int newIndex, IGameContext ctx)
+    {
+        if (previousIndex == newIndex)
+        {
+            return;
+        }
+
+        if (previousIndex == 0 && newIndex == 1)
+        {
+            int baseline = 2;
+            int max = GetMaxPopulation(ctx);
+            int target = Mathf.Clamp(Mathf.Max(Population, baseline), 0, max);
+            Population = target;
+        }
+    }
+
+
     public int GetMaxJobs(IGameContext ctx)
     {
-        var lvl = Def.Levels[LevelIndex];
+        BuildingLevelDef lvl = Def.Levels[LevelIndex];
         return Mathf.Max(0, lvl.BaseMaxJobs);
     }
     public void AssignWorkers(int count)
     {
-        WorkersAssigned = Mathf.Clamp(count, 0, GetMaxJobs(null));
+        IGameContext ctx = _ctx;
+        WorkersAssigned = Mathf.Clamp(count, 0, GetMaxJobs(ctx));
     }
 }

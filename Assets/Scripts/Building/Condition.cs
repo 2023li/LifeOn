@@ -9,8 +9,70 @@ public abstract class Condition
 }
 
 
+[Serializable]
+public class PopulationLessThan : Condition
+{
+    public int MaxExclusive;
 
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    {
+        why = "";
+        return self.Population < MaxExclusive;
+    }
+}
 
+/// <summary>用于判断仓库是否能满足人口的资源需求。</summary>
+[Serializable]
+public class HasResourceForPopulation : Condition
+{
+    public SupplyDef Resource;
+    [Min(0)] public float AmountPerCapita = 1f;
+    public bool IgnoreIfPopulationZero = true;
+
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    {
+        why = "";
+
+        if (Resource == null)
+        {
+            why = "资源定义为空";
+            return false;
+        }
+
+        int population = Mathf.Max(0, self.Population);
+        if (IgnoreIfPopulationZero && population == 0)
+        {
+            return true;
+        }
+
+        if (ctx == null || ctx.ResourceNetwork == null)
+        {
+            why = "缺少资源网络";
+            return false;
+        }
+
+        Inventory inventory = ctx.ResourceNetwork.GetAssignedStorage(self);
+        if (inventory == null)
+        {
+            why = "无可用仓库";
+            return false;
+        }
+
+        int required = Mathf.CeilToInt(population * AmountPerCapita);
+        if (required <= 0)
+        {
+            return true;
+        }
+
+        if (inventory.GetAmount(Resource) < required)
+        {
+            why = "资源不足";
+            return false;
+        }
+
+        return true;
+    }
+}
 
 
 [Serializable]

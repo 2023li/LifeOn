@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee61fcc490adb154f95c02cb2ab70f9a, type: 3}
+  m_Name: LumberCamp
+  m_EditorClassIdentifier: 
+  Id: lumber_camp
+  DisplayName: "\u4F10\u6728\u573A"
+  Size: 3
+  ViewPrefab: {fileID: 0}
+  Levels:
+  - Level: 1
+    BaseMaxPopulation: 0
+    BaseStorageCapacity: 80
+    ExpToNext: -1
+    BaseMaxJobs: 4
+    ConditionalStatModifiers: []
+    Rules:
+    - rid: 1546075376088252482
+    - rid: 1546075376088252483
+  classification: 2
+  references:
+    version: 2
+    RefIds:
+    - rid: 1546075376088252482
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 2
+        Conditions:
+        - rid: 1546075376088252484
+        OnSuccess:
+        - rid: 1546075376088252485
+        OnFailure: []
+    - rid: 1546075376088252483
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 3
+        Conditions: []
+        OnSuccess:
+        - rid: 1546075376088252486
+        OnFailure: []
+    - rid: 1546075376088252484
+      type: {class: WorkersAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 1
+    - rid: 1546075376088252485
+      type: {class: AddResourcePerWorker, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: 15d6c357e5874a44391c6672152e9134, type: 2}
+        AmountPerWorker: 2
+        ToAssignedStorage: 0
+    - rid: 1546075376088252486
+      type: {class: TransferSelfToAssigned, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: 15d6c357e5874a44391c6672152e9134, type: 2}
+        Amount: 10

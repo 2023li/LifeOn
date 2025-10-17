@@ -1,0 +1,137 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee61fcc490adb154f95c02cb2ab70f9a, type: 3}
+  m_Name: Hospital
+  m_EditorClassIdentifier: 
+  Id: hospital
+  DisplayName: "\u533B\u9662"
+  Size: 3
+  ViewPrefab: {fileID: 0}
+  Levels:
+  - Level: 1
+    BaseMaxPopulation: 0
+    BaseStorageCapacity: 0
+    ExpToNext: 8
+    BaseMaxJobs: 4
+    ConditionalStatModifiers: []
+    Rules:
+    - rid: 1546075376088252416
+    - rid: 1546075376088252417
+  - Level: 2
+    BaseMaxPopulation: 0
+    BaseStorageCapacity: 0
+    ExpToNext: 12
+    BaseMaxJobs: 6
+    ConditionalStatModifiers: []
+    Rules:
+    - rid: 1546075376088252418
+    - rid: 1546075376088252419
+  - Level: 3
+    BaseMaxPopulation: 0
+    BaseStorageCapacity: 0
+    ExpToNext: -1
+    BaseMaxJobs: 10
+    ConditionalStatModifiers: []
+    Rules:
+    - rid: 1546075376088252420
+    - rid: 1546075376088252421
+  classification: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 1546075376088252416
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 0
+        Conditions: []
+        OnSuccess:
+        - rid: 1546075376088252422
+        OnFailure: []
+    - rid: 1546075376088252417
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 3
+        Conditions: []
+        OnSuccess:
+        - rid: 1546075376088252423
+        OnFailure: []
+    - rid: 1546075376088252418
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 0
+        Conditions: []
+        OnSuccess:
+        - rid: 1546075376088252424
+        OnFailure: []
+    - rid: 1546075376088252419
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 3
+        Conditions: []
+        OnSuccess:
+        - rid: 1546075376088252425
+        OnFailure: []
+    - rid: 1546075376088252420
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 0
+        Conditions: []
+        OnSuccess:
+        - rid: 1546075376088252426
+        OnFailure: []
+    - rid: 1546075376088252421
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Trigger: 3
+        Conditions: []
+        OnSuccess:
+        - rid: 1546075376088252427
+        OnFailure: []
+    - rid: 1546075376088252422
+      type: {class: ApplyEnvironmentAura, ns: , asm: Assembly-CSharp}
+      data:
+        Category: 1
+        Rings:
+        - Radius: 8
+          Value: 2
+    - rid: 1546075376088252423
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1
+    - rid: 1546075376088252424
+      type: {class: ApplyEnvironmentAura, ns: , asm: Assembly-CSharp}
+      data:
+        Category: 1
+        Rings:
+        - Radius: 10
+          Value: 2
+        - Radius: 14
+          Value: 1
+    - rid: 1546075376088252425
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1
+    - rid: 1546075376088252426
+      type: {class: ApplyEnvironmentAura, ns: , asm: Assembly-CSharp}
+      data:
+        Category: 1
+        Rings:
+        - Radius: 14
+          Value: 3
+        - Radius: 20
+          Value: 2
+        - Radius: 35
+          Value: 1
+    - rid: 1546075376088252427
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1

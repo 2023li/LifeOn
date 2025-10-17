@@ -246,6 +246,20 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
 
         BuildingInstance b = Instantiate(BuildingPrefab);
         b.transform.position = anchor;
+
+        Vector2 center;
+        bool centerIsCorner;
+        int footprintSize;
+        if (!CoordinateCalculator.TryGetCenterFromCells(tempBuildingCells, out center, out centerIsCorner, out footprintSize))
+        {
+            center = Vector2.zero;
+            centerIsCorner = false;
+            footprintSize = currentBuildDef != null ? currentBuildDef.Size : 0;
+        }
+
+        Vector3Int[] occupy = tempBuildingCells.ToArray();
+        Vector3 centerVector = new Vector3(center.x, center.y, 0f);
+        b.ConfigurePlacement(occupy, centerVector, centerIsCorner, footprintSize);
         b.Initialize(currentBuildDef);
 
         Debug.Log("完成建造");
