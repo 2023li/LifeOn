@@ -348,9 +348,9 @@ public class Build_UIPanel_DebugGridInspector_TMP : EditorWindow
         // TMP_InputField
         TMP_InputField inputField = parent.gameObject.AddComponent<TMP_InputField>();
         inputField.textViewport = textAreaRT;
+        inputField.pointSize = fontSize;
         inputField.textComponent = textTMP;
         inputField.placeholder = placeholderTMP;
-        inputField.pointSize = fontSize;
         inputField.caretBlinkRate = 0.85f;
         inputField.caretWidth = 1;
         inputField.interactable = true;

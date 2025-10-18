@@ -476,6 +476,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foodSupply: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
   woodSupply: {fileID: 11400000, guid: 15d6c357e5874a44391c6672152e9134, type: 2}
+  testSupply: {fileID: 11400000, guid: ef9811f98affe7748a0f950d224e4cef, type: 2}
   buildingDefinitions:
   - {fileID: 11400000, guid: 8df312abae5d5a248a51a67562791d72, type: 2}
   - {fileID: 11400000, guid: 7cd54c6131ba3b84ebb8a9276da26974, type: 2}

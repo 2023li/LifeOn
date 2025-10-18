@@ -3,7 +3,6 @@ using System.Text;
 using Moyo.Unity;
 using Sirenix.OdinInspector;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,7 +38,7 @@ public class UIPanel_DebugGridInspector : PanelBase
     [SerializeField] private Button _supplyOptionButtonPrefab;
 
     [LabelText("数量输入框")]
-    [SerializeField] private TMP_InputField _supplyAmountInput;
+    [SerializeField] private InputField _supplyAmountInput;
 
     [LabelText("添加按钮")]
     [SerializeField] private Button _addSupplyButton;
@@ -157,11 +156,8 @@ public class UIPanel_DebugGridInspector : PanelBase
 
     private void UpdateSelectionAtCell(Vector3Int cell)
     {
-
-       // Debug.Log("传入的Cell"+ cell);
         if (BuildingInstance.TryGetAtCell(cell, out BuildingInstance inst))
         {
-            //Debug.Log("Yes");
             if (_currentBuilding != inst)
             {
                 SetBuildingInfo(inst);
@@ -173,7 +169,6 @@ public class UIPanel_DebugGridInspector : PanelBase
         }
         else
         {
-            //Debug.Log("No");
             SetBuildingInfo(null);
         }
     }
@@ -207,7 +202,6 @@ public class UIPanel_DebugGridInspector : PanelBase
 
         if (_currentBuilding == null || _currentBuilding.Storage == null)
         {
-           // Debug.Log(1);
             _storageInfoText.text = DefaultStorageText;
             SetStorageControlsVisible(false);
             return;
@@ -239,18 +233,7 @@ public class UIPanel_DebugGridInspector : PanelBase
 
     private void SetStorageControlsVisible(bool visible)
     {
-        //Debug.Log("e");
         bool shouldShow = visible && _currentBuilding != null && _currentBuilding.Storage != null && HasSupplyOptions();
-
-        Debug.Log(visible);
-
-        Debug.Log("_currentBuilding != null:" + (_currentBuilding != null));
-
-        if (_currentBuilding != null) 
-        {
-            Debug.Log("_currentBuilding.Storage != null:" + (_currentBuilding.Storage != null)); 
-        }
-        Debug.Log("HasSupplyOptions:" + HasSupplyOptions() );
 
         if (_storageControlsRoot != null)
         {
@@ -395,7 +378,7 @@ public class UIPanel_DebugGridInspector : PanelBase
         if (_supplyAmountInput != null)
         {
             _supplyAmountInput.text = string.Empty;
-            _supplyAmountInput.contentType = TMP_InputField.ContentType.IntegerNumber;
+            _supplyAmountInput.contentType = InputField.ContentType.IntegerNumber;
         }
 
         if (_supplyOptionButtonPrefab != null)

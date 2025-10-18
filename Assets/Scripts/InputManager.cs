@@ -133,6 +133,8 @@ public class InputManager : MonoSingleton<InputManager>
     private readonly List<IBackHandler> _backHandlers = new();
     private readonly List<ISlideHandler> _mouseWheelHandlers = new();
 
+
+
     public void Register(IBackHandler h)
     {
         _backHandlers.Add(h);

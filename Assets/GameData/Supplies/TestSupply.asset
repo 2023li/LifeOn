@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfd2eb7a55367d745a9a6df889614dd7, type: 3}
   m_Name: TestSupply
   m_EditorClassIdentifier: 
-  Id: wood
-  DisplayName: "\u6728\u6750"
+  Id: test
+  DisplayName: "\u6D4B\u8BD5\u7269\u8D44"
   Icon: {fileID: 0}
