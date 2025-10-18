@@ -14,6 +14,8 @@ public class TheGame : MonoSingleton<TheGame>
     public void Start()
     {
        _ = UIManager.Instance.ShowPanel<UIPanel_GameMain>(UIManager.UILayer.Main);
+
+        _ = UIManager.Instance.ShowPanel<UIPanel_DebugGridInspector>(UIManager.UILayer.DebugInfo);
     }
 
     public void GetAllBuildingClassify()
