@@ -1,14 +1,20 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using Sirenix.OdinInspector;
 
 public class BuildingInstance : MonoBehaviour
 {
     public string InstanceId { get; private set; } = Guid.NewGuid().ToString("N");
     public BuildingArchetype Def;
+
+    [ShowInInspector,ReadOnly]
     public int LevelIndex { get; private set; } = 0; // 对应 Def.Levels 索引
 
+    [ShowInInspector, ReadOnly]
     public int Population { get; set; }
+    
+    [ShowInInspector,ReadOnly]
     public int Exp { get; set; }
     public Inventory Storage { get; private set; } // 仅仓库使用
 
@@ -16,8 +22,13 @@ public class BuildingInstance : MonoBehaviour
 
     public Vector3Int[] Occupy { get; private set; } // 由放置系统设置
 
+    [ShowInInspector, ReadOnly]
     public Vector3 CenterInGrid { get; private set; }
+
+    [ShowInInspector, ReadOnly]
     public bool CenterIsCorner { get; private set; }
+
+    [ShowInInspector,ReadOnly]
     public int FootprintSize { get; private set; }
 
     private IGameContext _ctx;

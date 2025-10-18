@@ -474,8 +474,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91b109464cc1aea4499d71607178595e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  teest:
-  - {fileID: 11400000, guid: 13268503ca98be6468aaa4a2be917d2a, type: 2}
+  foodSupply: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+  woodSupply: {fileID: 11400000, guid: 15d6c357e5874a44391c6672152e9134, type: 2}
+  buildingDefinitions:
+  - {fileID: 11400000, guid: 8df312abae5d5a248a51a67562791d72, type: 2}
+  - {fileID: 11400000, guid: 7cd54c6131ba3b84ebb8a9276da26974, type: 2}
+  - {fileID: 11400000, guid: 8f6c704dcb20e5e41a567ff84ee09138, type: 2}
+  - {fileID: 11400000, guid: 21a6ea641bd504f43afbea515d009803, type: 2}
+  - {fileID: 11400000, guid: 2f80924b70bbbd142ac600379dffb67b, type: 2}
 --- !u!1 &1669619324
 GameObject:
   m_ObjectHideFlags: 0

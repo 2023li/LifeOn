@@ -311,6 +311,171 @@ public class CityEnvironment
 
         return 0;
     }
+
+    /// <summary>遍历所有有光环覆盖的格子。</summary>
+    public IEnumerable<Vector3Int> EnumerateActiveCells()
+    {
+        HashSet<Vector3Int> yielded = new HashSet<Vector3Int>();
+        foreach (KeyValuePair<AuraKey, int> pair in gridValues)
+        {
+            if (pair.Value <= 0)
+            {
+                continue;
+            }
+
+            if (yielded.Add(pair.Key.Cell))
+            {
+                yield return pair.Key.Cell;
+            }
+        }
+    }
+
+    /// <summary>遍历指定类型光环覆盖的所有格子。</summary>
+    public IEnumerable<Vector3Int> EnumerateActiveCells(AuraCategory category)
+    {
+        foreach (KeyValuePair<AuraKey, int> pair in gridValues)
+        {
+            if (pair.Key.Category != category || pair.Value <= 0)
+            {
+                continue;
+            }
+
+            yield return pair.Key.Cell;
+        }
+    }
+
+    /// <summary>根据数值条件筛选格子。</summary>
+    public IEnumerable<Vector3Int> EnumerateCells(AuraCategory category, Func<int, bool> predicate)
+    {
+        if (predicate == null)
+        {
+            yield break;
+        }
+
+        foreach (KeyValuePair<AuraKey, int> pair in gridValues)
+        {
+            if (pair.Key.Category != category)
+            {
+                continue;
+            }
+
+            int value = pair.Value;
+            if (value <= 0)
+            {
+                continue;
+            }
+
+            if (predicate(value))
+            {
+                yield return pair.Key.Cell;
+            }
+        }
+    }
+
+    /// <summary>判断格子光环是否大于等于指定阈值。</summary>
+    public bool MeetsMinimum(Vector3Int cell, AuraCategory category, int minValue)
+    {
+        return GetValue(cell, category) >= minValue;
+    }
+
+    /// <summary>判断格子光环是否小于等于指定阈值。</summary>
+    public bool MeetsMaximum(Vector3Int cell, AuraCategory category, int maxValue)
+    {
+        return GetValue(cell, category) <= maxValue;
+    }
+
+    /// <summary>判断格子光环是否等于指定数值。</summary>
+    public bool MeetsExact(Vector3Int cell, AuraCategory category, int value)
+    {
+        return GetValue(cell, category) == value;
+    }
+
+    /// <summary>生成“至少为”条件。</summary>
+    public Func<Vector3Int, bool> CreateMinimumCondition(AuraCategory category, int minValue)
+    {
+        return cell => MeetsMinimum(cell, category, minValue);
+    }
+
+    /// <summary>生成“至多为”条件。</summary>
+    public Func<Vector3Int, bool> CreateMaximumCondition(AuraCategory category, int maxValue)
+    {
+        return cell => MeetsMaximum(cell, category, maxValue);
+    }
+
+    /// <summary>生成“等于”条件。</summary>
+    public Func<Vector3Int, bool> CreateExactCondition(AuraCategory category, int value)
+    {
+        return cell => MeetsExact(cell, category, value);
+    }
+
+    /// <summary>根据条件筛选格子。</summary>
+    public IEnumerable<Vector3Int> EnumerateCellsSatisfying(params Func<Vector3Int, bool>[] conditions)
+    {
+        if (conditions == null || conditions.Length == 0)
+        {
+            yield break;
+        }
+
+        foreach (Vector3Int cell in EnumerateActiveCells())
+        {
+            bool pass = true;
+            for (int i = 0; i < conditions.Length; i++)
+            {
+                Func<Vector3Int, bool> condition = conditions[i];
+                if (condition == null)
+                {
+                    continue;
+                }
+
+                if (!condition(cell))
+                {
+                    pass = false;
+                    break;
+                }
+            }
+
+            if (pass)
+            {
+                yield return cell;
+            }
+        }
+    }
+
+    /// <summary>根据条件列表筛选格子。</summary>
+    public IEnumerable<Vector3Int> EnumerateCellsSatisfying(IReadOnlyList<Func<Vector3Int, bool>> conditions)
+    {
+        if (conditions == null || conditions.Count == 0)
+        {
+            yield break;
+        }
+
+        foreach (Vector3Int cell in EnumerateActiveCells())
+        {
+            bool pass = true;
+            for (int i = 0; i < conditions.Count; i++)
+            {
+                Func<Vector3Int, bool> condition = conditions[i];
+                if (condition == null)
+                {
+                    continue;
+                }
+
+                if (!condition(cell))
+                {
+                    pass = false;
+                    break;
+                }
+            }
+
+            if (pass)
+            {
+                yield return cell;
+            }
+        }
+    }
 }
+
+
+
 
 #endregion

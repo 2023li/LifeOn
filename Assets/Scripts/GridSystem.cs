@@ -64,8 +64,6 @@ public class GridSystem : MonoSingleton<GridSystem>
     {
         base.Awake();
         Init();
-
-        Halo = new HaloSystem();
     }
     public void Init()
     {
@@ -254,158 +252,34 @@ public class GridSystem : MonoSingleton<GridSystem>
     }
 
 
-
-
-
-    public HaloSystem Halo { get; private set; }
-
-
-
-    public class HaloSystem
+    public void ShowAuraHighlight(IGameContext context, AuraCategory category)
     {
-        public HaloSystem()
+        if (context == null || context.Environment == null)
         {
-            dic_HaloEffectMap = new Dictionary<HaloEffectType, Dictionary<Vector3Int, int>>()
-            {
-                {HaloEffectType.医疗, new Dictionary<Vector3Int, int>() },
-                {HaloEffectType.环境, new Dictionary<Vector3Int, int>() },
-                {HaloEffectType.治安, new Dictionary<Vector3Int, int>() },
-            };
-
-        }
-        //第一层字典：类型   第二层字典  坐标数值
-        private Dictionary<HaloEffectType, Dictionary<Vector3Int, int>> dic_HaloEffectMap;
-
-        public void AddHaloEffect(IEnumerable<Vector3Int> vector3Ints, HaloEffectRangeValue values) => ModifyEffect(vector3Ints, values, true);
-
-        public void RemoveEffect(IEnumerable<Vector3Int> vector3Ints, HaloEffectRangeValue values) => ModifyEffect(vector3Ints, values, false);
-
-        private void ModifyEffect(IEnumerable<Vector3Int> vector3Ints, HaloEffectRangeValue values, bool add)
-        {
-            var coors = CoordinateCalculator.CellsInRadius(vector3Ints, values.Range);
-            var dic = dic_HaloEffectMap[values.Type];
-
-            foreach (var c in coors)
-            {
-                if (!Instance.allCells.Contains(c)) continue;
-
-                if (add)
-                {
-                    dic[c] = (short)((dic.TryGetValue(c, out var cur) ? cur : 0) + values.Value);
-                }
-                else
-                {
-                    if (!dic.TryGetValue(c, out var cur)) continue; // 没有就不用减
-                    var newVal = (short)(cur - values.Value);
-                    if (newVal == 0) dic.Remove(c);
-                    else dic[c] = newVal;
-                }
-            }
+            ClearHighlight();
+            return;
         }
 
-        private IEnumerable<Vector3Int> ActiveHaloCells() => dic_HaloEffectMap.Values.SelectMany(d => d.Keys).Distinct();
+        CityEnvironment environment = context.Environment;
 
-        public int GetHaloValue(HaloEffectType haloEffectType, Vector3Int coor)
-        {
-            Dictionary<Vector3Int, int> map = dic_HaloEffectMap[haloEffectType];
-            return map.TryGetValue(coor, out int v) ? v : 0;
-        }
+        IEnumerable<Vector3Int> level1 = environment.EnumerateCells(category, value => value >= 1);
+        IEnumerable<Vector3Int> level2 = environment.EnumerateCells(category, value => value >= 2);
+        IEnumerable<Vector3Int> level3 = environment.EnumerateCells(category, value => value >= 3);
 
+        HighlightSpec spec1 = new HighlightSpec(level1, tile1);
+        HighlightSpec spec2 = new HighlightSpec(level2, tile2);
+        HighlightSpec spec3 = new HighlightSpec(level3, tile3);
 
-        //大于最小值
-        public Func<Vector3Int, bool> HaloAtLeast(HaloEffectType type, short min) => c => GetHaloValue(type, c) >= min;
-        //小于最大值
-        public Func<Vector3Int, bool> HaloAtMost(HaloEffectType type, short max) => c => GetHaloValue(type, c) <= max;
-        //等于
-        public Func<Vector3Int, bool> HaloEquals(HaloEffectType type, short value) => c => GetHaloValue(type, c) == value;
-
-
-
-        
-        public void ShowHaloByType(HaloEffectType type)
-        {
-            IEnumerable<Vector3Int> level1 = GetCoordinatesSatisfyingAuraConditionFast(HaloAtLeast(type,1));
-            IEnumerable<Vector3Int> level2 = GetCoordinatesSatisfyingAuraConditionFast(HaloAtLeast(type, 2));
-            IEnumerable<Vector3Int> level3 = GetCoordinatesSatisfyingAuraConditionFast(HaloAtLeast(type, 3));
-
-            HighlightSpec spec1 = new HighlightSpec(level1,Instance.tile1);
-            HighlightSpec spec2 = new HighlightSpec(level2, Instance.tile2);
-            HighlightSpec spec3 = new HighlightSpec(level3, Instance.tile3);
-
-
-            Instance.SetHighlight(spec1, spec2, spec3);
-        }
-
-
-        public IEnumerable<Vector3Int> GetCoordinatesSatisfyingAuraConditionFast(params Func<Vector3Int, bool>[] conditions)
-        {
-            if (conditions == null || conditions.Length == 0)
-                yield break;
-
-            foreach (var c in ActiveHaloCells())
-            {
-                bool pass = true;
-                for (int i = 0; i < conditions.Length; i++)
-                {
-                    Func<Vector3Int, bool> cond = conditions[i];
-                    if (cond == null)
-                    {
-                        continue;
-                    }
-                    if (!cond(c))
-                    {
-                        pass = false;
-                        break;
-                    }
-                }
-                if (pass)
-                {
-                    yield return c;
-                }
-            }
-        }
-
-        public IEnumerable<Vector3Int> GetCoordinatesSatisfyingAuraConditionFast(List<Func<Vector3Int, bool>> conditions)
-        {
-            if (conditions == null || conditions.Count == 0)
-                yield break;
-
-            foreach (var c in ActiveHaloCells())
-            {
-                bool pass = true;
-                for (int i = 0; i < conditions.Count; i++)
-                {
-                    Func<Vector3Int, bool> cond = conditions[i];
-                    if (cond == null)
-                    {
-                        continue;
-                    }
-                    if (!cond(c))
-                    {
-                        pass = false;
-                        break;
-                    }
-                }
-                if (pass)
-                {
-                    yield return c;
-                }
-            }
-        }
-
-
-
-
+        SetHighlight(spec1, spec2, spec3);
     }
-
-
-
 
 
     [Button]
-    private void Test(HaloEffectType t)
+    private void Test(AuraCategory category)
     {
-        Halo.ShowHaloByType(t);
+        GameContext context = FindObjectOfType<GameContext>();
+        ShowAuraHighlight(context, category);
     }
+
 
 }

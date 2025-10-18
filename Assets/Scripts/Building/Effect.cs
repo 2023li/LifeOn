@@ -40,7 +40,7 @@ public class AddExp : Effect
     {
         self.Exp += Amount;
 
-        Debug.Log("增加经验");
+        Debug.Log("增加经验",self);
     }
 
 
