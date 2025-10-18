@@ -7,9 +7,12 @@ public class ResourceRouting : MonoSingleton<ResourceRouting>
 {
     [LabelText("食物资源定义")]
     [SerializeField] private SupplyDef foodSupply;
-
     [LabelText("木材资源定义")]
     [SerializeField] private SupplyDef woodSupply;
+    [LabelText("测试资源定义")]
+    [SerializeField] private SupplyDef testSupply;
+
+
 
     [LabelText("建筑定义列表")]
     [SerializeField] private List<BuildingArchetype> buildingDefinitions = new List<BuildingArchetype>();
@@ -18,7 +21,7 @@ public class ResourceRouting : MonoSingleton<ResourceRouting>
     private bool definitionsBuilt;
     public SupplyDef FoodSupply => foodSupply;
     public SupplyDef WoodSupply => woodSupply;
-
+    public SupplyDef TestSupply => testSupply;
     protected override void Initialize()
     {
         base.Initialize();

@@ -10,6 +10,7 @@ public class Inventory
     [SerializeField] private List<Entry> entries = new List<Entry>();
     public int Capacity;
 
+    
     public int TotalQuantity
     {
         get { int t = 0; foreach (var e in entries) t += e.Amount; return t; }
@@ -26,6 +27,7 @@ public class Inventory
         foreach (var it in items) Add(it.Resource, it.Amount);
     }
 
+
     public void Add(SupplyDef r, int amount)
     {
         int free = Mathf.Max(0, Capacity - TotalQuantity);
@@ -35,7 +37,28 @@ public class Inventory
         var e = entries.Find(x => x.R == r);
         if (e == null) { e = new Entry { R = r, Amount = 0 }; entries.Add(e); }
         e.Amount += add;
+
+        Debug.Log("添加完成");
     }
+
+
+    public IEnumerable<SupplyAmount> EnumerateContents()
+    {
+        foreach (var entry in entries)
+        {
+            if (entry == null || entry.R == null || entry.Amount <= 0)
+            {
+                continue;
+            }
+
+            yield return new SupplyAmount
+            {
+                Resource = entry.R,
+                Amount = entry.Amount
+            };
+        }
+    }
+
 
     public void Consume(SupplyAmount[] costs)
     {

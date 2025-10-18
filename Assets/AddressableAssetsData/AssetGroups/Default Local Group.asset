@@ -17,6 +17,11 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 3671c473a1293ee44bbc8c826bf86a58
   m_SerializeEntries:
+  - m_GUID: 78094b4bf80ac3a4f8e719726fa3593d
+    m_Address: UIPanel_DebugGridInspector
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 85951683f50152745a5705ab02728b5e
     m_Address: UIPanel_Main
     m_ReadOnly: 0

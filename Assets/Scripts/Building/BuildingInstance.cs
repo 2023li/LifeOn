@@ -5,21 +5,56 @@ using Sirenix.OdinInspector;
 
 public class BuildingInstance : MonoBehaviour
 {
+
+    #region 静态
+    private static readonly HashSet<BuildingInstance> _activeInstances = new();
+
+    public static IReadOnlyCollection<BuildingInstance> ActiveInstances => _activeInstances;
+
+    public static bool TryGetAtCell(Vector3Int cell, out BuildingInstance inst)
+    {
+        foreach (BuildingInstance candidate in _activeInstances)
+        {
+            if (candidate == null || candidate.Occupy == null)
+            {
+                continue;
+            }
+
+            foreach (Vector3Int occupyCell in candidate.Occupy)
+            {
+                if (occupyCell == cell)
+                {
+                    inst = candidate;
+                    return true;
+                }
+            }
+        }
+
+        inst = null;
+        return false;
+    }
+    #endregion
+
+
     public string InstanceId { get; private set; } = Guid.NewGuid().ToString("N");
     public BuildingArchetype Def;
 
-    [ShowInInspector,ReadOnly]
+
+    public string DisplayName => Def != null ? Def.DisplayName : string.Empty;
+
+    [ShowInInspector, ReadOnly]
     public int LevelIndex { get; private set; } = 0; // 对应 Def.Levels 索引
 
     [ShowInInspector, ReadOnly]
     public int Population { get; set; }
-    
-    [ShowInInspector,ReadOnly]
+
+    [ShowInInspector, ReadOnly]
     public int Exp { get; set; }
     public Inventory Storage { get; private set; } // 仅仓库使用
 
     public BuildingInstance AssignedStorage;       // 非仓库：从此仓库拉取资源
 
+    [ShowInInspector, ReadOnly]
     public Vector3Int[] Occupy { get; private set; } // 由放置系统设置
 
     [ShowInInspector, ReadOnly]
@@ -28,7 +63,7 @@ public class BuildingInstance : MonoBehaviour
     [ShowInInspector, ReadOnly]
     public bool CenterIsCorner { get; private set; }
 
-    [ShowInInspector,ReadOnly]
+    [ShowInInspector, ReadOnly]
     public int FootprintSize { get; private set; }
 
     private IGameContext _ctx;
@@ -47,11 +82,14 @@ public class BuildingInstance : MonoBehaviour
     private void OnEnable()
     {
         TurnSystem.OnTurnEnd += FireRules;
+        _activeInstances.Add(this);
     }
 
     private void OnDisable()
     {
         TurnSystem.OnTurnEnd -= FireRules;
+        _activeInstances.Remove(this);
+
         if (_ctx != null && _ctx.ResourceNetwork != null && Storage != null)
         {
             _ctx.ResourceNetwork.UnregisterStorage(Storage);
@@ -184,4 +222,16 @@ public class BuildingInstance : MonoBehaviour
         IGameContext ctx = _ctx;
         WorkersAssigned = Mathf.Clamp(count, 0, GetMaxJobs(ctx));
     }
+
+    [Button]
+    public void Test_AddTestSupply()
+    {
+        if (Storage != null)
+        {
+            Storage.Add(ResourceRouting.Instance.TestSupply, 1);
+        }
+    }
+
+
+    
 }
