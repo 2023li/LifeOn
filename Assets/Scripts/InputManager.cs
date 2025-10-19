@@ -12,6 +12,10 @@ public class InputManager : MonoSingleton<InputManager>
     public Vector3 MousePos { get; private set; }
     public Vector2 MouseWheelDelta { get; private set; }
 
+    /// <summary>全局鼠标主键点击（排除 UI 命中）。</summary>
+    public event Action<Vector2> OnMousePrimaryClick;
+
+
     /// <summary>全局指针位置变更（无状态限制，用于别处需要）</summary>
     public event Action<Vector2> OnMouseMove;
 
@@ -69,6 +73,37 @@ public class InputManager : MonoSingleton<InputManager>
                 if (handler.TryHandleSlide(delta.y)) return;
             }
         };
+
+
+        inputActionMap.Global.MousePrimaryClick.performed += ctx =>
+        {
+            if (EventSystem.current != null)
+            {
+                //if (EventSystem.current.IsPointerOverGameObject())
+                //{
+                //    return;
+                //}
+
+                if (EventSystem.current.IsPointerOverGameObject(PointerInputModule.kMouseLeftId))
+                {
+                    return;
+                }
+            }
+
+            Vector2 clickPosition = MousePos;
+            if (Mouse.current != null)
+            {
+                clickPosition = Mouse.current.position.ReadValue();
+                MousePos = clickPosition;
+            }
+
+            OnMousePrimaryClick?.Invoke(clickPosition);
+        };
+
+
+
+
+
 
         inputActionMap.Global.Back.performed += ctx =>
         {

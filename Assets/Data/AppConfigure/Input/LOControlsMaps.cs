@@ -53,6 +53,15 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MousePrimaryClick"",
+                    ""type"": ""Button"",
+                    ""id"": ""be3101a0-f953-4fab-8601-e271763004be"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -86,6 +95,17 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Back"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4fdbe23d-4cb1-4b33-a664-864e3f5eb988"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MousePrimaryClick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -148,7 +168,7 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
             ]
         },
         {
-            ""name"": ""BuildingInstance"",
+            ""name"": ""Building"",
             ""id"": ""53e8dde2-50bd-4a5c-8dec-ff1adcfc713b"",
             ""actions"": [
                 {
@@ -203,14 +223,15 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
         m_Global_MousePostionChange = m_Global.FindAction("MousePostionChange", throwIfNotFound: true);
         m_Global_MouseWheelChanges = m_Global.FindAction("MouseWheelChanges", throwIfNotFound: true);
         m_Global_Back = m_Global.FindAction("Back", throwIfNotFound: true);
+        m_Global_MousePrimaryClick = m_Global.FindAction("MousePrimaryClick", throwIfNotFound: true);
         // GamePlay
         m_GamePlay = asset.FindActionMap("GamePlay", throwIfNotFound: true);
         m_GamePlay_MoveCamera = m_GamePlay.FindAction("MoveCamera", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Newaction = m_UI.FindAction("New action", throwIfNotFound: true);
-        // BuildingInstance
-        m_Building = asset.FindActionMap("BuildingInstance", throwIfNotFound: true);
+        // Building
+        m_Building = asset.FindActionMap("Building", throwIfNotFound: true);
         m_Building_ConfirmPlacement = m_Building.FindAction("ConfirmPlacement", throwIfNotFound: true);
         m_Building_ConfirmConstruction = m_Building.FindAction("ConfirmConstruction", throwIfNotFound: true);
     }
@@ -220,7 +241,7 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_Global.enabled, "This will cause a leak and performance issues, LOControlsMaps.Global.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_GamePlay.enabled, "This will cause a leak and performance issues, LOControlsMaps.GamePlay.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_UI.enabled, "This will cause a leak and performance issues, LOControlsMaps.UI.Disable() has not been called.");
-        UnityEngine.Debug.Assert(!m_Building.enabled, "This will cause a leak and performance issues, LOControlsMaps.BuildingInstance.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Building.enabled, "This will cause a leak and performance issues, LOControlsMaps.Building.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -285,6 +306,7 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
     private readonly InputAction m_Global_MousePostionChange;
     private readonly InputAction m_Global_MouseWheelChanges;
     private readonly InputAction m_Global_Back;
+    private readonly InputAction m_Global_MousePrimaryClick;
     public struct GlobalActions
     {
         private @LOControlsMaps m_Wrapper;
@@ -292,6 +314,7 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
         public InputAction @MousePostionChange => m_Wrapper.m_Global_MousePostionChange;
         public InputAction @MouseWheelChanges => m_Wrapper.m_Global_MouseWheelChanges;
         public InputAction @Back => m_Wrapper.m_Global_Back;
+        public InputAction @MousePrimaryClick => m_Wrapper.m_Global_MousePrimaryClick;
         public InputActionMap Get() { return m_Wrapper.m_Global; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -310,6 +333,9 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
             @Back.started += instance.OnBack;
             @Back.performed += instance.OnBack;
             @Back.canceled += instance.OnBack;
+            @MousePrimaryClick.started += instance.OnMousePrimaryClick;
+            @MousePrimaryClick.performed += instance.OnMousePrimaryClick;
+            @MousePrimaryClick.canceled += instance.OnMousePrimaryClick;
         }
 
         private void UnregisterCallbacks(IGlobalActions instance)
@@ -323,6 +349,9 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
             @Back.started -= instance.OnBack;
             @Back.performed -= instance.OnBack;
             @Back.canceled -= instance.OnBack;
+            @MousePrimaryClick.started -= instance.OnMousePrimaryClick;
+            @MousePrimaryClick.performed -= instance.OnMousePrimaryClick;
+            @MousePrimaryClick.canceled -= instance.OnMousePrimaryClick;
         }
 
         public void RemoveCallbacks(IGlobalActions instance)
@@ -433,7 +462,7 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
     }
     public UIActions @UI => new UIActions(this);
 
-    // BuildingInstance
+    // Building
     private readonly InputActionMap m_Building;
     private List<IBuildingActions> m_BuildingActionsCallbackInterfaces = new List<IBuildingActions>();
     private readonly InputAction m_Building_ConfirmPlacement;
@@ -491,6 +520,7 @@ public partial class @LOControlsMaps: IInputActionCollection2, IDisposable
         void OnMousePostionChange(InputAction.CallbackContext context);
         void OnMouseWheelChanges(InputAction.CallbackContext context);
         void OnBack(InputAction.CallbackContext context);
+        void OnMousePrimaryClick(InputAction.CallbackContext context);
     }
     public interface IGamePlayActions
     {

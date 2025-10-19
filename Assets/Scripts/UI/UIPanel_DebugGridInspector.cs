@@ -25,6 +25,9 @@ public class UIPanel_DebugGridInspector : PanelBase
     [LabelText("仓储交互容器")]
     [SerializeField] private GameObject _storageControlsRoot;
 
+    [LabelText("仓储收起按钮")]
+    [SerializeField] private Button _storageControlsCloseButton;
+
     [LabelText("物资下拉按钮")]
     [SerializeField] private Button _supplyDropdownButton;
 
@@ -38,7 +41,7 @@ public class UIPanel_DebugGridInspector : PanelBase
     [SerializeField] private Button _supplyOptionButtonPrefab;
 
     [LabelText("数量输入框")]
-    [SerializeField] private InputField _supplyAmountInput;
+    [SerializeField] private TMP_InputField _supplyAmountInput;
 
     [LabelText("添加按钮")]
     [SerializeField] private Button _addSupplyButton;
@@ -51,6 +54,7 @@ public class UIPanel_DebugGridInspector : PanelBase
     private BuildingInstance _currentBuilding;
     private SupplyDef _selectedSupply;
     private bool _dropdownVisible;
+    private BuildingInstance _lockedBuilding;
 
     protected override void Awake()
     {
@@ -65,6 +69,7 @@ public class UIPanel_DebugGridInspector : PanelBase
         if (InputManager.HasInstance)
         {
             InputManager.Instance.OnMouseMove += HandleMouseMove;
+            InputManager.Instance.OnMousePrimaryClick += HandleMousePrimaryClick;
             HandleMouseMove(InputManager.Instance.MousePos);
         }
         else
@@ -81,6 +86,7 @@ public class UIPanel_DebugGridInspector : PanelBase
         if (InputManager.HasInstance)
         {
             InputManager.Instance.OnMouseMove -= HandleMouseMove;
+            InputManager.Instance.OnMousePrimaryClick -= HandleMousePrimaryClick;
         }
 
         SetDropdownListActive(false);
@@ -98,12 +104,32 @@ public class UIPanel_DebugGridInspector : PanelBase
             _addSupplyButton.onClick.RemoveListener(HandleAddSupplyClicked);
         }
 
+        if (_storageControlsCloseButton != null)
+        {
+            _storageControlsCloseButton.onClick.RemoveListener(HandleStorageControlsHideClicked);
+        }
+
         ClearSupplyOptionButtons();
     }
 
     private void HandleMouseMove(Vector2 screenPoint)
     {
         RefreshCoordinate(screenPoint);
+    }
+
+    private void HandleMousePrimaryClick(Vector2 screenPoint)
+    {
+        Debug.Log("HandleMousePrimaryClick");
+        if (!GridSystem.HasInstance)
+        {
+            return;
+        }
+
+        Vector3Int cell = GridSystem.Instance.GetScreenPointCoordinates(screenPoint);
+        if (BuildingInstance.TryGetAtCell(cell, out BuildingInstance instance) && instance?.Storage != null)
+        {
+            LockStorageControls(instance);
+        }
     }
 
     private void RefreshCoordinate(Vector2 screenPoint)
@@ -177,19 +203,7 @@ public class UIPanel_DebugGridInspector : PanelBase
     {
         _currentBuilding = building;
 
-        if (_buildingNameText != null)
-        {
-            if (building == null)
-            {
-                _buildingNameText.text = DefaultBuildingText;
-            }
-            else
-            {
-                string name = !string.IsNullOrEmpty(building.DisplayName) ? building.DisplayName : building.name;
-                _buildingNameText.text = $"建筑: {name}";
-            }
-        }
-
+        UpdateBuildingLabel();
         RefreshStorageDisplay();
     }
 
@@ -200,14 +214,18 @@ public class UIPanel_DebugGridInspector : PanelBase
             return;
         }
 
-        if (_currentBuilding == null || _currentBuilding.Storage == null)
+        UpdateBuildingLabel();
+
+        BuildingInstance targetBuilding = GetActiveStorageBuilding();
+
+        if (targetBuilding == null || targetBuilding.Storage == null)
         {
             _storageInfoText.text = DefaultStorageText;
             SetStorageControlsVisible(false);
             return;
         }
 
-        Inventory storage = _currentBuilding.Storage;
+        Inventory storage = targetBuilding.Storage;
         StringBuilder builder = new StringBuilder();
         builder.AppendLine($"仓库容量: {storage.TotalQuantity}/{storage.Capacity}");
 
@@ -233,11 +251,16 @@ public class UIPanel_DebugGridInspector : PanelBase
 
     private void SetStorageControlsVisible(bool visible)
     {
-        bool shouldShow = visible && _currentBuilding != null && _currentBuilding.Storage != null && HasSupplyOptions();
+        bool shouldShow = visible && GetActiveStorageBuilding() != null && HasSupplyOptions();
 
         if (_storageControlsRoot != null)
         {
             _storageControlsRoot.SetActive(shouldShow);
+        }
+
+        if (_storageControlsCloseButton != null)
+        {
+            _storageControlsCloseButton.interactable = shouldShow;
         }
 
         if (_addSupplyButton != null)
@@ -295,7 +318,9 @@ public class UIPanel_DebugGridInspector : PanelBase
 
     private void HandleAddSupplyClicked()
     {
-        if (_currentBuilding?.Storage == null || !HasSupplyOptions() || _selectedSupply == null)
+        BuildingInstance targetBuilding = GetActiveStorageBuilding();
+
+        if (targetBuilding?.Storage == null || !HasSupplyOptions() || _selectedSupply == null)
         {
             return;
         }
@@ -305,7 +330,7 @@ public class UIPanel_DebugGridInspector : PanelBase
             return;
         }
 
-        _currentBuilding.Storage.Add(_selectedSupply, amount);
+        targetBuilding.Storage.Add(_selectedSupply, amount);
         _supplyAmountInput.text = string.Empty;
         RefreshStorageDisplay();
     }
@@ -375,10 +400,15 @@ public class UIPanel_DebugGridInspector : PanelBase
             _addSupplyButton.onClick.AddListener(HandleAddSupplyClicked);
         }
 
+        if (_storageControlsCloseButton != null)
+        {
+            _storageControlsCloseButton.onClick.AddListener(HandleStorageControlsHideClicked);
+        }
+
         if (_supplyAmountInput != null)
         {
             _supplyAmountInput.text = string.Empty;
-            _supplyAmountInput.contentType = InputField.ContentType.IntegerNumber;
+            _supplyAmountInput.contentType = TMP_InputField.ContentType.IntegerNumber;
         }
 
         if (_supplyOptionButtonPrefab != null)
@@ -556,5 +586,68 @@ public class UIPanel_DebugGridInspector : PanelBase
         {
             _supplyDropdownListRoot.SetActive(canShow);
         }
+    }
+
+    private void LockStorageControls(BuildingInstance building)
+    {
+        if (building == null || building.Storage == null)
+        {
+            Debug.Log("(building == null || building.Storage == null)");
+            return;
+        }
+        Debug.Log(11);
+        _lockedBuilding = building;
+        SetDropdownListActive(false);
+        UpdateBuildingLabel();
+        RefreshStorageDisplay();
+    }
+
+    private void HandleStorageControlsHideClicked()
+    {
+        Debug.Log(1);
+        _lockedBuilding = null;
+        SetDropdownListActive(false);
+        UpdateBuildingLabel();
+        RefreshStorageDisplay();
+    }
+
+    private BuildingInstance GetActiveStorageBuilding()
+    {
+        return ResolveLockedBuilding();
+    }
+
+    private void UpdateBuildingLabel()
+    {
+        if (_buildingNameText == null)
+        {
+            return;
+        }
+
+        BuildingInstance displayBuilding = ResolveLockedBuilding() ?? _currentBuilding;
+
+        if (displayBuilding == null)
+        {
+            _buildingNameText.text = DefaultBuildingText;
+            return;
+        }
+
+        string name = !string.IsNullOrEmpty(displayBuilding.DisplayName) ? displayBuilding.DisplayName : displayBuilding.name;
+        _buildingNameText.text = $"建筑: {name}";
+    }
+
+    private BuildingInstance ResolveLockedBuilding()
+    {
+        if (_lockedBuilding == null)
+        {
+            return null;
+        }
+
+        if (!_lockedBuilding.isActiveAndEnabled || _lockedBuilding.Storage == null)
+        {
+            _lockedBuilding = null;
+            return null;
+        }
+
+        return _lockedBuilding;
     }
 }
