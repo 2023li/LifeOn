@@ -39,6 +39,9 @@ public class BuildingInstance : MonoBehaviour
     public string InstanceId { get; private set; } = Guid.NewGuid().ToString("N");
     public BuildingArchetype Def;
 
+    [SerializeField, LabelText("建筑表现")]
+    private BuildingView _view;
+    private readonly List<BuildingLevelViewConfig> _viewConfigsCache = new();
 
     public string DisplayName => Def != null ? Def.DisplayName : string.Empty;
 
@@ -77,6 +80,7 @@ public class BuildingInstance : MonoBehaviour
         Def = def;
         _ctx = FindObjectOfType<GameContext>();
         TryInitStorageIfAny();
+        TryInitView();
     }
 
     private void OnEnable()
@@ -201,7 +205,7 @@ public class BuildingInstance : MonoBehaviour
         {
             return;
         }
-
+        _view?.PlayUpgrade(previousIndex, newIndex);
         if (previousIndex == 0 && newIndex == 1)
         {
             int baseline = 2;
@@ -209,6 +213,7 @@ public class BuildingInstance : MonoBehaviour
             int target = Mathf.Clamp(Mathf.Max(Population, baseline), 0, max);
             Population = target;
         }
+        _view?.ApplyLevelState(newIndex);
     }
 
 
@@ -232,6 +237,31 @@ public class BuildingInstance : MonoBehaviour
         }
     }
 
+    private void TryInitView()
+    {
+        if (Def == null)
+        {
+            return;
+        }
 
+        if (_view == null)
+        {
+            _view = GetComponentInChildren<BuildingView>();
+        }
+
+        if (_view == null)
+        {
+            return;
+        }
+
+        _viewConfigsCache.Clear();
+        foreach (BuildingLevelDef level in Def.Levels)
+        {
+            _viewConfigsCache.Add(level != null ? level.ViewConfig : null);
+        }
+
+        _view.ConfigureLevels(_viewConfigsCache);
+        _view.ApplyLevelState(LevelIndex);
+    }
     
 }

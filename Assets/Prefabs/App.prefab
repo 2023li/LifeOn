@@ -166,6 +166,7 @@ MonoBehaviour:
     isModal: 0
     blocksRaycasts: 0
   canvasReferenceResolution: {x: 1920, y: 1080}
+  enforceSinglePanelPerLayer: 1
 --- !u!1 &4539684391954363698
 GameObject:
   m_ObjectHideFlags: 0
@@ -299,6 +300,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8986474453935398527}
   - component: {fileID: 873446327084042900}
+  - component: {fileID: 6790068438061607902}
   m_Layer: 0
   m_Name: App
   m_TagString: Untagged
@@ -336,3 +338,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0d8a2a780db17c4981ea2d672caa99e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  NeedPreloadGameObject: []
+--- !u!114 &6790068438061607902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8832982178575566358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b109464cc1aea4499d71607178595e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  foodSupply: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+  woodSupply: {fileID: 11400000, guid: 15d6c357e5874a44391c6672152e9134, type: 2}
+  testSupply: {fileID: 11400000, guid: ef9811f98affe7748a0f950d224e4cef, type: 2}
+  buildingDefinitions:
+  - {fileID: 11400000, guid: 8df312abae5d5a248a51a67562791d72, type: 2}
+  - {fileID: 11400000, guid: 7cd54c6131ba3b84ebb8a9276da26974, type: 2}
+  - {fileID: 11400000, guid: 8f6c704dcb20e5e41a567ff84ee09138, type: 2}
+  - {fileID: 11400000, guid: 21a6ea641bd504f43afbea515d009803, type: 2}
+  - {fileID: 11400000, guid: 2f80924b70bbbd142ac600379dffb67b, type: 2}

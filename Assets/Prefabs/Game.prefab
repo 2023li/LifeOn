@@ -9,6 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8123488984481321654}
+  - component: {fileID: 4363055027613522454}
+  - component: {fileID: 1499232404362037814}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -34,6 +36,31 @@ Transform:
   - {fileID: 6592622187886793781}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4363055027613522454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 177802402273184384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 381f612826fe1c24f97c7b462b441da5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1499232404362037814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 177802402273184384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a1bc6de7a46a0848bc42f4f4613f697, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  highlightTile: {fileID: 0}
 --- !u!1 &277615136010143932
 GameObject:
   m_ObjectHideFlags: 0
@@ -7827,7 +7854,10 @@ MonoBehaviour:
   "tilemap_\u9053\u8DEF": {fileID: 8372729610360209407}
   "tilemap_\u7279\u6548": {fileID: 6979222577566618050}
   visualizationTile: {fileID: 11400000, guid: bb406b3c4e9f13a42890921b06baaba9, type: 2}
-  r: 3
+  tile1: {fileID: 11400000, guid: 4e398cdac4bf60c499a77608871cf670, type: 2}
+  tile2: {fileID: 11400000, guid: 353b9a08c9ced914bab7b919671adc74, type: 2}
+  tile3: {fileID: 11400000, guid: 59e9b8ebfa7b7194b9c292d0f89f128f, type: 2}
+  tile4: {fileID: 0}
 --- !u!1 &2819970720443469559
 GameObject:
   m_ObjectHideFlags: 0
@@ -8420,7 +8450,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62552e1bba366e04aad29b04170dc950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildingPrefab: {fileID: 2875451913886811603, guid: a513625fd8d200b459bca1715f2959b4, type: 3}
+  BuildingPrefab: {fileID: 2875451913886811603, guid: a513625fd8d200b459bca1715f2959b4, type: 3}
   green: {fileID: 11400000, guid: b86f4396bd8794342b30b900b5506909, type: 2}
   red: {fileID: 11400000, guid: 0ea46f375dd178a48a34ffcbee6642b5, type: 2}
   crimson: {fileID: 11400000, guid: b076407b2c2e6024e957368b1cf42a2c, type: 2}
