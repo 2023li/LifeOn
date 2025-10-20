@@ -1,0 +1,110 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.Tilemaps;
+
+public enum GameTileEnum
+{
+    Tile_默认 = 0,
+    Tile_浅绿色 = 1,
+    Tile_中绿色 = 2,
+    Tile_深绿色 = 3,
+    Tile_深红色 = 4,
+    Tile_红色 = 5,
+    Tile_黄色 = 6,
+}
+
+[CreateAssetMenu(fileName = "TileLib", menuName = "Game/TileLib")]
+public class TileLib : ScriptableObject
+{
+    [SerializeField] private List<StructKV<GameTileEnum, TileBase>> AllTiles;
+
+    private Dictionary<GameTileEnum, TileBase> dic_AllTiles;
+    private static TileLib ins;
+    private static Task<TileLib> initTask;
+    private static bool loggedInitFailure;
+
+    /// <summary>
+    /// 获取对应的 Tile；若资源仍在加载或加载失败则返回 null。
+    /// </summary>
+    public static TileBase GetTile(GameTileEnum e)
+    {
+        EnsureInitialized();
+
+        if (ins == null || ins.dic_AllTiles == null)
+        {
+            if (!loggedInitFailure)
+            {
+                Debug.LogWarning("[TileLib] TileLib 尚未加载完成或初始化失败，返回 null");
+                loggedInitFailure = true;
+            }
+
+            return null;
+        }
+
+        return ins.dic_AllTiles.TryGetValue(e, out var tile) ? tile : null;
+    }
+
+    /// <summary>
+    /// 确保静态 TileLib 实例加载完成；若异步仍在进行则直接返回，等待下一次访问。
+    /// </summary>
+    private static void EnsureInitialized()
+    {
+        if (ins != null && ins.dic_AllTiles != null) return;
+
+        if (initTask == null)
+        {
+            initTask = AssetsManager.Instance.LoadAssetAsync<TileLib>("TileLib");
+            loggedInitFailure = false;
+        }
+
+        if (!initTask.IsCompleted) return;
+
+        if (initTask.IsFaulted)
+        {
+            Debug.LogException(initTask.Exception);
+            initTask = null;
+            return;
+        }
+
+        if (!initTask.IsCompletedSuccessfully)
+        {
+            Debug.LogError("[TileLib] 加载 TileLib 失败：任务未成功完成");
+            initTask = null;
+            return;
+        }
+
+        var asset = initTask.Result;
+        if (asset == null)
+        {
+            Debug.LogError("[TileLib] 加载 TileLib 失败：返回结果为空");
+            initTask = null;
+            return;
+        }
+
+        ins = asset;
+        BuildTileDictionary();
+    }
+
+    private static void BuildTileDictionary()
+    {
+        if (ins == null) return;
+
+        if (ins.dic_AllTiles == null)
+        {
+            ins.dic_AllTiles = new Dictionary<GameTileEnum, TileBase>(ins.AllTiles?.Count ?? 0);
+        }
+        else
+        {
+            ins.dic_AllTiles.Clear();
+        }
+
+        if (ins.AllTiles == null) return;
+
+        foreach (var item in ins.AllTiles)
+        {
+            // 使用索引器可避免重复键抛异常，后写覆盖前写
+            ins.dic_AllTiles[item.Value1] = item.Value2;
+        }
+    }
+}

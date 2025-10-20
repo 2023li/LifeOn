@@ -120,7 +120,7 @@ public class VisualFieldController : MonoBehaviour, ISlideHandler
     public short Priority { get; set; } = LOConstant.InputPriority.Priority_相机监听鼠标滚轮;
     public bool TryHandleSlide(float scrollInput)
     {
-        Debug.Log("scrollInput:" + scrollInput);
+       
         if (scrollInput == 0)
         {
            
@@ -131,7 +131,7 @@ public class VisualFieldController : MonoBehaviour, ISlideHandler
         targetOrthoSize -= scrollInput * zoomSpeed * Time.deltaTime;
         targetOrthoSize = Mathf.Clamp(targetOrthoSize, minOrthoSize, maxOrthoSize);
 
-        Debug.Log(targetOrthoSize);
+      
         return true;
     }
 
@@ -213,7 +213,7 @@ public class VisualFieldController : MonoBehaviour, ISlideHandler
         virtualCamera.m_Lens.OrthographicSize = newOrthoSize;
 
         // 调试信息
-        if (Mathf.Abs(newOrthoSize - currentOrthoSize) > 0.001f)
+        if (showDebugAreas&&Mathf.Abs(newOrthoSize - currentOrthoSize) > 0.001f)
         {
             Debug.Log($"正交缩放: {currentOrthoSize:F2} -> {newOrthoSize:F2}, 目标: {targetOrthoSize:F2}");
         }
