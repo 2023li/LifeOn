@@ -45,7 +45,14 @@ public class VisualFieldController : MonoBehaviour, ISlideHandler
 
     // 在编辑器中重置组件时自动绑定字段
 
-
+    private void OnEnable()
+    {
+        var inputManager = InputManager.Instance;
+        if (inputManager != null)
+        {
+            inputManager.Register(this);
+        }
+    }
 
 
     private void Start()
@@ -65,7 +72,6 @@ public class VisualFieldController : MonoBehaviour, ISlideHandler
             Debug.LogWarning("virtualCamera未赋值，使用默认正交大小");
         }
 
-        InputManager.Instance.Register(this);
     }
 
 
@@ -103,17 +109,29 @@ public class VisualFieldController : MonoBehaviour, ISlideHandler
         }
     }
 
+    private void OnDisable()
+    {
+        if (!InputManager.HasInstance) return;
+        InputManager.Instance.UnRegister(this);
+    }
+
     #endregion
 
-
+    public short Priority { get; set; } = LOConstant.InputPriority.Priority_相机监听鼠标滚轮;
     public bool TryHandleSlide(float scrollInput)
     {
-        if (scrollInput == 0) return true;
+        Debug.Log("scrollInput:" + scrollInput);
+        if (scrollInput == 0)
+        {
+           
+            return true;
+        }
 
         // 对于正交相机：向上滚动(正值)减小OrthoSize(拉近)，向下滚动(负值)增大OrthoSize(拉远)
         targetOrthoSize -= scrollInput * zoomSpeed * Time.deltaTime;
         targetOrthoSize = Mathf.Clamp(targetOrthoSize, minOrthoSize, maxOrthoSize);
 
+        Debug.Log(targetOrthoSize);
         return true;
     }
 
@@ -252,7 +270,7 @@ public class VisualFieldController : MonoBehaviour, ISlideHandler
     [SerializeField] private Color debugAreaColor = new Color(1f, 0f, 0f, 0.3f);
     [SerializeField] private Color activeDebugAreaColor = new Color(0f, 1f, 0f, 0.5f);
 
-    public short Priority { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+  
 
     private void OnGUI()
     {
