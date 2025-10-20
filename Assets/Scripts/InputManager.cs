@@ -1,7 +1,9 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.EventSystems;
+
 using Moyo.Unity;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
@@ -23,7 +25,7 @@ public class InputManager : MonoSingleton<InputManager>
     public event Action<Vector2> Building_OnChangeCoordinates;
     public event Action Building_OnConfirmPlacement;
     public event Action Building_OnConfirmConstruction;
-    
+
 
     /// <summary>仅在 GamePlay.MoveCamera 激活时为 true。</summary>
     public event Action<bool> GamePlay_OnMoveCamera;
@@ -31,6 +33,13 @@ public class InputManager : MonoSingleton<InputManager>
     public LOControlsMaps inputActionMap;
 
     public bool IsGamePlayActive => inputActionMap != null && inputActionMap.GamePlay.enabled;
+    
+    
+    //标记UI
+    private bool _pendingMousePrimaryClick;
+    //应用于标记UI的
+    private Vector2 _pendingClickPosition;
+
 
     protected override void Initialize()
     {
@@ -77,19 +86,6 @@ public class InputManager : MonoSingleton<InputManager>
 
         inputActionMap.Global.MousePrimaryClick.performed += ctx =>
         {
-            if (EventSystem.current != null)
-            {
-                //if (EventSystem.current.IsPointerOverGameObject())
-                //{
-                //    return;
-                //}
-
-                if (EventSystem.current.IsPointerOverGameObject(PointerInputModule.kMouseLeftId))
-                {
-                    return;
-                }
-            }
-
             Vector2 clickPosition = MousePos;
             if (Mouse.current != null)
             {
@@ -97,7 +93,8 @@ public class InputManager : MonoSingleton<InputManager>
                 MousePos = clickPosition;
             }
 
-            OnMousePrimaryClick?.Invoke(clickPosition);
+            _pendingClickPosition = clickPosition;
+            _pendingMousePrimaryClick = true;
         };
 
 
@@ -122,15 +119,15 @@ public class InputManager : MonoSingleton<InputManager>
         // 确认/取消：只订 performed；确认前做 UI 命中过滤
         inputActionMap.Building.ConfirmPlacement.performed += ctx =>
         {
-          
+
             Building_OnConfirmPlacement?.Invoke();
         };
 
-       
+
 
         inputActionMap.Building.ConfirmConstruction.performed += ctx =>
         {
-            
+
             Building_OnConfirmConstruction?.Invoke();
         };
 
@@ -143,7 +140,7 @@ public class InputManager : MonoSingleton<InputManager>
 
     }
 
- 
+
 
     // 供外部开关建造 map
     public void EnableBuildingMap() => inputActionMap.Building.Enable();
@@ -159,17 +156,41 @@ public class InputManager : MonoSingleton<InputManager>
     }
     public bool IsGamePlayMap() => inputActionMap.GamePlay.enabled;
 
+     private void LateUpdate()
+    {
+        if (!_pendingMousePrimaryClick)
+        {
+            return;
+        }
+
+        bool shouldInvoke = true;
+        EventSystem currentEventSystem = EventSystem.current;
+        if (currentEventSystem != null)
+        {
+            if (currentEventSystem.IsPointerOverGameObject())
+            {
+                shouldInvoke = false;
+            }
+        }
+
+        if (shouldInvoke)
+        {
+            OnMousePrimaryClick?.Invoke(_pendingClickPosition);
+        }
+
+        _pendingMousePrimaryClick = false;
+    }
+
+
     protected override void OnDestroy()
     {
         base.OnDestroy();
     }
 
 
+
+
     private readonly List<IBackHandler> _backHandlers = new();
-    private readonly List<ISlideHandler> _mouseWheelHandlers = new();
-
-
-
     public void Register(IBackHandler h)
     {
         _backHandlers.Add(h);
@@ -181,6 +202,8 @@ public class InputManager : MonoSingleton<InputManager>
         if (handler == null) return;
         _backHandlers.Remove(handler);
     }
+    
+     private readonly List<ISlideHandler> _mouseWheelHandlers = new();
     public void Register(ISlideHandler handler)
     {
         if (handler == null) return;
@@ -195,5 +218,7 @@ public class InputManager : MonoSingleton<InputManager>
         _mouseWheelHandlers.Remove(handler);
     }
 
+
+    
 
 }
