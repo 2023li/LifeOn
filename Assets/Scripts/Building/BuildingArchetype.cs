@@ -19,7 +19,7 @@ public class BuildingArchetype : ScriptableObject
     public string Id;                // "residence", "warehouse", "garden"
     public string DisplayName;       // "居民房"
     public int Size;
-    public BuildingView ViewPrefab;    // Addressables/Prefab
+    public BuildingInstance BuildingPrefab;    // Addressables/Prefab
     public List<BuildingLevelDef> Levels = new List<BuildingLevelDef>();
     public BuildingClassify classification = BuildingClassify.基础;
 
@@ -70,11 +70,11 @@ public class BuildingLevelViewConfig
 {
     [LabelText("默认动画状态")]
     [Tooltip("调用 ApplyLevelState 时直接播放的 Animator 状态名，用于保持该等级的常态表现。")]
-    public string DefaultAnimatorState = "Idle";
+    public string DefaultAnimatorState;
 
     [LabelText("默认动画触发器")]
     [Tooltip("调用 ApplyLevelState 时触发的 Animator Trigger，常用于恢复待机动画。留空表示不触发。")]
-    public string DefaultAnimatorTrigger = "update";
+    public string DefaultAnimatorTrigger;
 
     [LabelText("升级动画触发器")]
     [Tooltip("升级瞬间触发的 Animator Trigger，PlayUpgrade 会在 from -> to 时调用。留空表示无需额外触发。")]

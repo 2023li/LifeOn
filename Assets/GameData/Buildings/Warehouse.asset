@@ -15,7 +15,7 @@ MonoBehaviour:
   Id: warehouse
   DisplayName: "\u4ED3\u5E93"
   Size: 3
-  ViewPrefab: {fileID: 0}
+  BuildingPrefab: {fileID: 2875451913886811603, guid: c64b5b30775311843b2cde71ea551ccb, type: 3}
   Levels:
   - Level: 0
     BaseMaxPopulation: 0
@@ -27,6 +27,13 @@ MonoBehaviour:
     - rid: 1546075376088252428
     - rid: 1546075376088252429
     - rid: 1546075376088252430
+    ViewConfig:
+      DefaultAnimatorState: Hospital_lv0
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
   - Level: 1
     BaseMaxPopulation: 0
     BaseStorageCapacity: 100
@@ -37,6 +44,13 @@ MonoBehaviour:
     - rid: 1546075376088252431
     - rid: 1546075376088252432
     - rid: 1546075376088252433
+    ViewConfig:
+      DefaultAnimatorState: 
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
   - Level: 2
     BaseMaxPopulation: 0
     BaseStorageCapacity: 200
@@ -47,6 +61,13 @@ MonoBehaviour:
     - rid: 1546075376088252434
     - rid: 1546075376088252435
     - rid: 1546075376088252436
+    ViewConfig:
+      DefaultAnimatorState: 
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
   - Level: 3
     BaseMaxPopulation: 0
     BaseStorageCapacity: 300
@@ -57,6 +78,13 @@ MonoBehaviour:
     - rid: 1546075376088252437
     - rid: 1546075376088252438
     - rid: 1546075376088252439
+    ViewConfig:
+      DefaultAnimatorState: Idle
+      DefaultAnimatorTrigger: update
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
   - Level: 4
     BaseMaxPopulation: 0
     BaseStorageCapacity: 400
@@ -67,6 +95,13 @@ MonoBehaviour:
     - rid: 1546075376088252440
     - rid: 1546075376088252441
     - rid: 1546075376088252442
+    ViewConfig:
+      DefaultAnimatorState: 
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
   - Level: 5
     BaseMaxPopulation: 0
     BaseStorageCapacity: 500
@@ -77,6 +112,13 @@ MonoBehaviour:
     - rid: 1546075376088252443
     - rid: 1546075376088252444
     - rid: 1546075376088252445
+    ViewConfig:
+      DefaultAnimatorState: 
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
   classification: 0
   references:
     version: 2

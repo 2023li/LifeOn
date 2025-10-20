@@ -15,8 +15,22 @@ MonoBehaviour:
   Id: hospital
   DisplayName: "\u533B\u9662"
   Size: 3
-  ViewPrefab: {fileID: 0}
+  BuildingPrefab: {fileID: 0}
   Levels:
+  - Level: 0
+    BaseMaxPopulation: 0
+    BaseStorageCapacity: 0
+    ExpToNext: 1
+    BaseMaxJobs: 0
+    ConditionalStatModifiers: []
+    Rules: []
+    ViewConfig:
+      DefaultAnimatorState: Test
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
   - Level: 1
     BaseMaxPopulation: 0
     BaseStorageCapacity: 0
@@ -26,6 +40,13 @@ MonoBehaviour:
     Rules:
     - rid: 1546075376088252416
     - rid: 1546075376088252417
+    ViewConfig:
+      DefaultAnimatorState: Test2
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
   - Level: 2
     BaseMaxPopulation: 0
     BaseStorageCapacity: 0
@@ -35,6 +56,13 @@ MonoBehaviour:
     Rules:
     - rid: 1546075376088252418
     - rid: 1546075376088252419
+    ViewConfig:
+      DefaultAnimatorState: 
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
   - Level: 3
     BaseMaxPopulation: 0
     BaseStorageCapacity: 0
@@ -44,6 +72,13 @@ MonoBehaviour:
     Rules:
     - rid: 1546075376088252420
     - rid: 1546075376088252421
+    ViewConfig:
+      DefaultAnimatorState: 
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
   classification: 0
   references:
     version: 2

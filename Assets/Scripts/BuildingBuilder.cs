@@ -46,7 +46,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
     [ShowInInspector, ReadOnly]
     private BuildingArchetype currentBuildDef;
 
-    public BuildingInstance BuildingPrefab;
+    //public BuildingInstance BuildingPrefab;
    
     [SerializeField] private TileBase green;
     [SerializeField] private TileBase red;
@@ -244,7 +244,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
 
         // 实例化 & 定位（若你的 BuildingInstance.Construction 内部会定位，可省略下面两行）
 
-        BuildingInstance b = Instantiate(BuildingPrefab);
+        BuildingInstance b = Instantiate(currentBuildDef.BuildingPrefab);
         b.transform.position = anchor;
 
         Vector2 center;
