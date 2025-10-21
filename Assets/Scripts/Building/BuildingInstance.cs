@@ -89,6 +89,11 @@ public class BuildingInstance : MonoBehaviour
         _activeInstances.Add(this);
     }
 
+    private void Start()
+    {
+        
+    }
+
     private void OnDisable()
     {
         TurnSystem.OnTurnEnd -= FireRules;
