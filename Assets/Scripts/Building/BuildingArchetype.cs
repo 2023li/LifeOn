@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System;
 using Sirenix.OdinInspector;
-
+using UnityEngine.Serialization;
 
 public enum BuildingClassify
 {
@@ -22,7 +22,16 @@ public class BuildingArchetype : ScriptableObject
     public BuildingInstance BuildingPrefab;    // Addressables/Prefab
     public List<BuildingLevelDef> Levels = new List<BuildingLevelDef>();
     public BuildingClassify classification = BuildingClassify.基础;
-    [HideInInspector] public BuildingArchetypeGraph GraphAsset;
+    [SerializeField]
+    [HideInInspector]
+    [FormerlySerializedAs("GraphAsset")]
+    private BuildingArchetypeGraph _graphAsset;
+
+    public BuildingArchetypeGraph GraphAsset
+    {
+        get => _graphAsset;
+        set => _graphAsset = value;
+    }
 }
 
 [Serializable]

@@ -5,18 +5,20 @@ using UnityEngine;
 [CustomEditor(typeof(BuildingArchetype))]
 public class BuildingArchetypeEditor : Editor
 {
+
+     private const string GraphPropertyName = "_graphAsset";
     private SerializedProperty _graphProperty;
 
     private void OnEnable()
     {
-        _graphProperty = serializedObject.FindProperty("GraphAsset");
+        _graphProperty = serializedObject.FindProperty(GraphPropertyName);
     }
 
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
 
-        DrawPropertiesExcluding(serializedObject, "m_Script", "GraphAsset");
+         DrawPropertiesExcluding(serializedObject, "m_Script", GraphPropertyName);
 
         using (new EditorGUI.DisabledScope(true))
         {

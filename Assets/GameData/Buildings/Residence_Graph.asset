@@ -1,0 +1,565 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c83f0aa0f73f64a43a111dc1e2c3f95f, type: 3}
+  m_Name: Residence_Graph
+  m_EditorClassIdentifier: 
+  _buildingInfo:
+    _id: 87137208f01a4b41894d4e76b123d095
+    _displayName: 
+    _typeName: BuildingArchetype, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    BuildingId: residence
+    InGameDisplayName: "\u5C45\u6C11\u623F"
+    Size: 2
+    Prefab: {fileID: 0}
+    Classification: 0
+    LevelNodeIds:
+    - 57269f5f39bb402db654c0267e5d83c6
+    - 497e9a31ec1b403bb5de271bb1785744
+    - ffbf06698d1c40f59e22dc799745c2f0
+    - 627898a7603f4b459977bdb287b407bd
+  _levels:
+  - _id: 57269f5f39bb402db654c0267e5d83c6
+    _displayName: "\u7B49\u7EA7 0"
+    _typeName: BuildingLevelDef, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    LevelData:
+      Level: 0
+      BaseMaxPopulation: 0
+      BaseStorageCapacity: 0
+      ExpToNext: 2
+      BaseMaxJobs: 0
+      ConditionalStatModifiers: []
+      Rules: []
+      ViewConfig:
+        DefaultAnimatorState: 
+        DefaultAnimatorTrigger: 
+        UpgradeTrigger: 
+        PersistentParticlePrefab: {fileID: 0}
+        UpgradeEffectPrefab: {fileID: 0}
+        ChildPrefab: {fileID: 0}
+    RuleNodeIds:
+    - fbc3c9ebe35c420da2f72bbbc548ec98
+    StatModifierNodeIds: []
+  - _id: 497e9a31ec1b403bb5de271bb1785744
+    _displayName: "\u7B49\u7EA7 1"
+    _typeName: BuildingLevelDef, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    LevelData:
+      Level: 1
+      BaseMaxPopulation: 5
+      BaseStorageCapacity: 0
+      ExpToNext: 10
+      BaseMaxJobs: 0
+      ConditionalStatModifiers: []
+      Rules: []
+      ViewConfig:
+        DefaultAnimatorState: 
+        DefaultAnimatorTrigger: 
+        UpgradeTrigger: 
+        PersistentParticlePrefab: {fileID: 0}
+        UpgradeEffectPrefab: {fileID: 0}
+        ChildPrefab: {fileID: 0}
+    RuleNodeIds:
+    - 897b491201314c7fa9e93b58706c9199
+    - d92a165629b64ccd89d30b18da2c1d33
+    StatModifierNodeIds: []
+  - _id: ffbf06698d1c40f59e22dc799745c2f0
+    _displayName: "\u7B49\u7EA7 2"
+    _typeName: BuildingLevelDef, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    LevelData:
+      Level: 2
+      BaseMaxPopulation: 10
+      BaseStorageCapacity: 0
+      ExpToNext: 20
+      BaseMaxJobs: 0
+      ConditionalStatModifiers: []
+      Rules: []
+      ViewConfig:
+        DefaultAnimatorState: 
+        DefaultAnimatorTrigger: 
+        UpgradeTrigger: 
+        PersistentParticlePrefab: {fileID: 0}
+        UpgradeEffectPrefab: {fileID: 0}
+        ChildPrefab: {fileID: 0}
+    RuleNodeIds:
+    - a10e02a6e5c742daa985d520e77ebaaa
+    - 394b1cdb6d8d4d0eb86f06529f834745
+    StatModifierNodeIds:
+    - 73fc060bffdc4bda96aef4193c1c2da7
+  - _id: 627898a7603f4b459977bdb287b407bd
+    _displayName: "\u7B49\u7EA7 3"
+    _typeName: BuildingLevelDef, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    LevelData:
+      Level: 3
+      BaseMaxPopulation: 20
+      BaseStorageCapacity: 0
+      ExpToNext: -1
+      BaseMaxJobs: 0
+      ConditionalStatModifiers: []
+      Rules: []
+      ViewConfig:
+        DefaultAnimatorState: 
+        DefaultAnimatorTrigger: 
+        UpgradeTrigger: 
+        PersistentParticlePrefab: {fileID: 0}
+        UpgradeEffectPrefab: {fileID: 0}
+        ChildPrefab: {fileID: 0}
+    RuleNodeIds:
+    - 7468a5375e7b4f4ba6c6d02724a5a4b4
+    - 8b41aeebab71432a8578eeca2c986f50
+    StatModifierNodeIds:
+    - baa0f2096c5a412489a29f10f9acbab8
+  _rules:
+  - _id: fbc3c9ebe35c420da2f72bbbc548ec98
+    _displayName: "\u56DE\u5408\u7ED3\u675F\u9636\u6BB5"
+    _typeName: Rule, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    RuleData:
+      Trigger: 3
+      Conditions: []
+      OnSuccess: []
+      OnFailure: []
+    ConditionNodeIds: []
+    SuccessEffectNodeIds:
+    - f4e0ab612f064a50810ffde489968c67
+    FailureEffectNodeIds: []
+    LevelNodeIds:
+    - 57269f5f39bb402db654c0267e5d83c6
+  - _id: 897b491201314c7fa9e93b58706c9199
+    _displayName: "\u8D44\u6E90\u6D88\u8017\u9636\u6BB5"
+    _typeName: Rule, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    RuleData:
+      Trigger: 1
+      Conditions: []
+      OnSuccess: []
+      OnFailure: []
+    ConditionNodeIds:
+    - a9dc25147be446be810316cb9d2e23d7
+    - 23a63ce05dbd4fdfac567f8ffa89ffca
+    SuccessEffectNodeIds:
+    - a3e2b2b1e1794ad283505c4f9c5bdb26
+    - a5cc4f00cb584af6aee0cf55e897ab7e
+    FailureEffectNodeIds:
+    - d08f3c0c0b454302ab682a67b31a0158
+    LevelNodeIds:
+    - 497e9a31ec1b403bb5de271bb1785744
+  - _id: d92a165629b64ccd89d30b18da2c1d33
+    _displayName: "\u56DE\u5408\u7ED3\u675F\u9636\u6BB5"
+    _typeName: Rule, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    RuleData:
+      Trigger: 3
+      Conditions: []
+      OnSuccess: []
+      OnFailure: []
+    ConditionNodeIds:
+    - 2d7dedddb88d429093b6b39c8c89ad1e
+    SuccessEffectNodeIds:
+    - 553f89dfd28a431493abd85e1781829d
+    FailureEffectNodeIds: []
+    LevelNodeIds:
+    - 497e9a31ec1b403bb5de271bb1785744
+  - _id: a10e02a6e5c742daa985d520e77ebaaa
+    _displayName: "\u8D44\u6E90\u6D88\u8017\u9636\u6BB5"
+    _typeName: Rule, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    RuleData:
+      Trigger: 1
+      Conditions: []
+      OnSuccess: []
+      OnFailure: []
+    ConditionNodeIds:
+    - f5b2689e77bc42088d8f85963605939d
+    - 5466f80a6a924fadbe037891e08752d5
+    SuccessEffectNodeIds:
+    - d70fa55053df409f8026860531406bcf
+    - 415c5bb3632e4f348e0e63f44fdf8a61
+    FailureEffectNodeIds:
+    - 3f0d20a133864a5cba07f025cd0ccdf7
+    LevelNodeIds:
+    - ffbf06698d1c40f59e22dc799745c2f0
+  - _id: 394b1cdb6d8d4d0eb86f06529f834745
+    _displayName: "\u56DE\u5408\u7ED3\u675F\u9636\u6BB5"
+    _typeName: Rule, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    RuleData:
+      Trigger: 3
+      Conditions: []
+      OnSuccess: []
+      OnFailure: []
+    ConditionNodeIds:
+    - 958b9fe01e1640d0b67ad43c513d9135
+    SuccessEffectNodeIds:
+    - e4b2e8f01a3f442ba95c1a43e9a46b35
+    FailureEffectNodeIds: []
+    LevelNodeIds:
+    - ffbf06698d1c40f59e22dc799745c2f0
+  - _id: 7468a5375e7b4f4ba6c6d02724a5a4b4
+    _displayName: "\u8D44\u6E90\u6D88\u8017\u9636\u6BB5"
+    _typeName: Rule, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    RuleData:
+      Trigger: 1
+      Conditions: []
+      OnSuccess: []
+      OnFailure: []
+    ConditionNodeIds:
+    - 79c30b12381e4544bdccd78621b7c271
+    - c395a721ee504be9a156fc81b27e64db
+    SuccessEffectNodeIds:
+    - dea134fa90d44221add91180e9f45023
+    - c6ca78d1b930431f9979a090cfec17eb
+    FailureEffectNodeIds:
+    - cf01dfec1e1b476cbb6c6c1e69f1d9f8
+    LevelNodeIds:
+    - 627898a7603f4b459977bdb287b407bd
+  - _id: 8b41aeebab71432a8578eeca2c986f50
+    _displayName: "\u56DE\u5408\u7ED3\u675F\u9636\u6BB5"
+    _typeName: Rule, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    RuleData:
+      Trigger: 3
+      Conditions: []
+      OnSuccess: []
+      OnFailure: []
+    ConditionNodeIds:
+    - 7352443de13e41e3a99b2d751b940abc
+    SuccessEffectNodeIds:
+    - 2525b00eca984eb68c30b0764dbd9ae1
+    FailureEffectNodeIds: []
+    LevelNodeIds:
+    - 627898a7603f4b459977bdb287b407bd
+  _conditions:
+  - _id: a9dc25147be446be810316cb9d2e23d7
+    _displayName: PopulationAtLeast
+    _typeName: PopulationAtLeast, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Condition:
+      rid: 1546075485893558272
+    RuleNodeIds:
+    - 897b491201314c7fa9e93b58706c9199
+  - _id: 23a63ce05dbd4fdfac567f8ffa89ffca
+    _displayName: HasResourceForPopulation
+    _typeName: HasResourceForPopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Condition:
+      rid: 1546075485893558273
+    RuleNodeIds:
+    - 897b491201314c7fa9e93b58706c9199
+  - _id: 2d7dedddb88d429093b6b39c8c89ad1e
+    _displayName: PopulationAtLeast
+    _typeName: PopulationAtLeast, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Condition:
+      rid: 1546075485893558274
+    RuleNodeIds:
+    - d92a165629b64ccd89d30b18da2c1d33
+  - _id: f5b2689e77bc42088d8f85963605939d
+    _displayName: PopulationAtLeast
+    _typeName: PopulationAtLeast, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Condition:
+      rid: 1546075485893558275
+    RuleNodeIds:
+    - a10e02a6e5c742daa985d520e77ebaaa
+  - _id: 5466f80a6a924fadbe037891e08752d5
+    _displayName: HasResourceForPopulation
+    _typeName: HasResourceForPopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Condition:
+      rid: 1546075485893558276
+    RuleNodeIds:
+    - a10e02a6e5c742daa985d520e77ebaaa
+  - _id: 958b9fe01e1640d0b67ad43c513d9135
+    _displayName: PopulationAtLeast
+    _typeName: PopulationAtLeast, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Condition:
+      rid: 1546075485893558277
+    RuleNodeIds:
+    - 394b1cdb6d8d4d0eb86f06529f834745
+  - _id: 79c30b12381e4544bdccd78621b7c271
+    _displayName: PopulationAtLeast
+    _typeName: PopulationAtLeast, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Condition:
+      rid: 1546075485893558278
+    RuleNodeIds:
+    - 7468a5375e7b4f4ba6c6d02724a5a4b4
+  - _id: c395a721ee504be9a156fc81b27e64db
+    _displayName: HasResourceForPopulation
+    _typeName: HasResourceForPopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Condition:
+      rid: 1546075485893558279
+    RuleNodeIds:
+    - 7468a5375e7b4f4ba6c6d02724a5a4b4
+  - _id: 7352443de13e41e3a99b2d751b940abc
+    _displayName: PopulationAtLeast
+    _typeName: PopulationAtLeast, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Condition:
+      rid: 1546075485893558280
+    RuleNodeIds:
+    - 8b41aeebab71432a8578eeca2c986f50
+  _effects:
+  - _id: f4e0ab612f064a50810ffde489968c67
+    _displayName: AddExp
+    _typeName: AddExp, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558281
+    Slot: 0
+    RuleNodeIds:
+    - fbc3c9ebe35c420da2f72bbbc548ec98
+  - _id: a3e2b2b1e1794ad283505c4f9c5bdb26
+    _displayName: ConsumeResourcePerPopulation
+    _typeName: ConsumeResourcePerPopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558282
+    Slot: 0
+    RuleNodeIds:
+    - 897b491201314c7fa9e93b58706c9199
+  - _id: a5cc4f00cb584af6aee0cf55e897ab7e
+    _displayName: ChangePopulation
+    _typeName: ChangePopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558283
+    Slot: 0
+    RuleNodeIds:
+    - 897b491201314c7fa9e93b58706c9199
+  - _id: d08f3c0c0b454302ab682a67b31a0158
+    _displayName: ChangePopulation
+    _typeName: ChangePopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558284
+    Slot: 1
+    RuleNodeIds:
+    - 897b491201314c7fa9e93b58706c9199
+  - _id: 553f89dfd28a431493abd85e1781829d
+    _displayName: AddExp
+    _typeName: AddExp, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558285
+    Slot: 0
+    RuleNodeIds:
+    - d92a165629b64ccd89d30b18da2c1d33
+  - _id: d70fa55053df409f8026860531406bcf
+    _displayName: ConsumeResourcePerPopulation
+    _typeName: ConsumeResourcePerPopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558286
+    Slot: 0
+    RuleNodeIds:
+    - a10e02a6e5c742daa985d520e77ebaaa
+  - _id: 415c5bb3632e4f348e0e63f44fdf8a61
+    _displayName: ChangePopulation
+    _typeName: ChangePopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558287
+    Slot: 0
+    RuleNodeIds:
+    - a10e02a6e5c742daa985d520e77ebaaa
+  - _id: 3f0d20a133864a5cba07f025cd0ccdf7
+    _displayName: ChangePopulation
+    _typeName: ChangePopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558288
+    Slot: 1
+    RuleNodeIds:
+    - a10e02a6e5c742daa985d520e77ebaaa
+  - _id: e4b2e8f01a3f442ba95c1a43e9a46b35
+    _displayName: AddExp
+    _typeName: AddExp, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558289
+    Slot: 0
+    RuleNodeIds:
+    - 394b1cdb6d8d4d0eb86f06529f834745
+  - _id: dea134fa90d44221add91180e9f45023
+    _displayName: ConsumeResourcePerPopulation
+    _typeName: ConsumeResourcePerPopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558290
+    Slot: 0
+    RuleNodeIds:
+    - 7468a5375e7b4f4ba6c6d02724a5a4b4
+  - _id: c6ca78d1b930431f9979a090cfec17eb
+    _displayName: ChangePopulation
+    _typeName: ChangePopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558291
+    Slot: 0
+    RuleNodeIds:
+    - 7468a5375e7b4f4ba6c6d02724a5a4b4
+  - _id: cf01dfec1e1b476cbb6c6c1e69f1d9f8
+    _displayName: ChangePopulation
+    _typeName: ChangePopulation, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558292
+    Slot: 1
+    RuleNodeIds:
+    - 7468a5375e7b4f4ba6c6d02724a5a4b4
+  - _id: 2525b00eca984eb68c30b0764dbd9ae1
+    _displayName: AddExp
+    _typeName: AddExp, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Effect:
+      rid: 1546075485893558293
+    Slot: 0
+    RuleNodeIds:
+    - 8b41aeebab71432a8578eeca2c986f50
+  _statModifiers:
+  - _id: 73fc060bffdc4bda96aef4193c1c2da7
+    _displayName: EnvironmentBonus
+    _typeName: EnvironmentBonus, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Modifier:
+      rid: 1546075485893558294
+    LevelNodeIds:
+    - ffbf06698d1c40f59e22dc799745c2f0
+  - _id: baa0f2096c5a412489a29f10f9acbab8
+    _displayName: EnvironmentBonus
+    _typeName: EnvironmentBonus, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+    Modifier:
+      rid: 1546075485893558295
+    LevelNodeIds:
+    - 627898a7603f4b459977bdb287b407bd
+  _linkedArchetype: {fileID: 11400000, guid: 8df312abae5d5a248a51a67562791d72, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 1546075485893558272
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 1
+    - rid: 1546075485893558273
+      type: {class: HasResourceForPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075485893558274
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 5
+    - rid: 1546075485893558275
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 1
+    - rid: 1546075485893558276
+      type: {class: HasResourceForPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075485893558277
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 10
+    - rid: 1546075485893558278
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 1
+    - rid: 1546075485893558279
+      type: {class: HasResourceForPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075485893558280
+      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
+      data:
+        Min: 15
+    - rid: 1546075485893558281
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1
+    - rid: 1546075485893558282
+      type: {class: ConsumeResourcePerPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075485893558283
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: 2
+    - rid: 1546075485893558284
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: -2
+    - rid: 1546075485893558285
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1
+    - rid: 1546075485893558286
+      type: {class: ConsumeResourcePerPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075485893558287
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: 2
+    - rid: 1546075485893558288
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: -2
+    - rid: 1546075485893558289
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1
+    - rid: 1546075485893558290
+      type: {class: ConsumeResourcePerPopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
+        AmountPerCapita: 1
+        IgnoreIfPopulationZero: 1
+    - rid: 1546075485893558291
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: 2
+    - rid: 1546075485893558292
+      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
+      data:
+        Delta: -2
+    - rid: 1546075485893558293
+      type: {class: AddExp, ns: , asm: Assembly-CSharp}
+      data:
+        Amount: 1
+    - rid: 1546075485893558294
+      type: {class: EnvironmentBonus, ns: , asm: Assembly-CSharp}
+      data:
+        Requirements:
+        - Category: 2
+          MinValue: 1
+        - Category: 0
+          MinValue: 1
+        Bonus: 5
+    - rid: 1546075485893558295
+      type: {class: EnvironmentBonus, ns: , asm: Assembly-CSharp}
+      data:
+        Requirements:
+        - Category: 2
+          MinValue: 2
+        - Category: 0
+          MinValue: 2
+        - Category: 1
+          MinValue: 2
+        Bonus: 10
