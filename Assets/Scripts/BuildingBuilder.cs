@@ -234,7 +234,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
         }
 
         // 落锚点（用于建筑摆放）
-        var anchor = _confirmAnchorWorld;
+        Vector3 anchor = _confirmAnchorWorld;
 
         // 标记占用
         foreach (var cell in tempBuildingCells)
@@ -245,8 +245,8 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
         // 实例化 & 定位（若你的 BuildingInstance.Construction 内部会定位，可省略下面两行）
 
         BuildingInstance b = Instantiate(currentBuildDef.BuildingPrefab);
-        b.transform.position = anchor;
-
+        b.transform.SetPositionAndRotation(anchor, Quaternion.identity); 
+        
         Vector2 center;
         bool centerIsCorner;
         int footprintSize;
@@ -338,7 +338,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
             {
                 // 格心：取最近格再 + 半格（若 Tile 原点为左下）
                 var baseCell = new Vector3Int(Mathf.RoundToInt(center.x), Mathf.RoundToInt(center.y), 0);
-                return GridSystem.Instance.CellToWorld(baseCell) + (Vector3)(GridSystem.Instance.mapGrid.cellSize * 0.5f);
+                return GridSystem.Instance.mapGrid.GetCellCenterWorld(baseCell);
             }
         }
 

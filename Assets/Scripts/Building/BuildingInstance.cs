@@ -77,6 +77,7 @@ public class BuildingInstance : MonoBehaviour
 
     public void Initialize(BuildingArchetype def)
     {
+       // transform.position = GridSystem.Instance.get
         Def = def;
         _ctx = FindObjectOfType<GameContext>();
         TryInitStorageIfAny();
@@ -89,10 +90,7 @@ public class BuildingInstance : MonoBehaviour
         _activeInstances.Add(this);
     }
 
-    private void Start()
-    {
-        
-    }
+   
 
     private void OnDisable()
     {
@@ -135,6 +133,8 @@ public class BuildingInstance : MonoBehaviour
         CenterInGrid = center;
         CenterIsCorner = centerIsCorner;
         FootprintSize = footprintSize;
+
+
     }
 
 
