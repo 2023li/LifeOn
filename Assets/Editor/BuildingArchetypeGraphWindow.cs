@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -22,6 +22,8 @@ public class BuildingArchetypeGraphWindow : EditorWindow
     private BuildingArchetypeGraphView _graphView;
     private VisualElement _inspectorPanel;
     private Label _inspectorHeader;
+    private ObjectField _graphField;
+    private ObjectField _archetypeField;
 
     [MenuItem("LifeOn/Building Archetype Graph")]
     public static void OpenWindow()
@@ -29,6 +31,15 @@ public class BuildingArchetypeGraphWindow : EditorWindow
         var window = GetWindow<BuildingArchetypeGraphWindow>();
         window.titleContent = new GUIContent(WindowTitle);
         window.Show();
+    }
+
+    public static BuildingArchetypeGraphWindow OpenWithAssets(BuildingArchetypeGraph graph, BuildingArchetype archetype, bool autoImportIfEmpty = false)
+    {
+        var window = GetWindow<BuildingArchetypeGraphWindow>();
+        window.titleContent = new GUIContent(WindowTitle);
+        window.SetAssets(graph, archetype, autoImportIfEmpty);
+        window.Show();
+        return window;
     }
 
     private void OnEnable()
@@ -48,6 +59,61 @@ public class BuildingArchetypeGraphWindow : EditorWindow
         }
     }
 
+    public void SetAssets(BuildingArchetypeGraph graph, BuildingArchetype archetype, bool autoImportIfEmpty)
+    {
+        _graphAsset = graph;
+        _archetypeAsset = archetype;
+
+        if (_graphField != null)
+        {
+            _graphField.SetValueWithoutNotify(graph);
+        }
+
+        if (_archetypeField != null)
+        {
+            _archetypeField.SetValueWithoutNotify(archetype);
+        }
+
+        if (_graphAsset != null)
+        {
+            PrepareGraphSerializedObject();
+            if (autoImportIfEmpty && _archetypeAsset != null && _graphAsset.IsEmpty())
+            {
+                RecordGraphChange("Import Archetype");
+                _graphAsset.FromArchetype(_archetypeAsset);
+                EditorUtility.SetDirty(_graphAsset);
+                PrepareGraphSerializedObject();
+            }
+        }
+        else
+        {
+            _graphSerializedObject = null;
+        }
+
+        EnsureGraphArchetypeLink();
+        RefreshGraphView();
+    }
+    private void EnsureGraphArchetypeLink()
+    {
+        if (_graphAsset == null || _archetypeAsset == null)
+        {
+            return;
+        }
+
+        if (_archetypeAsset.GraphAsset != _graphAsset)
+        {
+            Undo.RecordObject(_archetypeAsset, "Assign Graph Asset");
+            _archetypeAsset.GraphAsset = _graphAsset;
+            EditorUtility.SetDirty(_archetypeAsset);
+        }
+
+        if (_graphAsset.LinkedArchetype != _archetypeAsset)
+        {
+            Undo.RecordObject(_graphAsset, "Assign Linked Archetype");
+            _graphAsset.SetLinkedArchetype(_archetypeAsset);
+            EditorUtility.SetDirty(_graphAsset);
+        }
+    }
     private void ConstructUI()
     {
         rootVisualElement.style.flexDirection = FlexDirection.Column;
@@ -82,7 +148,7 @@ public class BuildingArchetypeGraphWindow : EditorWindow
             {
                 unityFontStyleAndWeight = FontStyle.Bold,
                 unityTextAlign = TextAnchor.MiddleCenter,
-                unityFontSize = 12,
+                fontSize = 12,
                 paddingTop = 4,
                 paddingBottom = 4
             }
@@ -100,68 +166,47 @@ public class BuildingArchetypeGraphWindow : EditorWindow
 
     private void BuildToolbar(Toolbar toolbar)
     {
-        // 选择图资产
-        var graphField = new ObjectField("Graph")
+        _graphField = new ObjectField("Graph")
         {
             objectType = typeof(BuildingArchetypeGraph),
             allowSceneObjects = false,
             value = _graphAsset
         };
-        graphField.RegisterValueChangedCallback(evt =>
-        {
-            if (evt.newValue == evt.previousValue)
-            {
-                return;
-            }
+        _graphField.RegisterValueChangedCallback(OnGraphFieldChanged);
+        toolbar.Add(_graphField);
 
-            _graphAsset = evt.newValue as BuildingArchetypeGraph;
-            PrepareGraphSerializedObject();
-            RefreshGraphView();
-        });
-        toolbar.Add(graphField);
-
-        // 选择目标原型资产
-        var archetypeField = new ObjectField("Archetype")
+        _archetypeField = new ObjectField("Archetype")
         {
             objectType = typeof(BuildingArchetype),
             allowSceneObjects = false,
             value = _archetypeAsset
         };
-        archetypeField.RegisterValueChangedCallback(evt => { _archetypeAsset = evt.newValue as BuildingArchetype; });
-        toolbar.Add(archetypeField);
+        _archetypeField.RegisterValueChangedCallback(OnArchetypeFieldChanged);
+        toolbar.Add(_archetypeField);
 
         toolbar.Add(new ToolbarButton(() =>
         {
-            if (_graphAsset == null)
-            {
-                EditorUtility.DisplayDialog("提示", "请先选择 BuildingArchetypeGraph 资产。", "好的");
-                return;
-            }
-
-            string path = EditorUtility.SaveFilePanelInProject("创建 BuildingArchetypeGraph", "NewBuildingArchetypeGraph", "asset", "请选择保存位置");
+            string path = EditorUtility.SaveFilePanelInProject("Create Building Archetype Graph", "NewBuildingArchetypeGraph", "asset", "Select a save location");
             if (!string.IsNullOrEmpty(path))
             {
                 var graph = CreateInstance<BuildingArchetypeGraph>();
                 AssetDatabase.CreateAsset(graph, path);
                 AssetDatabase.SaveAssets();
-                _graphAsset = graph;
-                graphField.value = graph;
-                PrepareGraphSerializedObject();
-                RefreshGraphView();
+                SetAssets(graph, _archetypeAsset, true);
             }
         })
         {
-            text = "新建图"
+            text = "New Graph"
         });
 
         toolbar.Add(new ToolbarButton(SaveToArchetype)
         {
-            text = "保存"
+            text = "Save"
         });
 
         toolbar.Add(new ToolbarButton(ImportFromArchetype)
         {
-            text = "导入"
+            text = "Import"
         });
 
         toolbar.Add(new ToolbarButton(() =>
@@ -169,7 +214,7 @@ public class BuildingArchetypeGraphWindow : EditorWindow
             _graphView.FrameAll();
         })
         {
-            text = "框选全部"
+            text = "Frame All"
         });
 
         toolbar.Add(new ToolbarButton(() =>
@@ -177,17 +222,37 @@ public class BuildingArchetypeGraphWindow : EditorWindow
             _graphView.ResetGraphView();
         })
         {
-            text = "重置缩放"
+            text = "Reset Zoom"
         });
 
         var createMenu = new ToolbarMenu { text = "创建节点" };
-        createMenu.menu.AppendAction("等级", _ => _graphView.CreateNode(NodeCategory.Level));
-        createMenu.menu.AppendAction("规则", _ => _graphView.CreateNode(NodeCategory.Rule));
-        createMenu.menu.AppendAction("条件", _ => _graphView.CreateNode(NodeCategory.Condition));
-        createMenu.menu.AppendAction("效果/成功", _ => _graphView.CreateNode(NodeCategory.EffectSuccess));
-        createMenu.menu.AppendAction("效果/失败", _ => _graphView.CreateNode(NodeCategory.EffectFailure));
-        createMenu.menu.AppendAction("属性修正", _ => _graphView.CreateNode(NodeCategory.StatModifier));
+        createMenu.menu.AppendAction("Level", _ => _graphView.CreateNode(NodeCategory.Level));
+        createMenu.menu.AppendAction("Rule", _ => _graphView.CreateNode(NodeCategory.Rule));
+        createMenu.menu.AppendAction("Condition", _ => _graphView.CreateNode(NodeCategory.Condition));
+        createMenu.menu.AppendAction("Effect / Success", _ => _graphView.CreateNode(NodeCategory.EffectSuccess));
+        createMenu.menu.AppendAction("Effect / Failure", _ => _graphView.CreateNode(NodeCategory.EffectFailure));
+        createMenu.menu.AppendAction("Stat Modifier", _ => _graphView.CreateNode(NodeCategory.StatModifier));
         toolbar.Add(createMenu);
+    }
+
+    private void OnGraphFieldChanged(ChangeEvent<UnityEngine.Object> evt)
+    {
+        if (Equals(evt.newValue, evt.previousValue))
+        {
+            return;
+        }
+
+        SetAssets(evt.newValue as BuildingArchetypeGraph, _archetypeAsset, false);
+    }
+
+    private void OnArchetypeFieldChanged(ChangeEvent<UnityEngine.Object> evt)
+    {
+        if (Equals(evt.newValue, evt.previousValue))
+        {
+            return;
+        }
+
+        SetAssets(_graphAsset, evt.newValue as BuildingArchetype, false);
     }
 
     private void PrepareGraphSerializedObject()
@@ -233,43 +298,43 @@ public class BuildingArchetypeGraphWindow : EditorWindow
     {
         if (_graphAsset == null)
         {
-            EditorUtility.DisplayDialog("提示", "请先选择 BuildingArchetypeGraph 资产。", "好的");
+            EditorUtility.DisplayDialog("Info", "Please select a BuildingArchetypeGraph asset first.", "OK");
             return;
         }
 
         if (_archetypeAsset == null)
         {
-            EditorUtility.DisplayDialog("提示", "请为保存指定 BuildingArchetype 资产。", "好的");
+            EditorUtility.DisplayDialog("Info", "Please assign a BuildingArchetype asset before saving.", "OK");
             return;
         }
 
-        RecordGraphChange("保存建筑原型");
+        EnsureGraphArchetypeLink();
+        RecordGraphChange("Save Archetype");
         _graphAsset.ToArchetype(_archetypeAsset);
         EditorUtility.SetDirty(_archetypeAsset);
         AssetDatabase.SaveAssets();
     }
-
     private void ImportFromArchetype()
     {
         if (_graphAsset == null)
         {
-            EditorUtility.DisplayDialog("提示", "请先选择 BuildingArchetypeGraph 资产。", "好的");
+            EditorUtility.DisplayDialog("Info", "Please select a BuildingArchetypeGraph asset first.", "OK");
             return;
         }
 
         if (_archetypeAsset == null)
         {
-            EditorUtility.DisplayDialog("提示", "请指定 BuildingArchetype 资产用于导入。", "好的");
+            EditorUtility.DisplayDialog("Info", "Please specify a BuildingArchetype asset to import from.", "OK");
             return;
         }
 
-        RecordGraphChange("导入建筑原型");
+        EnsureGraphArchetypeLink();
+        RecordGraphChange("Import Archetype");
         _graphAsset.FromArchetype(_archetypeAsset);
         PrepareGraphSerializedObject();
         RefreshGraphView();
         EditorUtility.SetDirty(_graphAsset);
     }
-
     public void RecordGraphChange(string description)
     {
         if (_graphAsset == null)
@@ -337,7 +402,7 @@ public enum LinkCategory
 public class BuildingArchetypeGraphView : GraphView
 {
     private readonly BuildingArchetypeGraphWindow _window;
-    private readonly Dictionary<string, GraphNodeView> _nodeLookup = new();
+    private readonly Dictionary<string, GraphNodeView> _nodeLookup = new Dictionary<string, GraphNodeView>();
 
     private BuildingArchetypeGraph _graphAsset;
     private SerializedObject _graphSerializedObject;
@@ -348,7 +413,7 @@ public class BuildingArchetypeGraphView : GraphView
         _window = window;
 
         style.flexGrow = 1f;
-        SetupZoom(0.05f, 4f, 0.05f);
+        SetupZoom(0.05f, 4f);
         this.AddManipulator(new ContentDragger());
         this.AddManipulator(new SelectionDragger());
         this.AddManipulator(new RectangleSelector());
@@ -360,16 +425,50 @@ public class BuildingArchetypeGraphView : GraphView
         nodeCreationRequest = ctx =>
         {
             var menu = new GenericMenu();
-            menu.AddItem(new GUIContent("等级"), false, () => CreateNode(NodeCategory.Level, ctx.screenMousePosition));
-            menu.AddItem(new GUIContent("规则"), false, () => CreateNode(NodeCategory.Rule, ctx.screenMousePosition));
-            menu.AddItem(new GUIContent("条件"), false, () => CreateNode(NodeCategory.Condition, ctx.screenMousePosition));
-            menu.AddItem(new GUIContent("效果/成功"), false, () => CreateNode(NodeCategory.EffectSuccess, ctx.screenMousePosition));
-            menu.AddItem(new GUIContent("效果/失败"), false, () => CreateNode(NodeCategory.EffectFailure, ctx.screenMousePosition));
-            menu.AddItem(new GUIContent("属性修正"), false, () => CreateNode(NodeCategory.StatModifier, ctx.screenMousePosition));
+            menu.AddItem(new GUIContent("Level"), false, () => CreateNode(NodeCategory.Level, ctx.screenMousePosition));
+            menu.AddItem(new GUIContent("Rule"), false, () => CreateNode(NodeCategory.Rule, ctx.screenMousePosition));
+            menu.AddItem(new GUIContent("Condition"), false, () => CreateNode(NodeCategory.Condition, ctx.screenMousePosition));
+            menu.AddItem(new GUIContent("Effect / Success"), false, () => CreateNode(NodeCategory.EffectSuccess, ctx.screenMousePosition));
+            menu.AddItem(new GUIContent("Effect / Failure"), false, () => CreateNode(NodeCategory.EffectFailure, ctx.screenMousePosition));
+            menu.AddItem(new GUIContent("Stat Modifier"), false, () => CreateNode(NodeCategory.StatModifier, ctx.screenMousePosition));
             menu.ShowAsContext();
         };
 
-        selectionChanged += OnSelectionChanged;
+    }
+
+    private List<TData> GetMutableList<TData>(IReadOnlyList<TData> source)
+    {
+        if (source == null)
+        {
+            return null;
+        }
+
+        return source as List<TData>;
+    }
+
+    private List<LevelNodeData> GetMutableLevels()
+    {
+        return _graphAsset != null ? GetMutableList(_graphAsset.Levels) : null;
+    }
+
+    private List<RuleNodeData> GetMutableRules()
+    {
+        return _graphAsset != null ? GetMutableList(_graphAsset.Rules) : null;
+    }
+
+    private List<ConditionNodeData> GetMutableConditions()
+    {
+        return _graphAsset != null ? GetMutableList(_graphAsset.Conditions) : null;
+    }
+
+    private List<EffectNodeData> GetMutableEffects()
+    {
+        return _graphAsset != null ? GetMutableList(_graphAsset.Effects) : null;
+    }
+
+    private List<StatModifierNodeData> GetMutableStatModifiers()
+    {
+        return _graphAsset != null ? GetMutableList(_graphAsset.StatModifiers) : null;
     }
 
     public void ClearGraph()
@@ -667,7 +766,25 @@ public class BuildingArchetypeGraphView : GraphView
         return change;
     }
 
-    private void OnSelectionChanged(IEnumerable<GraphElement> selection)
+    public override void AddToSelection(ISelectable selectable)
+    {
+        base.AddToSelection(selectable);
+        NotifySelectionChanged();
+    }
+
+    public override void RemoveFromSelection(ISelectable selectable)
+    {
+        base.RemoveFromSelection(selectable);
+        NotifySelectionChanged();
+    }
+
+    public override void ClearSelection()
+    {
+        base.ClearSelection();
+        NotifySelectionChanged();
+    }
+
+    private void NotifySelectionChanged()
     {
         var nodeView = selection?.OfType<GraphNodeView>().FirstOrDefault();
         _window.ShowInspector(nodeView);
@@ -686,7 +803,7 @@ public class BuildingArchetypeGraphView : GraphView
 
         string createdId = null;
 
-        _window.RecordGraphChange("创建节点");
+        _window.RecordGraphChange("鍒涘缓鑺傜偣");
 
         switch (category)
         {
@@ -697,7 +814,11 @@ public class BuildingArchetypeGraphView : GraphView
                 level.SetRuntimeType(typeof(BuildingLevelDef));
                 createdId = level.Id;
                 _graphAsset.BuildingInfo?.LevelNodeIds.Add(level.Id);
-                _graphAsset.Levels.Add(level);
+                var levels = GetMutableLevels();
+                if (levels != null)
+                {
+                    levels.Add(level);
+                }
                 break;
             case NodeCategory.Rule:
                 var rule = new RuleNodeData();
@@ -705,14 +826,22 @@ public class BuildingArchetypeGraphView : GraphView
                 rule.DisplayName = "Rule";
                 rule.SetRuntimeType(typeof(Rule));
                 createdId = rule.Id;
-                _graphAsset.Rules.Add(rule);
+                var rules = GetMutableRules();
+                if (rules != null)
+                {
+                    rules.Add(rule);
+                }
                 break;
             case NodeCategory.Condition:
                 var condition = new ConditionNodeData();
                 condition.ForceSetIdIfEmpty();
                 condition.DisplayName = "Condition";
                 createdId = condition.Id;
-                _graphAsset.Conditions.Add(condition);
+                var conditions = GetMutableConditions();
+                if (conditions != null)
+                {
+                    conditions.Add(condition);
+                }
                 break;
             case NodeCategory.EffectSuccess:
                 var success = new EffectNodeData();
@@ -720,7 +849,11 @@ public class BuildingArchetypeGraphView : GraphView
                 success.DisplayName = "Effect";
                 success.Slot = EffectNodeData.EffectSlot.Success;
                 createdId = success.Id;
-                _graphAsset.Effects.Add(success);
+                var effects = GetMutableEffects();
+                if (effects != null)
+                {
+                    effects.Add(success);
+                }
                 break;
             case NodeCategory.EffectFailure:
                 var failure = new EffectNodeData();
@@ -728,14 +861,22 @@ public class BuildingArchetypeGraphView : GraphView
                 failure.DisplayName = "Effect";
                 failure.Slot = EffectNodeData.EffectSlot.Failure;
                 createdId = failure.Id;
-                _graphAsset.Effects.Add(failure);
+                var failureEffects = GetMutableEffects();
+                if (failureEffects != null)
+                {
+                    failureEffects.Add(failure);
+                }
                 break;
             case NodeCategory.StatModifier:
                 var modifier = new StatModifierNodeData();
                 modifier.ForceSetIdIfEmpty();
                 modifier.DisplayName = "StatModifier";
                 createdId = modifier.Id;
-                _graphAsset.StatModifiers.Add(modifier);
+                var modifiers = GetMutableStatModifiers();
+                if (modifiers != null)
+                {
+                    modifiers.Add(modifier);
+                }
                 break;
             default:
                 break;
@@ -752,12 +893,12 @@ public class BuildingArchetypeGraphView : GraphView
 
     private void HandleEdgeCreated(Edge edge)
     {
-        if (edge.output?.userData is not PortMetadata outputMeta || edge.input?.userData is not PortMetadata inputMeta)
+        if (!(edge.output?.userData is PortMetadata outputMeta) || !(edge.input?.userData is PortMetadata inputMeta))
         {
             return;
         }
 
-        _window.RecordGraphChange("连接节点");
+        _window.RecordGraphChange("杩炴帴鑺傜偣");
 
         switch (outputMeta.Link)
         {
@@ -786,12 +927,12 @@ public class BuildingArchetypeGraphView : GraphView
 
     private void HandleEdgeRemoved(Edge edge)
     {
-        if (edge.output?.userData is not PortMetadata outputMeta || edge.input?.userData is not PortMetadata inputMeta)
+        if (!(edge.output?.userData is PortMetadata outputMeta) || !(edge.input?.userData is PortMetadata inputMeta))
         {
             return;
         }
 
-        _window.RecordGraphChange("断开连线");
+        _window.RecordGraphChange("鏂紑杩炵嚎");
 
         switch (outputMeta.Link)
         {
@@ -825,7 +966,7 @@ public class BuildingArchetypeGraphView : GraphView
             return;
         }
 
-        _window.RecordGraphChange("删除节点");
+        _window.RecordGraphChange("鍒犻櫎鑺傜偣");
 
         switch (nodeView.Category)
         {
@@ -847,7 +988,7 @@ public class BuildingArchetypeGraphView : GraphView
                 break;
         }
 
-        _nodeLookup.Remove(nodeView.NodeId);
+        ((IDictionary<string, GraphNodeView>)_nodeLookup).Remove(nodeView.NodeId);
         _window.GraphSerializedObject?.UpdateIfRequiredOrScript();
     }
 
@@ -872,7 +1013,11 @@ public class BuildingArchetypeGraphView : GraphView
             }
         }
 
-        _graphAsset.Levels.Remove(data);
+        var levels = GetMutableLevels();
+        if (levels != null)
+        {
+            levels.Remove(data);
+        }
     }
 
     private void RemoveRuleNode(RuleNodeView node)
@@ -910,7 +1055,11 @@ public class BuildingArchetypeGraphView : GraphView
             }
         }
 
-        _graphAsset.Rules.Remove(data);
+        var rules = GetMutableRules();
+        if (rules != null)
+        {
+            rules.Remove(data);
+        }
     }
 
     private void RemoveConditionNode(ConditionNodeView node)
@@ -924,7 +1073,11 @@ public class BuildingArchetypeGraphView : GraphView
             }
         }
 
-        _graphAsset.Conditions.Remove(data);
+        var conditions = GetMutableConditions();
+        if (conditions != null)
+        {
+            conditions.Remove(data);
+        }
     }
 
     private void RemoveEffectNode(EffectNodeView node)
@@ -939,7 +1092,11 @@ public class BuildingArchetypeGraphView : GraphView
             }
         }
 
-        _graphAsset.Effects.Remove(data);
+        var effects = GetMutableEffects();
+        if (effects != null)
+        {
+            effects.Remove(data);
+        }
     }
 
     private void RemoveStatModifierNode(StatModifierNodeView node)
@@ -953,7 +1110,11 @@ public class BuildingArchetypeGraphView : GraphView
             }
         }
 
-        _graphAsset.StatModifiers.Remove(data);
+        var modifiers = GetMutableStatModifiers();
+        if (modifiers != null)
+        {
+            modifiers.Remove(data);
+        }
     }
 
     private void ConnectBuildingToLevel(GraphNodeView buildingNode, GraphNodeView levelNode)
@@ -973,7 +1134,7 @@ public class BuildingArchetypeGraphView : GraphView
 
     private void ConnectLevelToRule(GraphNodeView levelNode, GraphNodeView ruleNode)
     {
-        if (levelNode is not LevelNodeView levelView || ruleNode is not RuleNodeView ruleView)
+        if (!(levelNode is LevelNodeView levelView) || !(ruleNode is RuleNodeView ruleView))
         {
             return;
         }
@@ -991,7 +1152,7 @@ public class BuildingArchetypeGraphView : GraphView
 
     private void DisconnectLevelToRule(GraphNodeView levelNode, GraphNodeView ruleNode)
     {
-        if (levelNode is not LevelNodeView levelView || ruleNode is not RuleNodeView ruleView)
+        if (!(levelNode is LevelNodeView levelView) || !(ruleNode is RuleNodeView ruleView))
         {
             return;
         }
@@ -1002,7 +1163,7 @@ public class BuildingArchetypeGraphView : GraphView
 
     private void ConnectLevelToModifier(GraphNodeView levelNode, GraphNodeView modifierNode)
     {
-        if (levelNode is not LevelNodeView levelView || modifierNode is not StatModifierNodeView modifierView)
+        if (!(levelNode is LevelNodeView levelView) || !(modifierNode is StatModifierNodeView modifierView))
         {
             return;
         }
@@ -1020,7 +1181,7 @@ public class BuildingArchetypeGraphView : GraphView
 
     private void DisconnectLevelToModifier(GraphNodeView levelNode, GraphNodeView modifierNode)
     {
-        if (levelNode is not LevelNodeView levelView || modifierNode is not StatModifierNodeView modifierView)
+        if (!(levelNode is LevelNodeView levelView) || !(modifierNode is StatModifierNodeView modifierView))
         {
             return;
         }
@@ -1031,7 +1192,7 @@ public class BuildingArchetypeGraphView : GraphView
 
     private void ConnectRuleToCondition(GraphNodeView ruleNode, GraphNodeView conditionNode)
     {
-        if (ruleNode is not RuleNodeView ruleView || conditionNode is not ConditionNodeView conditionView)
+        if (!(ruleNode is RuleNodeView ruleView) || !(conditionNode is ConditionNodeView conditionView))
         {
             return;
         }
@@ -1049,7 +1210,7 @@ public class BuildingArchetypeGraphView : GraphView
 
     private void DisconnectRuleToCondition(GraphNodeView ruleNode, GraphNodeView conditionNode)
     {
-        if (ruleNode is not RuleNodeView ruleView || conditionNode is not ConditionNodeView conditionView)
+        if (!(ruleNode is RuleNodeView ruleView) || !(conditionNode is ConditionNodeView conditionView))
         {
             return;
         }
@@ -1060,7 +1221,7 @@ public class BuildingArchetypeGraphView : GraphView
 
     private void ConnectRuleToEffect(GraphNodeView ruleNode, GraphNodeView effectNode, bool success)
     {
-        if (ruleNode is not RuleNodeView ruleView || effectNode is not EffectNodeView effectView)
+        if (!(ruleNode is RuleNodeView ruleView) || !(effectNode is EffectNodeView effectView))
         {
             return;
         }
@@ -1081,7 +1242,7 @@ public class BuildingArchetypeGraphView : GraphView
 
     private void DisconnectRuleToEffect(GraphNodeView ruleNode, GraphNodeView effectNode, bool success)
     {
-        if (ruleNode is not RuleNodeView ruleView || effectNode is not EffectNodeView effectView)
+        if (!(ruleNode is RuleNodeView ruleView) || !(effectNode is EffectNodeView effectView))
         {
             return;
         }
@@ -1169,7 +1330,7 @@ public abstract class GraphNodeView : Node
         var property = serializedObject.FindProperty(PropertyPath);
         if (property == null)
         {
-            container.Add(new Label("未找到序列化属性。"));
+            container.Add(new Label("Serialized property not found."));
             return container;
         }
 
@@ -1180,7 +1341,7 @@ public abstract class GraphNodeView : Node
         propertyField.Bind(serializedObject);
         propertyField.RegisterValueChangeCallback(_ =>
         {
-            Window.RecordGraphChange("编辑节点属性");
+            Window.RecordGraphChange("Edit Node Property");
             RefreshTitle();
         });
         CustomizePropertyField(propertyField);
@@ -1238,12 +1399,12 @@ public class LevelNodeView : GraphNodeView
         inputContainer.Add(buildingInput);
 
         var ruleOutput = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(float));
-        ruleOutput.portName = "规则";
+        ruleOutput.portName = "瑙勫垯";
         ruleOutput.userData = new PortMetadata(this, LinkCategory.LevelToRule);
         outputContainer.Add(ruleOutput);
 
         var modifierOutput = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(float));
-        modifierOutput.portName = "属性";
+        modifierOutput.portName = "Stat";
         modifierOutput.userData = new PortMetadata(this, LinkCategory.LevelToStatModifier);
         outputContainer.Add(modifierOutput);
 
@@ -1268,7 +1429,7 @@ public class RuleNodeView : GraphNodeView
         inputContainer.Add(levelInput);
 
         var conditionOutput = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(float));
-        conditionOutput.portName = "条件";
+        conditionOutput.portName = "鏉′欢";
         conditionOutput.userData = new PortMetadata(this, LinkCategory.RuleToCondition);
         outputContainer.Add(conditionOutput);
 
@@ -1315,7 +1476,7 @@ public class ConditionNodeView : GraphNodeView
         Data = data;
 
         var ruleInput = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
-        ruleInput.portName = "规则";
+        ruleInput.portName = "瑙勫垯";
         ruleInput.userData = new PortMetadata(this, LinkCategory.RuleToCondition);
         inputContainer.Add(ruleInput);
 
@@ -1395,3 +1556,33 @@ public class StatModifierNodeView : GraphNodeView
         RefreshPorts();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

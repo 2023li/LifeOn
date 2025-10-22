@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +17,7 @@ public class BuildingArchetypeGraph : ScriptableObject
     [SerializeField] private List<ConditionNodeData> _conditions = new();
     [SerializeField] private List<EffectNodeData> _effects = new();
     [SerializeField] private List<StatModifierNodeData> _statModifiers = new();
+    [SerializeField] private BuildingArchetype _linkedArchetype;
 
     public BuildingInfoNodeData BuildingInfo => _buildingInfo;
     public IReadOnlyList<LevelNodeData> Levels => _levels;
@@ -24,6 +25,21 @@ public class BuildingArchetypeGraph : ScriptableObject
     public IReadOnlyList<ConditionNodeData> Conditions => _conditions;
     public IReadOnlyList<EffectNodeData> Effects => _effects;
     public IReadOnlyList<StatModifierNodeData> StatModifiers => _statModifiers;
+    public BuildingArchetype LinkedArchetype => _linkedArchetype;
+
+    public void SetLinkedArchetype(BuildingArchetype archetype)
+    {
+        _linkedArchetype = archetype;
+    }
+
+    public bool IsEmpty()
+    {
+        return (_levels == null || _levels.Count == 0)
+               && (_rules == null || _rules.Count == 0)
+               && (_conditions == null || _conditions.Count == 0)
+               && (_effects == null || _effects.Count == 0)
+               && (_statModifiers == null || _statModifiers.Count == 0);
+    }
 
     /// <summary>
     /// 将图结构编译成 BuildingArchetype 资产。
@@ -35,6 +51,9 @@ public class BuildingArchetypeGraph : ScriptableObject
             ReportError("目标 BuildingArchetype 为空，无法写入数据。");
             return;
         }
+
+        SetLinkedArchetype(target);
+
 
         if (!ValidateGraph(out var errors))
         {
@@ -154,6 +173,7 @@ public class BuildingArchetypeGraph : ScriptableObject
     {
         _buildingInfo ??= new BuildingInfoNodeData();
         _buildingInfo.ForceSetIdIfEmpty();
+        SetLinkedArchetype(source);
         _buildingInfo.SetRuntimeType(typeof(BuildingArchetype));
 
         _buildingInfo.BuildingId = source != null ? source.Id : string.Empty;
@@ -682,6 +702,7 @@ public class BuildingArchetypeGraph : ScriptableObject
     {
         _buildingInfo ??= new BuildingInfoNodeData();
         _buildingInfo.ForceSetIdIfEmpty();
+        SetLinkedArchetype(_linkedArchetype);
         _buildingInfo.SetRuntimeType(typeof(BuildingArchetype));
 
         foreach (var level in _levels)
@@ -863,3 +884,9 @@ public class BuildingArchetypeGraph : ScriptableObject
 
     #endregion
 }
+
+
+
+
+
+

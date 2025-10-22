@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
 using Sirenix.OdinInspector;
@@ -22,7 +22,7 @@ public class BuildingArchetype : ScriptableObject
     public BuildingInstance BuildingPrefab;    // Addressables/Prefab
     public List<BuildingLevelDef> Levels = new List<BuildingLevelDef>();
     public BuildingClassify classification = BuildingClassify.基础;
-
+    [HideInInspector] public BuildingArchetypeGraph GraphAsset;
 }
 
 [Serializable]
@@ -92,3 +92,5 @@ public class BuildingLevelViewConfig
     [Tooltip("用于切换子模型或装饰的预制体，ApplyLevelState 会销毁旧实例并重新生成。留空则沿用上一等级的外观。")]
     public GameObject ChildPrefab;
 }
+
+
