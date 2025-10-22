@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -256,6 +256,7 @@ public static class ResourceRoutingAssetGenerator
 
         archetype.Levels = new List<BuildingLevelDef> { level0, level1, level2, level3 };
         EditorUtility.SetDirty(archetype);
+        SyncGraphAsset(GetGraphAssetPath(assetPath), archetype);
         return archetype;
     }
 
@@ -344,6 +345,7 @@ public static class ResourceRoutingAssetGenerator
 
         archetype.Levels = new List<BuildingLevelDef> { level1, level2, level3 };
         EditorUtility.SetDirty(archetype);
+        SyncGraphAsset(GetGraphAssetPath(assetPath), archetype);
         return archetype;
     }
 
@@ -432,6 +434,7 @@ public static class ResourceRoutingAssetGenerator
 
         archetype.Levels = new List<BuildingLevelDef> { level1, level2, level3 };
         EditorUtility.SetDirty(archetype);
+        SyncGraphAsset(GetGraphAssetPath(assetPath), archetype);
         return archetype;
     }
 
@@ -487,6 +490,7 @@ public static class ResourceRoutingAssetGenerator
 
         archetype.Levels = levels;
         EditorUtility.SetDirty(archetype);
+        SyncGraphAsset(GetGraphAssetPath(assetPath), archetype);
         return archetype;
     }
 
@@ -525,7 +529,43 @@ public static class ResourceRoutingAssetGenerator
 
         archetype.Levels = new List<BuildingLevelDef> { level };
         EditorUtility.SetDirty(archetype);
+        SyncGraphAsset(GetGraphAssetPath(assetPath), archetype);
         return archetype;
+    }
+
+    private static string GetGraphAssetPath(string archetypeAssetPath)
+    {
+        string normalized = NormalizeAssetPath(archetypeAssetPath);
+        string directory = Path.GetDirectoryName(normalized);
+        if (string.IsNullOrEmpty(directory))
+        {
+            directory = "Assets";
+        }
+        directory = directory.Replace("\\", "/");
+
+        string fileName = Path.GetFileNameWithoutExtension(normalized);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            fileName = "BuildingArchetype";
+        }
+
+        return $"{directory}/{fileName}Graph.asset";
+    }
+
+    private static BuildingArchetypeGraph SyncGraphAsset(string graphPath, BuildingArchetype archetype)
+    {
+        var graph = LoadOrCreateAsset<BuildingArchetypeGraph>(graphPath);
+        graph.SetLinkedArchetype(archetype);
+        graph.FromArchetype(archetype);
+        EditorUtility.SetDirty(graph);
+
+        if (archetype.GraphAsset != graph)
+        {
+            archetype.GraphAsset = graph;
+            EditorUtility.SetDirty(archetype);
+        }
+
+        return graph;
     }
 
     private static void AssignToResourceRouting(SupplyDef foodSupply, SupplyDef woodSupply, List<BuildingArchetype> definitions)

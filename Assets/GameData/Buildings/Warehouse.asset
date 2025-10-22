@@ -28,7 +28,7 @@ MonoBehaviour:
     - rid: 1546075376088252429
     - rid: 1546075376088252430
     ViewConfig:
-      DefaultAnimatorState: Hospital_lv0
+      DefaultAnimatorState: Test
       DefaultAnimatorTrigger: 
       UpgradeTrigger: 
       PersistentParticlePrefab: {fileID: 0}
@@ -45,7 +45,7 @@ MonoBehaviour:
     - rid: 1546075376088252432
     - rid: 1546075376088252433
     ViewConfig:
-      DefaultAnimatorState: 
+      DefaultAnimatorState: Test2
       DefaultAnimatorTrigger: 
       UpgradeTrigger: 
       PersistentParticlePrefab: {fileID: 0}
