@@ -19,17 +19,22 @@ public class BuildingArchetype : ScriptableObject
     public string Id;                // "residence", "warehouse", "garden"
     public string DisplayName;       // "居民房"
     public int Size;
+     public BuildingClassify classification = BuildingClassify.基础;
     public BuildingInstance BuildingPrefab;    // Addressables/Prefab
+    
+     [ListDrawerSettings(ShowFoldout = true, ShowIndexLabels = true, DraggableItems = false)]
     public List<BuildingLevelDef> Levels = new List<BuildingLevelDef>();
-    public BuildingClassify classification = BuildingClassify.基础;
+   
 
 }
 
 [Serializable]
 public class BuildingLevelDef
 {
-     
-    [Min(0)] public int Level = 0;
+
+    
+    [LabelText("等级")]
+    public int Level = 0;
 
     // —— 基础属性（根据建筑不同使用其子集）——
     [LabelText("基础最大人口")]
@@ -48,12 +53,15 @@ public class BuildingLevelDef
 
 
 
+
+   
     [LabelText("基础最大岗位")]
-    [Min(0)] public int BaseMaxJobs;
+    public int BaseMaxJobs;
 
 
-
-    [SerializeReference] public List<StatModifier> ConditionalStatModifiers = new();
+    [LabelText("条件属性修饰")]
+    [SerializeReference] 
+    public List<StatModifier> ConditionalStatModifiers = new();
 
 
 
