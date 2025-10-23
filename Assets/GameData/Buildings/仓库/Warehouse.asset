@@ -15,10 +15,10 @@ MonoBehaviour:
   Id: warehouse
   DisplayName: "\u4ED3\u5E93"
   Size: 3
+  classification: 0
   BuildingPrefab: {fileID: 2875451913886811603, guid: c64b5b30775311843b2cde71ea551ccb, type: 3}
   Levels:
-  - Level: 0
-    BaseMaxPopulation: 0
+  - BaseMaxPopulation: 0
     BaseStorageCapacity: 60
     ExpToNext: 2
     BaseMaxJobs: 5
@@ -34,8 +34,7 @@ MonoBehaviour:
       PersistentParticlePrefab: {fileID: 0}
       UpgradeEffectPrefab: {fileID: 0}
       ChildPrefab: {fileID: 0}
-  - Level: 1
-    BaseMaxPopulation: 0
+  - BaseMaxPopulation: 0
     BaseStorageCapacity: 100
     ExpToNext: 5
     BaseMaxJobs: 5
@@ -51,8 +50,7 @@ MonoBehaviour:
       PersistentParticlePrefab: {fileID: 0}
       UpgradeEffectPrefab: {fileID: 0}
       ChildPrefab: {fileID: 0}
-  - Level: 2
-    BaseMaxPopulation: 0
+  - BaseMaxPopulation: 0
     BaseStorageCapacity: 200
     ExpToNext: 5
     BaseMaxJobs: 5
@@ -68,8 +66,7 @@ MonoBehaviour:
       PersistentParticlePrefab: {fileID: 0}
       UpgradeEffectPrefab: {fileID: 0}
       ChildPrefab: {fileID: 0}
-  - Level: 3
-    BaseMaxPopulation: 0
+  - BaseMaxPopulation: 0
     BaseStorageCapacity: 300
     ExpToNext: 5
     BaseMaxJobs: 5
@@ -85,8 +82,7 @@ MonoBehaviour:
       PersistentParticlePrefab: {fileID: 0}
       UpgradeEffectPrefab: {fileID: 0}
       ChildPrefab: {fileID: 0}
-  - Level: 4
-    BaseMaxPopulation: 0
+  - BaseMaxPopulation: 0
     BaseStorageCapacity: 400
     ExpToNext: 5
     BaseMaxJobs: 5
@@ -102,30 +98,14 @@ MonoBehaviour:
       PersistentParticlePrefab: {fileID: 0}
       UpgradeEffectPrefab: {fileID: 0}
       ChildPrefab: {fileID: 0}
-  - Level: 5
-    BaseMaxPopulation: 0
-    BaseStorageCapacity: 500
-    ExpToNext: -1
-    BaseMaxJobs: 5
-    ConditionalStatModifiers: []
-    Rules:
-    - rid: 1546075376088252443
-    - rid: 1546075376088252444
-    - rid: 1546075376088252445
-    ViewConfig:
-      DefaultAnimatorState: 
-      DefaultAnimatorTrigger: 
-      UpgradeTrigger: 
-      PersistentParticlePrefab: {fileID: 0}
-      UpgradeEffectPrefab: {fileID: 0}
-      ChildPrefab: {fileID: 0}
-  classification: 0
   references:
     version: 2
     RefIds:
     - rid: 1546075376088252428
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 0
         Conditions: []
         OnSuccess:
@@ -134,6 +114,8 @@ MonoBehaviour:
     - rid: 1546075376088252429
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 3
         Conditions: []
         OnSuccess:
@@ -142,6 +124,8 @@ MonoBehaviour:
     - rid: 1546075376088252430
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 3
         Conditions:
         - rid: 1546075376088252448
@@ -151,6 +135,8 @@ MonoBehaviour:
     - rid: 1546075376088252431
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 0
         Conditions: []
         OnSuccess:
@@ -159,6 +145,8 @@ MonoBehaviour:
     - rid: 1546075376088252432
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 3
         Conditions: []
         OnSuccess:
@@ -167,6 +155,8 @@ MonoBehaviour:
     - rid: 1546075376088252433
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 3
         Conditions:
         - rid: 1546075376088252452
@@ -176,6 +166,8 @@ MonoBehaviour:
     - rid: 1546075376088252434
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 0
         Conditions: []
         OnSuccess:
@@ -184,6 +176,8 @@ MonoBehaviour:
     - rid: 1546075376088252435
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 3
         Conditions: []
         OnSuccess:
@@ -192,6 +186,8 @@ MonoBehaviour:
     - rid: 1546075376088252436
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 3
         Conditions:
         - rid: 1546075376088252456
@@ -201,6 +197,8 @@ MonoBehaviour:
     - rid: 1546075376088252437
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 0
         Conditions: []
         OnSuccess:
@@ -209,6 +207,8 @@ MonoBehaviour:
     - rid: 1546075376088252438
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 3
         Conditions: []
         OnSuccess:
@@ -217,6 +217,8 @@ MonoBehaviour:
     - rid: 1546075376088252439
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 3
         Conditions:
         - rid: 1546075376088252460
@@ -226,6 +228,8 @@ MonoBehaviour:
     - rid: 1546075376088252440
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 0
         Conditions: []
         OnSuccess:
@@ -234,6 +238,8 @@ MonoBehaviour:
     - rid: 1546075376088252441
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 3
         Conditions: []
         OnSuccess:
@@ -242,36 +248,13 @@ MonoBehaviour:
     - rid: 1546075376088252442
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
+        Name: 
+        Description: 
         Trigger: 3
         Conditions:
         - rid: 1546075376088252464
         OnSuccess:
         - rid: 1546075376088252465
-        OnFailure: []
-    - rid: 1546075376088252443
-      type: {class: Rule, ns: , asm: Assembly-CSharp}
-      data:
-        Trigger: 0
-        Conditions: []
-        OnSuccess:
-        - rid: 1546075376088252466
-        OnFailure: []
-    - rid: 1546075376088252444
-      type: {class: Rule, ns: , asm: Assembly-CSharp}
-      data:
-        Trigger: 3
-        Conditions: []
-        OnSuccess:
-        - rid: 1546075376088252467
-        OnFailure: []
-    - rid: 1546075376088252445
-      type: {class: Rule, ns: , asm: Assembly-CSharp}
-      data:
-        Trigger: 3
-        Conditions:
-        - rid: 1546075376088252468
-        OnSuccess:
-        - rid: 1546075376088252469
         OnFailure: []
     - rid: 1546075376088252446
       type: {class: AdjustStorageCapacityWithWorkers, ns: , asm: Assembly-CSharp}
@@ -365,25 +348,6 @@ MonoBehaviour:
       data:
         Threshold: 0.4
     - rid: 1546075376088252465
-      type: {class: AddExp, ns: , asm: Assembly-CSharp}
-      data:
-        Amount: 1
-    - rid: 1546075376088252466
-      type: {class: AdjustStorageCapacityWithWorkers, ns: , asm: Assembly-CSharp}
-      data:
-        LowWorkerThreshold: 3
-        LowWorkerMultiplier: 0.5
-        FullWorkerThreshold: 5
-        FullWorkerMultiplier: 1.2
-    - rid: 1546075376088252467
-      type: {class: AddExp, ns: , asm: Assembly-CSharp}
-      data:
-        Amount: 1
-    - rid: 1546075376088252468
-      type: {class: FillPercentOver, ns: , asm: Assembly-CSharp}
-      data:
-        Threshold: 0.4
-    - rid: 1546075376088252469
       type: {class: AddExp, ns: , asm: Assembly-CSharp}
       data:
         Amount: 1

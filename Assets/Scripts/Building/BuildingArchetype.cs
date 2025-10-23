@@ -19,10 +19,21 @@ public class BuildingArchetype : ScriptableObject
     public string Id;                // "residence", "warehouse", "garden"
     public string DisplayName;       // "居民房"
     public int Size;
-     public BuildingClassify classification = BuildingClassify.基础;
+    public BuildingClassify classification = BuildingClassify.基础;
     public BuildingInstance BuildingPrefab;    // Addressables/Prefab
+    //是否在建造面板显示
+    [LabelText("显示在建造面板的条件")]
+    [SerializeReference] 
+    [Tooltip("留空则始终显示")]
+    public List<Condition> ShowInBuildPanel;
+    //允许建造
+    [LabelText("允许建造的条件")]
+    [SerializeReference] 
+    [Tooltip("留空则始终允许建造")]
+    public List<Condition> AllowConstruction;
+
     
-     [ListDrawerSettings(ShowFoldout = true, ShowIndexLabels = true, DraggableItems = false)]
+    [ListDrawerSettings(ShowFoldout = true, ShowIndexLabels = true, DraggableItems = true)]
     public List<BuildingLevelDef> Levels = new List<BuildingLevelDef>();
    
 
@@ -31,11 +42,6 @@ public class BuildingArchetype : ScriptableObject
 [Serializable]
 public class BuildingLevelDef
 {
-
-    
-    [LabelText("等级")]
-    public int Level = 0;
-
     // —— 基础属性（根据建筑不同使用其子集）——
     [LabelText("基础最大人口")]
     public int BaseMaxPopulation;   // 人口上限基础值（居民类）
@@ -60,13 +66,25 @@ public class BuildingLevelDef
 
 
     [LabelText("条件属性修饰")]
-    [SerializeReference] 
+    [SerializeReference]
     public List<StatModifier> ConditionalStatModifiers = new();
 
-
+    [LabelText("允许升级的条件")]
+    [SerializeReference]
+    public List<Condition> ConditionsForAllowingUpgrades = new List<Condition>
+    {
+        //这里需要增加一个默认的条件：建筑经验值大于ExpToNext
+    };
 
     // 规则：回合末拉取资源、人口增减、经验与升级等
-    [SerializeReference] public List<Rule> Rules = new();
+     [LabelText("规则")]
+     [ListDrawerSettings(
+        ShowFoldout = true,
+        ShowIndexLabels = true,
+        DraggableItems = true,
+        ListElementLabelName = nameof(Rule.ElementLabel))]
+    [SerializeReference, HideReferenceObjectPicker]
+    public List<Rule> Rules = new();
 
     [LabelText("等级表现配置")]
     public BuildingLevelViewConfig ViewConfig = new();
