@@ -138,7 +138,6 @@ public class BuildingInstance : MonoBehaviour
     }
 
 
-
     public void FireRules(TurnPhase trigger)
     {
         BuildingLevelDef lvl = Def.Levels[LevelIndex];
@@ -185,6 +184,14 @@ public class BuildingInstance : MonoBehaviour
         if (cur.ExpToNext <= 0) return false; // 无可升
         if (Exp < cur.ExpToNext) return false;
 
+        IGameContext context = ctx ?? _ctx;
+        if (!ConditionUtility.TryEvaluateConditions(cur.ConditionsForAllowingUpgrades, this, context, out string reason))
+        {
+            string message = string.IsNullOrWhiteSpace(reason) ? "未满足升级条件" : reason;
+            Debug.LogWarning($"[BuildingInstance] 建筑 {DisplayName}({Def?.Id}) 无法升级：{message}", this);
+            return false;
+        }
+
         int previousIndex = LevelIndex;
         LevelIndex = Mathf.Min(LevelIndex + 1, Def.Levels.Count - 1);
         Exp = 0;
@@ -197,8 +204,7 @@ public class BuildingInstance : MonoBehaviour
 
         TryInitStorageIfAny();
 
-        OnLevelChanged(previousIndex, LevelIndex, ctx);
-
+        OnLevelChanged(previousIndex, LevelIndex, context);
         // 等级变化后的瞬时触发（可选）
         return true;
     }
@@ -231,15 +237,6 @@ public class BuildingInstance : MonoBehaviour
     {
         IGameContext ctx = _ctx;
         WorkersAssigned = Mathf.Clamp(count, 0, GetMaxJobs(ctx));
-    }
-
-    [Button]
-    public void Test_AddTestSupply()
-    {
-        if (Storage != null)
-        {
-            Storage.Add(ResourceRouting.Instance.TestSupply, 1);
-        }
     }
 
     private void TryInitView()
