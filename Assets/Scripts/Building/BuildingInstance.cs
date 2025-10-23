@@ -79,7 +79,7 @@ public class BuildingInstance : MonoBehaviour
     {
        // transform.position = GridSystem.Instance.get
         Def = def;
-        _ctx = FindObjectOfType<GameContext>();
+        _ctx = GameContext.Instance;
         TryInitStorageIfAny();
         TryInitView();
     }

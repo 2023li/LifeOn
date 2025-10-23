@@ -68,6 +68,16 @@ public abstract class Condition
     public abstract bool Evaluate(BuildingInstance self, IGameContext ctx, out string why);
 }
 
+[Serializable]
+public class NeverNo : Condition
+{
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    {
+        why = "这个条件永远不满足";
+        return false;
+    }
+}
+
 
 [Serializable]
 public class PopulationLessThan : Condition

@@ -185,7 +185,7 @@ public class UIItem_HaloPanel : MonoBehaviour
             return _cachedContext;
         }
 
-        _cachedContext = FindObjectOfType<GameContext>();
+        _cachedContext = GameContext.Instance;
         return _cachedContext;
     }
 }

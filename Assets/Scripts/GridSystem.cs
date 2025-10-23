@@ -277,7 +277,7 @@ public class GridSystem : MonoSingleton<GridSystem>
     [Button]
     private void Test(AuraCategory category)
     {
-        GameContext context = FindObjectOfType<GameContext>();
+        GameContext context = GameContext.Instance;
         ShowAuraHighlight(context, category);
     }
 

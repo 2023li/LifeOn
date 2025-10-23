@@ -92,7 +92,7 @@ public class UIItem_BuildingSelection : MonoBehaviour
         item.SetOnClick(() => ShowBuilingClasss(captured));
     }
 
-    private void CreateBuildingButton(BuildingArchetype buildingDef)
+    private void CreateBuildingButton(BuildingArchetype buildingDef, bool canBuild)
     {
         IconTextButton item = LeanPool.Spawn(btnPrefabs, BuildBuildingBtnContent);
 
@@ -104,7 +104,17 @@ public class UIItem_BuildingSelection : MonoBehaviour
         item.SetContent(buildingDef.DisplayName, null);
 
         var captured = buildingDef;
-        item.SetOnClick(() => BuildBuilding(captured));
+
+        if (canBuild)
+        {
+            item.SetOnClick(() => BuildBuilding(captured));
+        }
+        else
+        {
+            item.SetOnClick(null);
+        }
+
+        item.SetInteractable(canBuild);
     }
 
     private void ClearBuildingClassButtons()
@@ -163,9 +173,15 @@ public class UIItem_BuildingSelection : MonoBehaviour
                 Debug.LogWarning($"[UIItem_BuildingSelection] 跳过建筑 {def.DisplayName}({def.Id})：{reason}");
                 continue;
             }
-
-
-            CreateBuildingButton(def); // ✅ 修正：传入 def
+            bool canBuild = ConditionUtility.TryEvaluateConditions(def.AllowConstruction, null, context, out var buildReason);
+            if (!canBuild)
+            {
+                var message = string.IsNullOrWhiteSpace(buildReason)
+                    ? "条件未通过"
+                    : buildReason;
+                Debug.LogWarning($"[UIItem_BuildingSelection] 建筑 {def.DisplayName}({def.Id}) 当前不可建造：{message}");
+            }
+            CreateBuildingButton(def, canBuild);
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(BuildBuildingBtnContent);
@@ -237,7 +253,7 @@ public class UIItem_BuildingSelection : MonoBehaviour
             return _cachedContext;
         }
 
-        _cachedContext = FindObjectOfType<GameContext>();
+        _cachedContext = GameContext.Instance;
         return _cachedContext;
     }
 

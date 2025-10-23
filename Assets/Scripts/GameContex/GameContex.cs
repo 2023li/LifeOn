@@ -13,8 +13,11 @@ public interface IGameContext
     CityEnvironment Environment { get; }
 }
 
-public class GameContext : MonoSingleton<GameContext>, IGameContext
+public class GameContext : Singleton<GameContext>, IGameContext
 {
+
+    protected  GameContext() { }
+
     private ResourceNetwork resourceNetwork = new ResourceNetwork();
     private TechTree techTree = new TechTree();
     private CityEnvironment environment = new CityEnvironment();
@@ -28,9 +31,9 @@ public class GameContext : MonoSingleton<GameContext>, IGameContext
     /// <summary>城市环境：用于处理治安、医疗、美化等光环。</summary>
     public CityEnvironment Environment => environment;
 
-    protected override void Awake()
+    public void Init()
     {
-        base.Awake();
+       
         // 兜底初始化，避免在场景中缺失引用。
         if (resourceNetwork == null)
         {

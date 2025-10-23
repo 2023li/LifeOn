@@ -35,4 +35,15 @@ public class IconTextButton : MonoBehaviour
         if (onClick != null)
             btn.onClick.AddListener(() => onClick());
     }
+
+    /// <summary>
+    /// 设置按钮可交互状态
+    /// </summary>
+    /// <param name="interactable">是否可交互</param>
+    public void SetInteractable(bool interactable)
+    {
+        if (btn == null) return;
+
+        btn.interactable = interactable;
+    }
 }

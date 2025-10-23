@@ -10,7 +10,11 @@ public class TheGame : MonoSingleton<TheGame>
 {
     protected override bool IsDontDestroyOnLoad => true;
 
-
+    protected override void Awake()
+    {
+        base.Awake ();
+        GameContext.Instance.Init();
+    }
     public void Start()
     {
        _ = UIManager.Instance.ShowPanel<UIPanel_GameMain>(UIManager.UILayer.Main);
