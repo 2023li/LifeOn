@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Lean.Pool; // LeanPool
 using Moyo.Unity;
+using Sirenix.OdinInspector;
 
 
 
@@ -22,6 +23,13 @@ public class UIItem_BuildingSelection : MonoBehaviour
 
     [Header("预制体")]
     public IconTextButton btnPrefabs;
+
+    [Header("上下文引用")]
+    [LabelText("游戏上下文")]
+    [SerializeField] private GameContext _gameContext;
+
+    private IGameContext _cachedContext;
+
 
     private void Reset()
     {
@@ -130,6 +138,13 @@ public class UIItem_BuildingSelection : MonoBehaviour
             return;
         }
 
+        IGameContext context = GetContext();
+        if (context == null)
+        {
+            Debug.LogError("[UIItem_BuildingSelection] 未找到有效的 GameContext，无法评估建造条件。");
+            return;
+        }
+
         var allBuilding = ResourceRouting.Instance.GetClassAllBuildingDef(classify);
         if (allBuilding == null)
         {
@@ -142,6 +157,14 @@ public class UIItem_BuildingSelection : MonoBehaviour
         foreach (var def in allBuilding)
         {
             if (def == null) continue;
+
+            if (!ConditionUtility.TryEvaluateConditions(def.ShowInBuildPanel, null, context, out var reason))
+            {
+                Debug.LogWarning($"[UIItem_BuildingSelection] 跳过建筑 {def.DisplayName}({def.Id})：{reason}");
+                continue;
+            }
+
+
             CreateBuildingButton(def); // ✅ 修正：传入 def
         }
 
@@ -200,4 +223,22 @@ public class UIItem_BuildingSelection : MonoBehaviour
         if (btn_BackToClass == null) { Debug.LogWarning("[UIItem_BuildingSelection] 提示：未绑定 btn_BackToClass（返回按钮）。"); }
         return ok;
     }
+
+    private IGameContext GetContext()
+    {
+        if (_cachedContext != null)
+        {
+            return _cachedContext;
+        }
+
+        if (_gameContext != null)
+        {
+            _cachedContext = _gameContext;
+            return _cachedContext;
+        }
+
+        _cachedContext = FindObjectOfType<GameContext>();
+        return _cachedContext;
+    }
+
 }

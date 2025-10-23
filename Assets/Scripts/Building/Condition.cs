@@ -1,6 +1,66 @@
 using System;
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+
+
+
+public static class ConditionUtility
+{
+
+    /// <summary>
+    /// 逐项评估条件列表，若有失败返回 false 并写出失败原因。
+    /// </summary>
+    /// <param name="conditions">条件集合，允许为空。</param>
+    /// <param name="self">当前建筑实例，可为空。</param>
+    /// <param name="ctx">游戏上下文，允许为空但可能导致评估失败。</param>
+    /// <param name="failedReason">失败原因，为空字符串表示全部通过。</param>
+    public static bool TryEvaluateConditions(IEnumerable<Condition> conditions, BuildingInstance self, IGameContext ctx, out string failedReason)
+    {
+        failedReason = string.Empty;
+
+        if (conditions == null)
+        {
+            return true;
+        }
+
+        foreach (Condition condition in conditions)
+        {
+            if (condition == null)
+            {
+                failedReason = "条件配置为空";
+                return false;
+            }
+
+            try
+            {
+                if (condition.Evaluate(self, ctx, out string why))
+                {
+                    continue;
+                }
+
+                failedReason = string.IsNullOrWhiteSpace(why)
+                    ? $"条件 {condition.GetType().Name} 未通过"
+                    : why;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                failedReason = $"条件 {condition.GetType().Name} 评估异常：{ex.Message}";
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+
+
+
+
+
+
 
 [Serializable]
 public abstract class Condition
