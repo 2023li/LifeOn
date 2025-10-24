@@ -86,7 +86,7 @@ public class BuildingInstance : MonoBehaviour
 
     private void OnEnable()
     {
-        TurnSystem.OnTurnEnd += FireRules;
+        TurnSystem.OnTurnPhaseChange += FireRules;
         _activeInstances.Add(this);
     }
 
@@ -94,7 +94,7 @@ public class BuildingInstance : MonoBehaviour
 
     private void OnDisable()
     {
-        TurnSystem.OnTurnEnd -= FireRules;
+        TurnSystem.OnTurnPhaseChange -= FireRules;
         _activeInstances.Remove(this);
 
         if (_ctx != null && _ctx.ResourceNetwork != null && Storage != null)

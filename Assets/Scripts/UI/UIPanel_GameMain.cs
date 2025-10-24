@@ -23,15 +23,32 @@ public class UIPanel_GameMain : PanelBase
 
     protected override void Awake()
     {
+        this.AutoBindFields();
+
         btn_打开建造.onClick.AddListener(() => { item_建造选择.Show(); });
 
 
         btn_下回合.onClick.AddListener(() => { TurnSystem.Instance.EndTurn(); });
     }
 
+    private void Start()
+    {
+        Start_顶部HUD();
+    }
 
     #region 顶部HUD
     [AutoBind("text_回合数")] TMP_Text text_TurnText;
+
+    public void Start_顶部HUD()
+    {
+        TurnSystem.OnTurnPhaseChange += (p) =>
+        {
+            if (p==TurnPhase.开始准备阶段)
+            {
+                text_TurnText.text = TurnSystem.Instance.NumberOfRounds.ToString();
+            }
+        };
+    }
 
     #endregion 
 

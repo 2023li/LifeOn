@@ -8,7 +8,7 @@ using UnityEngine;
 public interface IGameContext
 {
     ResourceNetwork ResourceNetwork { get; }
-    TechTree TechTree { get; }
+    TechTreeManager TechTree { get; }
 
     CityEnvironment Environment { get; }
 }
@@ -19,14 +19,14 @@ public class GameContext : Singleton<GameContext>, IGameContext
     protected  GameContext() { }
 
     private ResourceNetwork resourceNetwork = new ResourceNetwork();
-    private TechTree techTree = new TechTree();
+    private TechTreeManager techTree = new TechTreeManager();
     private CityEnvironment environment = new CityEnvironment();
 
     /// <summary>资源网络：负责仓库注册、库存查询。</summary>
     public ResourceNetwork ResourceNetwork => resourceNetwork;
 
     /// <summary>科技树：用于校验科技节点。</summary>
-    public TechTree TechTree => techTree;
+    public TechTreeManager TechTree => techTree;
 
     /// <summary>城市环境：用于处理治安、医疗、美化等光环。</summary>
     public CityEnvironment Environment => environment;
@@ -42,7 +42,7 @@ public class GameContext : Singleton<GameContext>, IGameContext
 
         if (techTree == null)
         {
-            techTree = new TechTree();
+            techTree = new TechTreeManager();
         }
 
         if (environment == null)

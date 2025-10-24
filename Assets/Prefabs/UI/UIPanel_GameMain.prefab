@@ -770,7 +770,7 @@ GameObject:
   - component: {fileID: 7772449764917949840}
   - component: {fileID: 4872216189891284627}
   m_Layer: 5
-  m_Name: "txt_\u56DE\u5408\u6570"
+  m_Name: "text_\u56DE\u5408\u6570"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -945,7 +945,6 @@ MonoBehaviour:
   "toggle_\u6CBB\u5B89": {fileID: 1047722579604519737}
   "toggle_\u533B\u7597": {fileID: 3871496561019259409}
   gridSystem: {fileID: 0}
-  gameContext: {fileID: 0}
 --- !u!1 &1946300477321310218
 GameObject:
   m_ObjectHideFlags: 0

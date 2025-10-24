@@ -17,12 +17,16 @@ MonoBehaviour:
   Size: 2
   classification: 0
   BuildingPrefab: {fileID: 2875451913886811603, guid: edbfe980b4bd54d478d1b1f15746f438, type: 3}
+  ShowInBuildPanel: []
+  AllowConstruction:
+  - rid: 1546075510240968704
   Levels:
   - BaseMaxPopulation: 0
     BaseStorageCapacity: 0
     ExpToNext: 2
     BaseMaxJobs: 0
     ConditionalStatModifiers: []
+    ConditionsForAllowingUpgrades: []
     Rules:
     - rid: 1546075376088252487
     ViewConfig:
@@ -37,6 +41,7 @@ MonoBehaviour:
     ExpToNext: 10
     BaseMaxJobs: 0
     ConditionalStatModifiers: []
+    ConditionsForAllowingUpgrades: []
     Rules:
     - rid: 1546075376088252488
     - rid: 1546075376088252489
@@ -53,6 +58,7 @@ MonoBehaviour:
     BaseMaxJobs: 0
     ConditionalStatModifiers:
     - rid: 1546075376088252490
+    ConditionsForAllowingUpgrades: []
     Rules:
     - rid: 1546075376088252491
     - rid: 1546075376088252492
@@ -69,6 +75,7 @@ MonoBehaviour:
     BaseMaxJobs: 0
     ConditionalStatModifiers:
     - rid: 1546075376088252493
+    ConditionsForAllowingUpgrades: []
     Rules:
     - rid: 1546075376088252494
     - rid: 1546075376088252495
@@ -287,3 +294,6 @@ MonoBehaviour:
       type: {class: AddExp, ns: , asm: Assembly-CSharp}
       data:
         Amount: 1
+    - rid: 1546075510240968704
+      type: {class: NeverNo, ns: , asm: Assembly-CSharp}
+      data: 

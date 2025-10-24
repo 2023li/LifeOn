@@ -11,6 +11,7 @@ namespace Moyo.Unity
         
         protected virtual void Awake()
         {
+            this.AutoBindFields();
             canvas = UIManager.Instance.GetMainCanvas();
         }
 
