@@ -13,31 +13,42 @@ MonoBehaviour:
   m_Name: TechTree
   m_EditorClassIdentifier: 
   techList:
-  - id: 1
-    name: 111
-    description: "\u65B0\u79D1\u6280\u63CF\u8FF0"
-    icon: {fileID: 0}
-    cost: 0
-    dependencies: 
-    position: {x: -514, y: -64}
-  - id: 2
-    name: "\u65B0\u79D1\u6280"
-    description: "\u65B0\u79D1\u6280\u63CF\u8FF0"
-    icon: {fileID: 0}
-    cost: 0
-    dependencies: 01000000
-    position: {x: -178, y: -281}
-  - id: 3
-    name: "\u65B0\u79D1\u6280"
-    description: "\u65B0\u79D1\u6280\u63CF\u8FF0111"
-    icon: {fileID: 0}
-    cost: 0
-    dependencies: 01000000
-    position: {x: -131, y: 96}
-  - id: 4
+  - id: T001
     name: "\u65B0\u79D1\u6280"
     description: 
     icon: {fileID: 0}
     cost: 0
-    dependencies: 02000000
-    position: {x: 255, y: -260}
+    dependencies: []
+    position: {x: -167, y: -259}
+  - id: T002
+    name: "\u65B0\u79D1\u6280"
+    description: 
+    icon: {fileID: 0}
+    cost: 0
+    dependencies:
+    - T001
+    position: {x: 170, y: -85}
+  - id: T003
+    name: "\u65B0\u79D1\u6280"
+    description: 
+    icon: {fileID: 0}
+    cost: 0
+    dependencies:
+    - T002
+    position: {x: 500, y: 132}
+  - id: T004
+    name: "\u65B0\u79D1\u6280"
+    description: 
+    icon: {fileID: 0}
+    cost: 0
+    dependencies: []
+    position: {x: 3109, y: 63}
+  - id: T005
+    name: "\u65B0\u79D1\u6280"
+    description: 
+    icon: {fileID: 0}
+    cost: 0
+    dependencies:
+    - T003
+    - T002
+    position: {x: 820, y: -276}

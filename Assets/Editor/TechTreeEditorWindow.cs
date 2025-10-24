@@ -1,4 +1,3 @@
-// Assets/Editor/TechTree/TechTreeEditorWindow.cs
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -7,8 +6,6 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
-
-// 需要项目中已存在：TechTree.cs（定义 TechTree 与 TechNodeData）
 
 public class TechTreeEditorWindow : EditorWindow
 {
@@ -76,7 +73,6 @@ public class TechTreeEditorWindow : EditorWindow
             }
         }, TrickleDown.TrickleDown);
 
-        // 初始提示
         if (_currentTree == null)
         {
             var tip = new Label("请在上方选择一个 TechTree 资产进行编辑。")
@@ -124,7 +120,6 @@ public class TechTreeEditorWindow : EditorWindow
 
     private void RebuildGraphView()
     {
-        // 移除旧视图（不要调用 Dispose——GraphView 没这个方法）
         if (_graphView != null)
         {
             rootVisualElement.Remove(_graphView);
@@ -144,7 +139,7 @@ public class TechTreeEditorWindow : EditorWindow
         ClearDirty();
     }
 
-    // 保存并校验重复ID
+    // —— 保存 & 校验 —— //
     private void SaveWithValidation()
     {
         if (_currentTree == null)
@@ -153,8 +148,21 @@ public class TechTreeEditorWindow : EditorWindow
             return;
         }
 
+        // 空ID检测
+        var empties = _currentTree.techList
+            .Where(t => t == null || string.IsNullOrWhiteSpace(t.id))
+            .Select(t => t?.name ?? "(未命名)")
+            .ToList();
+        if (empties.Count > 0)
+        {
+            EditorUtility.DisplayDialog("保存失败：存在空ID",
+                "以下节点ID为空，请填写后再保存：\n" + string.Join("\n", empties), "好的");
+            return;
+        }
+
+        // 重复ID检测（忽略大小写）
         var dup = _currentTree.techList
-            .GroupBy(t => t.id)
+            .GroupBy(t => t.id.Trim(), StringComparer.OrdinalIgnoreCase)
             .Where(g => g.Count() > 1)
             .Select(g => g.Key)
             .OrderBy(x => x)
@@ -182,32 +190,39 @@ public class TechTreeEditorWindow : EditorWindow
 
         internal readonly PortEdgeConnectorListener edgeConnectorListener;
 
-        private readonly Dictionary<int, TechNodeView> _nodeViews = new Dictionary<int, TechNodeView>();
-        private readonly Vector2 _defaultNodeSize = new Vector2(220, 180);
+        private readonly Dictionary<string, TechNodeView> _nodeViews = new Dictionary<string, TechNodeView>(StringComparer.OrdinalIgnoreCase);
+        private readonly Vector2 _defaultNodeSize = new Vector2(240, 200);
 
         public TechTreeGraphView(TechTree tree, Action markDirty)
         {
             _tree = tree;
             _markDirty = markDirty;
 
-            // 交互：缩放、平移、框选、多选
             this.AddManipulator(new ContentZoomer());
             this.AddManipulator(new ContentDragger());
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
 
-            // 网格背景
             var grid = new GridBackground();
             Insert(0, grid);
             grid.StretchToParentSize();
 
-            // 监听变化
             graphViewChanged += OnGraphViewChanged;
 
-            // 从端口拖拽到空白时新建节点
+            // 删除键支持
+            this.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode == KeyCode.Delete || evt.keyCode == KeyCode.Backspace)
+                {
+                    DeleteSelection();
+                    evt.StopImmediatePropagation();
+                }
+            });
+
+            // 端口拖拽监听
             edgeConnectorListener = new PortEdgeConnectorListener(this);
 
-            // 空白处按空格创建节点（简单行为）
+            // 空白处按空格也可创建
             nodeCreationRequest = ctx =>
             {
                 Vector2 pos = contentViewContainer.WorldToLocal(ctx.screenMousePosition);
@@ -222,21 +237,21 @@ public class TechTreeEditorWindow : EditorWindow
             _nodeViews.Clear();
             DeleteElements(graphElements.ToList());
 
-            // 节点
             foreach (var tech in _tree.techList)
             {
                 var nv = new TechNodeView(tech, _tree, this);
                 nv.SetPosition(new Rect(tech.position, _defaultNodeSize));
                 AddElement(nv);
-                _nodeViews[tech.id] = nv;
+                if (!string.IsNullOrEmpty(tech.id))
+                    _nodeViews[tech.id] = nv;
             }
 
-            // 连线（依赖 -> 目标）
             foreach (var tech in _tree.techList)
             {
                 if (tech.dependencies == null) continue;
                 foreach (var depId in tech.dependencies)
                 {
+                    if (string.IsNullOrEmpty(depId)) continue;
                     if (_nodeViews.TryGetValue(depId, out var from) &&
                         _nodeViews.TryGetValue(tech.id, out var to))
                     {
@@ -261,6 +276,22 @@ public class TechTreeEditorWindow : EditorWindow
             }
         }
 
+        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
+        {
+            var compatible = new List<Port>();
+            ports.ForEach(p =>
+            {
+                // 只能连接到不同节点、相反方向、相同类型
+                if (p != startPort && p.node != startPort.node &&
+                    p.direction != startPort.direction &&
+                    p.portType == startPort.portType)
+                {
+                    compatible.Add(p);
+                }
+            });
+            return compatible;
+        }
+
         private void CreateTechNodeAt(Vector2 graphPos)
         {
             Undo.RecordObject(_tree, "Add Tech Node");
@@ -278,6 +309,7 @@ public class TechTreeEditorWindow : EditorWindow
 
         private GraphViewChange OnGraphViewChanged(GraphViewChange change)
         {
+            // 这里只处理删除（增连线由 OnDrop 直接写数据，避免重复）
             if (change.elementsToRemove != null)
             {
                 foreach (var e in change.elementsToRemove)
@@ -293,33 +325,16 @@ public class TechTreeEditorWindow : EditorWindow
                             SetDirty();
                         }
                     }
-
-                    if (e is TechNodeView nv)
+                    else if (e is TechNodeView nv)
                     {
                         Undo.RecordObject(_tree, "Remove Tech Node");
-                        int id = nv.techData.id;
+                        string id = nv.techData.id;
                         _tree.RemoveTech(id);
                         _nodeViews.Remove(id);
                         SetDirty();
                     }
                 }
             }
-
-            if (change.edgesToCreate != null)
-            {
-                foreach (var edge in change.edgesToCreate)
-                {
-                    var from = edge.output.node as TechNodeView;
-                    var to = edge.input.node as TechNodeView;
-                    if (from != null && to != null)
-                    {
-                        Undo.RecordObject(_tree, "Add Dependency");
-                        _tree.AddDependency(from.techData.id, to.techData.id);
-                        SetDirty();
-                    }
-                }
-            }
-
             return change;
         }
 
@@ -329,12 +344,44 @@ public class TechTreeEditorWindow : EditorWindow
             EditorUtility.SetDirty(_tree);
         }
 
-        // 端口拖拽监听：拖到空白自动建点并连接
+        // —— 端口拖拽监听：支持端口对端口、端口到空白 —— //
         internal class PortEdgeConnectorListener : IEdgeConnectorListener
         {
             private readonly TechTreeGraphView _view;
             public PortEdgeConnectorListener(TechTreeGraphView view) { _view = view; }
 
+            // 端口对端口
+            public void OnDrop(GraphView graphView, Edge tempEdge)
+            {
+                var outNode = tempEdge.output?.node as TechNodeView;
+                var inNode = tempEdge.input?.node as TechNodeView;
+                if (outNode == null || inNode == null) return;
+                if (outNode == inNode) return;
+
+                // 防重复依赖
+                if (inNode.techData.dependencies.Contains(outNode.techData.id, StringComparer.OrdinalIgnoreCase))
+                {
+                    // 已存在依赖：只画一条（避免多条同义）
+                    var already = outNode.outputPort.connections
+                        .Any(e => e.input == inNode.inputPort);
+                    if (!already)
+                    {
+                        var edge = outNode.outputPort.ConnectTo(inNode.inputPort);
+                        graphView.AddElement(edge);
+                    }
+                    return;
+                }
+
+                Undo.RecordObject(_view._tree, "Add Dependency");
+                _view._tree.AddDependency(outNode.techData.id, inNode.techData.id);
+                _view.SetDirty();
+
+                // 画线
+                var newEdge = outNode.outputPort.ConnectTo(inNode.inputPort);
+                graphView.AddElement(newEdge);
+            }
+
+            // 端口到空白：新建节点并连接
             public void OnDropOutsidePort(Edge edge, Vector2 position)
             {
                 Vector2 graphPos = _view.contentViewContainer.WorldToLocal(position);
@@ -349,26 +396,23 @@ public class TechTreeEditorWindow : EditorWindow
                 _view.AddElement(newNode);
                 _view._nodeViews[newTech.id] = newNode;
 
+                // 根据拖拽方向连接
                 if (edge.output != null && edge.output.node is TechNodeView from)
                 {
+                    // from -> new
+                    _view._tree.AddDependency(from.techData.id, newTech.id);
                     var newEdge = from.outputPort.ConnectTo(newNode.inputPort);
                     _view.AddElement(newEdge);
-                    _view._tree.AddDependency(from.techData.id, newTech.id);
                 }
                 else if (edge.input != null && edge.input.node is TechNodeView to)
                 {
+                    // new -> to
+                    _view._tree.AddDependency(newTech.id, to.techData.id);
                     var newEdge = newNode.outputPort.ConnectTo(to.inputPort);
                     _view.AddElement(newEdge);
-                    _view._tree.AddDependency(newTech.id, to.techData.id);
                 }
 
                 _view.SetDirty();
-            }
-
-            public void OnDrop(GraphView graphView, Edge edge)
-            {
-                // 端口到端口：直接添加 Edge（GraphViewChanged 会把依赖写回数据）
-                graphView.AddElement(edge);
             }
         }
 
@@ -395,7 +439,7 @@ public class TechTreeEditorWindow : EditorWindow
 
                 capabilities |= Capabilities.Movable | Capabilities.Deletable | Capabilities.Selectable;
 
-                // 端口（使用默认 InstantiatePort，并正确挂 EdgeConnector<Edge>）
+                // 端口 + EdgeConnector
                 inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(bool));
                 inputPort.portName = "";
                 inputPort.AddManipulator(new EdgeConnector<Edge>(_owner.edgeConnectorListener));
@@ -412,26 +456,27 @@ public class TechTreeEditorWindow : EditorWindow
                 titleContainer.Insert(0, _iconImage);
 
                 // ===== 可编辑字段 =====
-                var idField = new IntegerField("科技ID") { value = data.id };
+                var idField = new TextField("科技ID") { value = data.id };
                 idField.RegisterValueChangedCallback(evt =>
                 {
-                    if (evt.newValue == techData.id) return;
+                    var newId = (evt.newValue ?? "").Trim();
+                    if (newId.Equals(techData.id, StringComparison.OrdinalIgnoreCase)) return;
+                    if (string.IsNullOrWhiteSpace(newId)) { idField.SetValueWithoutNotify(techData.id); return; }
 
                     Undo.RecordObject(_tree, "Edit Tech ID");
 
-                    int oldId = techData.id;
-                    int newId = evt.newValue;
+                    string oldId = techData.id;
+                    techData.id = newId;
 
-                    // 替换依赖引用
+                    // 更新依赖中的引用
                     foreach (var n in _tree.techList)
                     {
                         for (int i = 0; i < n.dependencies.Count; i++)
-                            if (n.dependencies[i] == oldId) n.dependencies[i] = newId;
+                            if (string.Equals(n.dependencies[i], oldId, StringComparison.OrdinalIgnoreCase))
+                                n.dependencies[i] = newId;
                     }
 
-                    techData.id = newId;
-
-                    // 更新映射
+                    // 更新视图字典键
                     if (_owner._nodeViews.ContainsKey(oldId))
                     {
                         _owner._nodeViews.Remove(oldId);
