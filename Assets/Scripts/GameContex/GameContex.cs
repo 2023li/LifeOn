@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using Moyo.Unity;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
-using UnityEngine;
 
 public interface IGameContext
 {
@@ -43,6 +41,7 @@ public class GameContext : Singleton<GameContext>, IGameContext
         if (techTree == null)
         {
             techTree = new TechTreeManager();
+            techTree.Init();
         }
 
         if (environment == null)

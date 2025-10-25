@@ -15,6 +15,16 @@ public class UIPanel_GameMain : PanelBase
 
     [AutoBind("建造选择")] public UIItem_BuildingSelection item_建造选择;
 
+    [SerializeField, LabelText("按钮_打开科技面板")]
+    private Button btn_打开科技面板;
+
+    [SerializeField,LabelText("按钮_关闭科技面板")]
+    private Button btn_关闭科技面板;
+
+    [SerializeField, LabelText("面板_科技面板")]
+    private RectTransform panel_科技面板;
+
+
 
     private void Reset()
     {
@@ -29,6 +39,24 @@ public class UIPanel_GameMain : PanelBase
 
 
         btn_下回合.onClick.AddListener(() => { TurnSystem.Instance.EndTurn(); });
+
+
+        btn_打开科技面板.onClick.AddListener(() =>
+        {
+            panel_科技面板.gameObject.SetActive(true);
+
+
+
+        });
+        btn_关闭科技面板.onClick.AddListener(() =>
+        {
+            panel_科技面板.gameObject.SetActive(false);
+
+
+        });
+
+
+
     }
 
     private void Start()
@@ -37,7 +65,7 @@ public class UIPanel_GameMain : PanelBase
     }
 
     #region 顶部HUD
-    [AutoBind("text_回合数")] TMP_Text text_TurnText;
+    [SerializeField,LabelText("文本_回合数")] TMP_Text text_TurnText;
 
     public void Start_顶部HUD()
     {

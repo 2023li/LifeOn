@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.XR;
 
 /// <summary>
 /// 科技树运行时管理器：
@@ -15,6 +16,11 @@ using UnityEngine;
 /// </summary>
 public class TechTreeManager
 {
+
+    public event Action<TechNodeData> ResearchStarted;
+ 
+    public event Action<TechNodeData> ResearchCompleted;
+
     // —— 数据源（编辑器里配的 ScriptableObject）——
     private TechTreeAssets _tree; // 引用到你的 TechTreeAssets 资源（ScriptableObject）
 
@@ -151,6 +157,8 @@ public class TechTreeManager
         }
 
         _researching[techId] = new ResearchTask(node);
+
+        ResearchStarted?.Invoke(node);
         return true;
     }
 
@@ -182,7 +190,10 @@ public class TechTreeManager
         {
             // 如果依赖满足并且没在研究，允许快捷开始
             if (!StartResearch(techId)) return false;
-            task = _researching[techId];
+            if (!_researching.TryGetValue(techId,out task))
+            {
+                return true;
+            }
         }
 
         task.Accumulated += points;
@@ -282,14 +293,28 @@ public class TechTreeManager
 
     public IReadOnlyCollection<string> GetUnlockedIds() => _unlocked;
 
-    //========================== 内部实现 ==========================
+    public bool IsResearching(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id)) return false;
+        return _researching.ContainsKey(id);
+    }
+
+//========================== 内部实现 ==========================
 
     private void UnlockInternal(string techId)
     {
-        _unlocked.Add(techId);
+        if (!_unlocked.Add(techId))
+        {
+            _researching.Remove(techId);
+            return;
+        }
+
         _researching.Remove(techId);
-        // 这里可触发事件：如刷新UI/派发解锁效果等
-        // OnTechUnlocked?.Invoke(techId);
+        if (_nodes.TryGetValue(techId,out var node))
+        {
+            ResearchCompleted?.Invoke(node);
+        }
+
     }
 
     private void EnsureTreeBound()
