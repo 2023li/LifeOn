@@ -301,12 +301,12 @@ public class TechTreeManager
     /// <summary>
     /// （存档）导出当前状态：已解锁集合 + 正在研究的进度
     /// </summary>
-    public SaveData ExportState()
+    public TechSystemSaveData ExportState()
     {
-        var sd = new SaveData
+        var sd = new TechSystemSaveData
         {
             unlocked = _unlocked.ToList(),
-            researching = _progressSnapshots.Values.Select(r => new SaveData.ResearchingItem
+            researching = _progressSnapshots.Values.Select(r => new TechSystemSaveData.ResearchingItem
             {
                 id = r.Node.id,
                 accumulated = r.Accumulated,
@@ -320,7 +320,7 @@ public class TechTreeManager
     /// <summary>
     /// （读档）导入状态：恢复已解锁与在研进度（需在 Init 之后调用）
     /// </summary>
-    public void ImportState(SaveData data)
+    public void ImportState(TechSystemSaveData data)
     {
         if (data == null) return;
 
@@ -460,7 +460,7 @@ public class TechTreeManager
     }
 
     [Serializable]
-    public class SaveData
+    public class TechSystemSaveData
     {
         public List<string> unlocked = new List<string>();
 

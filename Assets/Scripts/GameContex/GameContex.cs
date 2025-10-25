@@ -10,6 +10,8 @@ public interface IGameContext
     TechTreeManager TechTree { get; }
 
     CityEnvironment Environment { get; }
+
+    NationalTreasury NationalTreasury { get; }  
 }
 
 public class GameContext : Singleton<GameContext>, IGameContext
@@ -20,6 +22,7 @@ public class GameContext : Singleton<GameContext>, IGameContext
     private ResourceNetwork resourceNetwork = new ResourceNetwork();
     private TechTreeManager techTree = new TechTreeManager();
     private CityEnvironment environment = new CityEnvironment();
+    private NationalTreasury nationalTreasury = new NationalTreasury();
 
     /// <summary>资源网络：负责仓库注册、库存查询。</summary>
     public ResourceNetwork ResourceNetwork => resourceNetwork;
@@ -29,6 +32,8 @@ public class GameContext : Singleton<GameContext>, IGameContext
 
     /// <summary>城市环境：用于处理治安、医疗、美化等光环。</summary>
     public CityEnvironment Environment => environment;
+    /// <summary>国库</summary>
+    public NationalTreasury NationalTreasury => nationalTreasury;
 
     public void Init()
     {
