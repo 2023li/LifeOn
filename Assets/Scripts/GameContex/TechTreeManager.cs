@@ -15,16 +15,20 @@ using UnityEngine;
 /// </summary>
 public class TechTreeManager
 {
+    public TechTreeManager()
+    {
+        Init();
+    }
 
     public event Action<TechNodeData> ResearchStarted;
  
     public event Action<TechNodeData> ResearchCompleted;
 
     // —— 数据源（编辑器里配的 ScriptableObject）——
-    private TechTreeAssets _tree; // 引用到你的 TechTreeAssets 资源（ScriptableObject）
+    private TechTreeAssets _treeAssets; // 引用到你的 TechTreeAssets 资源（ScriptableObject）
 
     // —— 运行时状态 —— 
-    private readonly Dictionary<string, TechNodeData> _nodes =
+    private readonly Dictionary<string, TechNodeData> _DicNodesID =
         new Dictionary<string, TechNodeData>(StringComparer.OrdinalIgnoreCase);
 
     private readonly HashSet<string> _unlocked =
@@ -51,15 +55,17 @@ public class TechTreeManager
     /// </summary>
     public void Init(IEnumerable<string> preUnlockedIds = null, string startingNodeId = null)
     {
+        
 
+        _treeAssets = ResourceRouting.Instance.treeAssets;
 
-        _tree = ResourceRouting.Instance.treeAssets;
+    
 
-        _nodes.Clear();
-        foreach (var t in _tree.techList)
+        _DicNodesID.Clear();
+        foreach (TechNodeData t in _treeAssets.techList)
         {
             if (t == null || string.IsNullOrWhiteSpace(t.id)) continue;
-            _nodes[t.id] = t;
+            _DicNodesID[t.id] = t;
         }
 
         _unlocked.Clear();
@@ -67,7 +73,7 @@ public class TechTreeManager
         {
             foreach (var id in preUnlockedIds)
             {
-                if (!string.IsNullOrWhiteSpace(id) && _nodes.ContainsKey(id))
+                if (!string.IsNullOrWhiteSpace(id) && _DicNodesID.ContainsKey(id))
                     _unlocked.Add(id);
             }
         }
@@ -97,7 +103,7 @@ public class TechTreeManager
 
         // TechTreeAssets 已内置“依赖满足 → 可研究”的判定与筛选
         // 参见 TechTreeAssets.AreDependenciesMet / GetAvailableTechs
-        var available = _tree.GetAvailableTechs(_unlocked); // 依赖满足但未解锁的列表
+        var available = _treeAssets.GetAvailableTechs(_unlocked); // 依赖满足但未解锁的列表
         // 过滤掉已经在研究中的
         return available.Where(t => !_progressSnapshots.ContainsKey(t.id)).ToList();
     }
@@ -145,11 +151,11 @@ public class TechTreeManager
     public bool StartResearch(string techId)
     {
         EnsureTreeBound();
-        if (!_nodes.TryGetValue(techId, out var node)) return false;
+        if (!_DicNodesID.TryGetValue(techId, out var node)) return false;
         if (_unlocked.Contains(techId)) return false;
 
         // 依赖满足校验（TechTreeAssets 自带方法）
-        if (!_tree.AreDependenciesMet(techId, _unlocked)) return false;
+        if (!_treeAssets.AreDependenciesMet(techId, _unlocked)) return false;
 
         if (!string.IsNullOrEmpty(_activeResearchId) &&
             string.Equals(_activeResearchId, techId, StringComparison.OrdinalIgnoreCase) &&
@@ -273,7 +279,7 @@ public class TechTreeManager
     /// </summary>
     public bool ForceUnlock(string techId)
     {
-        if (!_nodes.ContainsKey(techId)) return false;
+        if (!_DicNodesID.ContainsKey(techId)) return false;
         UnlockInternal(techId);
         return true;
     }
@@ -306,7 +312,7 @@ public class TechTreeManager
 
         _unlocked.Clear();
         foreach (var id in data.unlocked)
-            if (_nodes.ContainsKey(id)) _unlocked.Add(id);
+            if (_DicNodesID.ContainsKey(id)) _unlocked.Add(id);
 
         _progressSnapshots.Clear();
         _activeResearchId = string.Empty;
@@ -314,7 +320,7 @@ public class TechTreeManager
         {
             foreach (var item in data.researching)
             {
-                if (!_nodes.TryGetValue(item.id, out var node)) continue;
+                if (!_DicNodesID.TryGetValue(item.id, out var node)) continue;
                 if (_unlocked.Contains(item.id)) continue; // 已经解锁则跳过
                 var task = new ResearchProgressSnapshot(node)
                 {
@@ -356,12 +362,16 @@ public class TechTreeManager
 
     //========================== 查询/工具 ==========================
 
-    public bool HasNode(string id) => !string.IsNullOrWhiteSpace(id) && _nodes.ContainsKey(id);
+    public bool HasNode(string id) => !string.IsNullOrWhiteSpace(id) && _DicNodesID.ContainsKey(id);
 
     public bool TryGetNode(string id, out TechNodeData node) =>
-        _nodes.TryGetValue(id ?? string.Empty, out node);
+        _DicNodesID.TryGetValue(id ?? string.Empty, out node);
 
-    public IEnumerable<TechNodeData> GetAllNodes() => _nodes.Values;
+    public IEnumerable<TechNodeData> GetAllNodes()
+    {
+      
+       return _DicNodesID.Values;
+    }
 
     public IReadOnlyCollection<string> GetUnlockedIds() => _unlocked;
 
@@ -390,7 +400,7 @@ public class TechTreeManager
         {
             _activeResearchId = string.Empty;
         }
-        if (_nodes.TryGetValue(techId,out var node))
+        if (_DicNodesID.TryGetValue(techId,out var node))
         {
             ResearchCompleted?.Invoke(node);
         }
@@ -399,14 +409,14 @@ public class TechTreeManager
 
     private void EnsureTreeBound()
     {
-        _tree = ResourceRouting.Instance.treeAssets;
-        if (_tree == null)
+        _treeAssets = ResourceRouting.Instance.treeAssets;
+        if (_treeAssets == null)
             throw new InvalidOperationException($"{nameof(TechTreeManager)} 还未 Init，请先调用 Init(TechTreeAssets ...)。");
     }
 
     private string FindFirstRootId()
     {
-        foreach (var kv in _nodes)
+        foreach (var kv in _DicNodesID)
         {
             var node = kv.Value;
             if (node.dependencies == null || node.dependencies.Count == 0)

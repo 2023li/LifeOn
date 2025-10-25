@@ -9,11 +9,11 @@ using UnityEngine.UI;
 public class UIPanel_GameMain : PanelBase
 {
 
-    [AutoBind] public Button btn_打开建造;
+    [SerializeField, LabelText("Btn_打开建造")] private Button btn_打开建造;
 
-    [AutoBind] public Button btn_下回合;
+    [SerializeField, LabelText("Btn_结束回合")] private Button btn_下回合;
 
-    [AutoBind("建造选择")] public UIItem_BuildingSelection item_建造选择;
+    [SerializeField, LabelText("Item_建造选择")] private UIItem_BuildingSelection item_建造选择;
 
     [SerializeField, LabelText("按钮_打开科技面板")]
     private Button btn_打开科技面板;
@@ -28,7 +28,7 @@ public class UIPanel_GameMain : PanelBase
 
     private void Reset()
     {
-        this.AutoBindFields();
+        
     }
 
     protected override void Awake()

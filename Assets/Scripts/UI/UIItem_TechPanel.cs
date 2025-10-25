@@ -9,8 +9,7 @@ public class UIItem_TechPanel : MonoBehaviour
     [SerializeField, LabelText("节点容器")]
     private RectTransform _nodeContainer;
 
-    private readonly Dictionary<string, UIItem_TechNode> _nodeViews =
-        new Dictionary<string, UIItem_TechNode>(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, UIItem_TechNode> _nodeViews = new Dictionary<string, UIItem_TechNode>(StringComparer.OrdinalIgnoreCase);
 
     private readonly List<UIItem_TechNode> _nodeItems = new List<UIItem_TechNode>();
 
@@ -53,7 +52,7 @@ public class UIItem_TechPanel : MonoBehaviour
         EnsureManager();
         RebuildNodeCollections();
 
-        var seenIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> seenIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var node in _nodeItems)
         {
@@ -87,6 +86,38 @@ public class UIItem_TechPanel : MonoBehaviour
                 node?.Refresh(false, false, 0f, false);
             }
             return;
+        }
+
+        IEnumerable<TechNodeData> allNodes = _techTree.GetAllNodes();
+        if (allNodes != null)
+        {
+            
+            
+            foreach (TechNodeData nodeData in allNodes)
+            {
+                
+                if (nodeData == null)
+                {
+                    Debug.LogWarning("nodeData为Null");
+                    continue;
+                }
+
+                string nodeId = nodeData.id;
+               
+                if (string.IsNullOrWhiteSpace(nodeId))
+                {
+                    Debug.LogWarning("nodeID为空");
+                    continue;
+                }
+
+                if (_nodeViews.ContainsKey(nodeId))
+                {
+                    continue;
+                }
+
+                string nodeName = string.IsNullOrWhiteSpace(nodeData.name) ? "<未命名>" : nodeData.name;
+                Debug.LogWarning($"[{nameof(UIItem_TechPanel)}] 科技节点 {nodeId} ({nodeName}) 未找到对应的 UI 节点。",this);
+            }
         }
 
         var activeId = _techTree.ActiveResearchId;
@@ -136,11 +167,11 @@ public class UIItem_TechPanel : MonoBehaviour
             return;
         }
 
-        var nodes = _nodeContainer.GetComponentsInChildren<UIItem_TechNode>(true);
+        UIItem_TechNode[] nodes = _nodeContainer.GetComponentsInChildren<UIItem_TechNode>(true);
         _nodeItems.AddRange(nodes);
 
         _nodeViews.Clear();
-        foreach (var node in _nodeItems)
+        foreach (UIItem_TechNode node in _nodeItems)
         {
             if (node == null)
             {

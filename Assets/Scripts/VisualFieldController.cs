@@ -64,7 +64,7 @@ public class VisualFieldController : MonoBehaviour, ISlideHandler
         if (virtualCamera != null)
         {
             targetOrthoSize = virtualCamera.m_Lens.OrthographicSize;
-            Debug.Log($"初始化正交大小: {targetOrthoSize}");
+          
         }
         else
         {

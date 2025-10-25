@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Moyo.Unity;
+using UnityEngine;
 
 public interface IGameContext
 {
@@ -40,14 +41,17 @@ public class GameContext : Singleton<GameContext>, IGameContext
 
         if (techTree == null)
         {
-            techTree = new TechTreeManager();
-            techTree.Init();
+            techTree = new TechTreeManager(); 
         }
+        techTree.Init();
 
         if (environment == null)
         {
             environment = new CityEnvironment();
         }
+
+
+        Debug.Log("GameContext初始化完成");
     }
 }
 
