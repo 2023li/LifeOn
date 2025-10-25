@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
@@ -24,19 +22,24 @@ public class UIItem_TechNode : MonoBehaviour
     [SerializeField,LabelText("连线出口")]
     private RectTransform linePoint_Export;
 
+    [SerializeField, LabelText("匹配的节点ID")]
+    private string _nodeId;
+
 
     private TechNodeData _data;
     private TechTreeManager _manager;
     private Action<string> _onRequestResearch;
 
+    private bool _hasWarnedEmptyId;
+    private string _lastWarnedMissingNodeId = string.Empty;
+
     public RectTransform LinePointEnter => linePoint_Enter;
     public RectTransform LinePointExport => linePoint_Export;
 
-    public string NodeId => _data != null ? _data.id : string.Empty;
+    public string NodeId => _nodeId;
 
-    public void Bind(TechNodeData data, TechTreeManager manager, Action<string> onRequestResearch)
+    public void Bind(TechTreeManager manager, Action<string> onRequestResearch)
     {
-        _data = data;
         _manager = manager;
         _onRequestResearch = onRequestResearch;
 
@@ -46,27 +49,14 @@ public class UIItem_TechNode : MonoBehaviour
             btn_TheNode.onClick.AddListener(OnNodeButtonClicked);
         }
 
-        if (text_NodeName != null)
-        {
-            text_NodeName.text = _data != null ? _data.name : string.Empty;
-        }
-
-        if (text_NodeDescription != null)
-        {
-            text_NodeDescription.text = _data != null ? _data.description : string.Empty;
-        }
-
-        if (img_TechIcon != null)
-        {
-            img_TechIcon.sprite = _data != null ? _data.icon : null;
-            img_TechIcon.enabled = img_TechIcon.sprite != null;
-        }
+        UpdateStaticInfo();
     }
 
     public void Refresh(bool canResearch, bool isResearching, float progress, bool isUnlocked)
     {
-        if (_data == null)
+        if (!TryResolveData())
         {
+            ApplyUnavailableState();
             return;
         }
 
@@ -87,12 +77,12 @@ public class UIItem_TechNode : MonoBehaviour
 
     private void OnNodeButtonClicked()
     {
-        if (_data == null)
+        if (!TryResolveData())
         {
             return;
         }
 
-        _onRequestResearch?.Invoke(_data.id);
+        _onRequestResearch?.Invoke(_nodeId);
     }
 
     private void OnDestroy()
@@ -103,4 +93,97 @@ public class UIItem_TechNode : MonoBehaviour
         }
     }
 
+    private bool TryResolveData()
+    {
+        if (string.IsNullOrWhiteSpace(_nodeId))
+        {
+            if (!_hasWarnedEmptyId)
+            {
+                Debug.LogWarning($"[{nameof(UIItem_TechNode)}] 节点 {name} 未配置节点ID。", this);
+                _hasWarnedEmptyId = true;
+            }
+            _data = null;
+            return false;
+        }
+
+        _hasWarnedEmptyId = false;
+
+        if (_manager == null)
+        {
+            _data = null;
+            return false;
+        }
+
+        if (!_manager.TryGetNode(_nodeId, out var nodeData) || nodeData == null)
+        {
+            if (!string.Equals(_lastWarnedMissingNodeId, _nodeId, StringComparison.OrdinalIgnoreCase))
+            {
+                Debug.LogWarning($"[{nameof(UIItem_TechNode)}] 节点ID {_nodeId} 在科技树中未找到（{name}）。", this);
+                _lastWarnedMissingNodeId = _nodeId;
+            }
+            _data = null;
+            return false;
+        }
+
+        _lastWarnedMissingNodeId = string.Empty;
+        _data = nodeData;
+        return true;
+    }
+
+    private void UpdateStaticInfo()
+    {
+        if (!TryResolveData())
+        {
+            ClearStaticInfo();
+            return;
+        }
+
+        if (text_NodeName != null)
+        {
+            text_NodeName.text = _data != null ? _data.name : string.Empty;
+        }
+
+        if (text_NodeDescription != null)
+        {
+            text_NodeDescription.text = _data != null ? _data.description : string.Empty;
+        }
+
+        if (img_TechIcon != null)
+        {
+            img_TechIcon.sprite = _data != null ? _data.icon : null;
+            img_TechIcon.enabled = img_TechIcon.sprite != null;
+        }
+    }
+
+    private void ClearStaticInfo()
+    {
+        if (text_NodeName != null)
+        {
+            text_NodeName.text = string.Empty;
+        }
+
+        if (text_NodeDescription != null)
+        {
+            text_NodeDescription.text = string.Empty;
+        }
+
+        if (img_TechIcon != null)
+        {
+            img_TechIcon.sprite = null;
+            img_TechIcon.enabled = false;
+        }
+    }
+
+    private void ApplyUnavailableState()
+    {
+        if (slider_ResearchProgress != null)
+        {
+            slider_ResearchProgress.gameObject.SetActive(false);
+        }
+
+        if (btn_TheNode != null)
+        {
+            btn_TheNode.interactable = false;
+        }
+    }
 }

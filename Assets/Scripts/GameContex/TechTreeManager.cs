@@ -399,8 +399,9 @@ public class TechTreeManager
 
     private void EnsureTreeBound()
     {
+        _tree = ResourceRouting.Instance.treeAssets;
         if (_tree == null)
-            throw new InvalidOperationException("TechTreeManager 还未 Init，请先调用 Init(TechTreeAssets ...)。");
+            throw new InvalidOperationException($"{nameof(TechTreeManager)} 还未 Init，请先调用 Init(TechTreeAssets ...)。");
     }
 
     private string FindFirstRootId()

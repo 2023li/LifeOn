@@ -6,19 +6,27 @@ using UnityEngine;
 
 public class UIItem_TechPanel : MonoBehaviour
 {
-    [SerializeField, LabelText("科技节点列表")]
-    private List<UIItem_TechNode> techNodes = new List<UIItem_TechNode>();
+    [SerializeField, LabelText("节点容器")]
+    private RectTransform _nodeContainer;
+
+    private readonly Dictionary<string, UIItem_TechNode> _nodeViews =
+        new Dictionary<string, UIItem_TechNode>(StringComparer.OrdinalIgnoreCase);
+
+    private readonly List<UIItem_TechNode> _nodeItems = new List<UIItem_TechNode>();
 
     private TechTreeManager _techTree;
+
+    public IReadOnlyDictionary<string, UIItem_TechNode> NodeViews => _nodeViews;
 
     private void Awake()
     {
         EnsureManager();
+        RebuildNodeCollections();
     }
 
     private void OnEnable()
     {
-        RefreshTechNodes();
+        RefreshAllNodes();
     }
 
     public void OnRequestResearch(string techId)
@@ -36,15 +44,48 @@ public class UIItem_TechPanel : MonoBehaviour
 
         if (_techTree.SetActiveResearch(techId))
         {
-            RefreshTechNodes();
+            RefreshAllNodes();
         }
     }
 
-    public void RefreshTechNodes()
+    public void RefreshAllNodes()
     {
         EnsureManager();
+        RebuildNodeCollections();
+
+        var seenIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var node in _nodeItems)
+        {
+            if (node == null)
+            {
+                continue;
+            }
+
+            var nodeId = node.NodeId;
+            if (string.IsNullOrWhiteSpace(nodeId))
+            {
+                Debug.LogWarning($"[{nameof(UIItem_TechPanel)}] 节点 {node.name} 未配置节点ID。", node);
+                continue;
+            }
+
+            if (!seenIds.Add(nodeId))
+            {
+                Debug.LogWarning($"[{nameof(UIItem_TechPanel)}] 节点ID {nodeId} 存在重复，请检查摆放。", node);
+            }
+
+            if (_techTree != null && !_techTree.TryGetNode(nodeId, out _))
+            {
+                Debug.LogWarning($"[{nameof(UIItem_TechPanel)}] 节点ID {nodeId} 在科技树数据中不存在。", node);
+            }
+        }
+
         if (_techTree == null)
         {
+            foreach (var node in _nodeItems)
+            {
+                node?.Refresh(false, false, 0f, false);
+            }
             return;
         }
 
@@ -53,7 +94,7 @@ public class UIItem_TechPanel : MonoBehaviour
             _techTree.GetResearchableNodes().Select(n => n.id),
             StringComparer.OrdinalIgnoreCase);
 
-        foreach (var node in techNodes)
+        foreach (var node in _nodeItems)
         {
             if (node == null)
             {
@@ -61,8 +102,15 @@ public class UIItem_TechPanel : MonoBehaviour
             }
 
             var id = node.NodeId;
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrWhiteSpace(id))
             {
+                node.Refresh(false, false, 0f, false);
+                continue;
+            }
+
+            if (!_techTree.TryGetNode(id, out _))
+            {
+                node.Refresh(false, false, 0f, false);
                 continue;
             }
 
@@ -74,6 +122,45 @@ public class UIItem_TechPanel : MonoBehaviour
             float progress = _techTree.GetResearchProgress(id);
 
             node.Refresh(canResearch, isActive, progress, isUnlocked);
+        }
+    }
+
+    private void RebuildNodeCollections()
+    {
+        _nodeItems.Clear();
+
+        if (_nodeContainer == null)
+        {
+            Debug.LogWarning($"[{nameof(UIItem_TechPanel)}] 未配置节点容器。", this);
+            _nodeViews.Clear();
+            return;
+        }
+
+        var nodes = _nodeContainer.GetComponentsInChildren<UIItem_TechNode>(true);
+        _nodeItems.AddRange(nodes);
+
+        _nodeViews.Clear();
+        foreach (var node in _nodeItems)
+        {
+            if (node == null)
+            {
+                continue;
+            }
+
+            node.Bind(_techTree, OnRequestResearch);
+
+            var nodeId = node.NodeId;
+            if (string.IsNullOrWhiteSpace(nodeId))
+            {
+                continue;
+            }
+
+            if (_nodeViews.ContainsKey(nodeId))
+            {
+                continue;
+            }
+
+            _nodeViews.Add(nodeId, node);
         }
     }
 
