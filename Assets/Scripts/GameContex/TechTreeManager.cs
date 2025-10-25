@@ -274,6 +274,20 @@ public class TechTreeManager
         ContributeResearch(_activeResearchId, totalPoints);
     }
 
+
+    /// <summary>
+    /// 向当前激活的研究投入指定科研点并返回是否完成。
+    /// 返回：true 表示本次投入后解锁该科技。
+    /// </summary>
+    public bool AddProgressToActiveResearch(int researchPoints)
+    {
+        if (researchPoints <= 0) return false;
+        if (string.IsNullOrEmpty(_activeResearchId)) return false;
+
+        return ContributeResearch(_activeResearchId, researchPoints);
+    }
+
+
     /// <summary>
     /// 直接解锁（用于剧情/奖励等）。
     /// </summary>

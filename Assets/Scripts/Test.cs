@@ -2,20 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moyo.Unity;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class Test : MonoBehaviour
 {
     // Start is called before the first frame update
-    private async void Start()
-  {
-    Debug.Log("START");
-      _  = await UIManager.Instance.ShowPanel<UIPanel_Main>(UIManager.UILayer.Main);
+
+
+
+    [Button]
+    public void TestXX()
+    {
+        GameContext.Instance.TechTree.AddProgressToActiveResearch(1);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+
+   
 }

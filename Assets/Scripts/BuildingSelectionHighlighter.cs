@@ -29,7 +29,7 @@ public class BuildingSelectionHighlighter : MonoBehaviour
 
     private void HandleClick(Vector2 screenPoint)
     {
-        Debug.Log("ddd");
+        
 
         if (!GridSystem.HasInstance || (InputManager.Instance?.IsBuildingMap() ?? false))
         {

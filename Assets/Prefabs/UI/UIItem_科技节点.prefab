@@ -473,7 +473,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 4497048691112706946}
   m_FillRect: {fileID: 4392513649845627132}
   m_HandleRect: {fileID: 215092848090146976}
@@ -1001,6 +1001,7 @@ MonoBehaviour:
   text_NodeDescription: {fileID: 2227004886730674411}
   linePoint_Enter: {fileID: 573688374967750883}
   linePoint_Export: {fileID: 8466468085098041446}
+  _nodeId: 
 --- !u!1 &8779238165553112862
 GameObject:
   m_ObjectHideFlags: 0

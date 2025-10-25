@@ -43,7 +43,7 @@ public class GameContext : Singleton<GameContext>, IGameContext
         {
             techTree = new TechTreeManager(); 
         }
-        techTree.Init();
+       
 
         if (environment == null)
         {
