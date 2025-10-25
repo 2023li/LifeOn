@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.XR;
 
 /// <summary>
 /// 科技树运行时管理器：
@@ -31,8 +30,12 @@ public class TechTreeManager
     private readonly HashSet<string> _unlocked =
         new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-    private readonly Dictionary<string, ResearchTask> _researching =
-        new Dictionary<string, ResearchTask>(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, ResearchProgressSnapshot> _progressSnapshots =
+        new Dictionary<string, ResearchProgressSnapshot>(StringComparer.OrdinalIgnoreCase);
+
+    public string ActiveResearchId => _activeResearchId;
+
+    private string _activeResearchId = string.Empty;
 
     /// <summary>可选：记录一个“起始节点ID”（若需要）</summary>
     public string StartingNodeId { get; private set; } = string.Empty;
@@ -69,7 +72,8 @@ public class TechTreeManager
             }
         }
 
-        _researching.Clear();
+        _progressSnapshots.Clear();
+        _activeResearchId = string.Empty;
 
         // 设定起始节点（若未指定，则挑第一个“无依赖”的作为起点，若存在）
         StartingNodeId = startingNodeId ?? FindFirstRootId();
@@ -95,15 +99,15 @@ public class TechTreeManager
         // 参见 TechTreeAssets.AreDependenciesMet / GetAvailableTechs
         var available = _tree.GetAvailableTechs(_unlocked); // 依赖满足但未解锁的列表
         // 过滤掉已经在研究中的
-        return available.Where(t => !_researching.ContainsKey(t.id)).ToList();
+        return available.Where(t => !_progressSnapshots.ContainsKey(t.id)).ToList();
     }
 
     /// <summary>
-    /// 4) 获取当前正在研究的节点（按加入顺序）。
+    /// 4) 获取当前已经启动的节点（包含激活与暂停状态）。
     /// </summary>
     public List<TechNodeData> GetResearchingNodes()
     {
-        return _researching.Values.Select(r => r.Node).ToList();
+        return _progressSnapshots.Values.Select(r => r.Node).ToList();
     }
 
     /// <summary>
@@ -115,7 +119,7 @@ public class TechTreeManager
     {
         if (string.IsNullOrWhiteSpace(techId)) return 0f;
         if (_unlocked.Contains(techId)) return 1f;
-        if (_researching.TryGetValue(techId, out var task))
+        if (_progressSnapshots.TryGetValue(techId, out var task))
             return task.ProgressRatio;
         return 0f;
     }
@@ -126,7 +130,7 @@ public class TechTreeManager
     public Dictionary<string, float> GetAllResearchProgress()
     {
         var dict = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
-        foreach (var kv in _researching)
+        foreach (var kv in _progressSnapshots)
             dict[kv.Key] = kv.Value.ProgressRatio;
         return dict;
     }
@@ -147,7 +151,13 @@ public class TechTreeManager
         // 依赖满足校验（TechTreeAssets 自带方法）
         if (!_tree.AreDependenciesMet(techId, _unlocked)) return false;
 
-        if (_researching.ContainsKey(techId)) return false;
+        if (!string.IsNullOrEmpty(_activeResearchId) &&
+            string.Equals(_activeResearchId, techId, StringComparison.OrdinalIgnoreCase) &&
+            _progressSnapshots.TryGetValue(techId, out var activeSnapshot) &&
+            !activeSnapshot.IsPaused)
+        {
+            return true;
+        }
 
         if (node.cost <= 0)
         {
@@ -156,10 +166,37 @@ public class TechTreeManager
             return true;
         }
 
-        _researching[techId] = new ResearchTask(node);
+        bool isNewTask = false;
+        if (!_progressSnapshots.TryGetValue(techId, out var task))
+        {
+            task = new ResearchProgressSnapshot(node);
+            _progressSnapshots[techId] = task;
+            isNewTask = true;
+        }
 
-        ResearchStarted?.Invoke(node);
+        if (!string.IsNullOrEmpty(_activeResearchId) &&
+            !string.Equals(_activeResearchId, techId, StringComparison.OrdinalIgnoreCase) &&
+            _progressSnapshots.TryGetValue(_activeResearchId, out var currentActive))
+        {
+            currentActive.IsPaused = true;
+        }
+
+        _activeResearchId = techId;
+        task.IsPaused = false;
+
+        if (isNewTask)
+        {
+            ResearchStarted?.Invoke(node);
+        }
+
         return true;
+    }
+
+    public bool SetActiveResearch(string techId)
+    {
+        if (string.IsNullOrWhiteSpace(techId)) return false;
+        if (_unlocked.Contains(techId)) return false;
+        return StartResearch(techId);
     }
 
     /// <summary>
@@ -167,17 +204,27 @@ public class TechTreeManager
     /// </summary>
     public bool CancelResearch(string techId, bool keepProgress = true)
     {
-        if (!_researching.TryGetValue(techId, out var task)) return false;
+        if (!_progressSnapshots.TryGetValue(techId, out var task)) return false;
+
+        if (string.Equals(_activeResearchId, techId, StringComparison.OrdinalIgnoreCase))
+        {
+            _activeResearchId = string.Empty;
+        }
+
         if (!keepProgress)
         {
             task.Accumulated = 0;
+            _progressSnapshots.Remove(techId);
         }
-        _researching.Remove(techId);
+        else
+        {
+            task.IsPaused = true;
+        }
         return true;
     }
 
     /// <summary>
-    /// 为指定节点投入研究点（例如每回合/每秒产出的科研值）。
+    /// 为指定节点投入研究点（例如每回合/每秒产出的科研值，仅对激活节点生效）。
     /// 当达到或超过 cost 时自动解锁。
     /// 返回：是否已在本次投放后解锁。
     /// </summary>
@@ -186,14 +233,17 @@ public class TechTreeManager
         if (points <= 0) return false;
         if (_unlocked.Contains(techId)) return true; // 已解锁
 
-        if (!_researching.TryGetValue(techId, out var task))
+        if (!_progressSnapshots.TryGetValue(techId, out var task))
         {
             // 如果依赖满足并且没在研究，允许快捷开始
             if (!StartResearch(techId)) return false;
-            if (!_researching.TryGetValue(techId,out task))
-            {
-                return true;
-            }
+            if (_unlocked.Contains(techId)) return true;
+            if (!_progressSnapshots.TryGetValue(techId, out task)) return false;
+        }
+
+        if (!string.Equals(_activeResearchId, techId, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
         }
 
         task.Accumulated += points;
@@ -208,20 +258,14 @@ public class TechTreeManager
     }
 
     /// <summary>
-    /// 批量平均分配研究点到所有在研项目（适合“被动产出科研点”的场景）。
+    /// 批量投入研究点；当前实现仅作用于激活中的节点。
     /// </summary>
     public void DistributeResearchPoints(int totalPoints)
     {
         if (totalPoints <= 0) return;
-        int count = _researching.Count;
-        if (count == 0) return;
+        if (string.IsNullOrEmpty(_activeResearchId)) return;
 
-        int per = Math.Max(1, totalPoints / count);
-        // 粗略平均；余数忽略或可做更复杂分配策略
-        foreach (var id in _researching.Keys.ToList())
-        {
-            ContributeResearch(id, per);
-        }
+        ContributeResearch(_activeResearchId, totalPoints);
     }
 
     /// <summary>
@@ -242,11 +286,13 @@ public class TechTreeManager
         var sd = new SaveData
         {
             unlocked = _unlocked.ToList(),
-            researching = _researching.Values.Select(r => new SaveData.ResearchingItem
+            researching = _progressSnapshots.Values.Select(r => new SaveData.ResearchingItem
             {
                 id = r.Node.id,
-                accumulated = r.Accumulated
-            }).ToList()
+                accumulated = r.Accumulated,
+                paused = r.IsPaused
+            }).ToList(),
+            activeResearchId = _activeResearchId
         };
         return sd;
     }
@@ -262,22 +308,48 @@ public class TechTreeManager
         foreach (var id in data.unlocked)
             if (_nodes.ContainsKey(id)) _unlocked.Add(id);
 
-        _researching.Clear();
+        _progressSnapshots.Clear();
+        _activeResearchId = string.Empty;
         if (data.researching != null)
         {
             foreach (var item in data.researching)
             {
                 if (!_nodes.TryGetValue(item.id, out var node)) continue;
                 if (_unlocked.Contains(item.id)) continue; // 已经解锁则跳过
-                var task = new ResearchTask(node) { Accumulated = Math.Max(0, item.accumulated) };
+                var task = new ResearchProgressSnapshot(node)
+                {
+                    Accumulated = Math.Max(0, item.accumulated),
+                    IsPaused = item.paused
+                };
                 if (task.Accumulated >= task.Cost)
                 {
                     UnlockInternal(item.id);
                 }
                 else
                 {
-                    _researching[item.id] = task;
+                    _progressSnapshots[item.id] = task;
                 }
+            }
+        }
+
+        if (!string.IsNullOrEmpty(data.activeResearchId) &&
+            _progressSnapshots.TryGetValue(data.activeResearchId, out var activeTask))
+        {
+            _activeResearchId = data.activeResearchId;
+            activeTask.IsPaused = false;
+            foreach (var kv in _progressSnapshots)
+            {
+                if (!string.Equals(kv.Key, _activeResearchId, StringComparison.OrdinalIgnoreCase))
+                {
+                    kv.Value.IsPaused = true;
+                }
+            }
+        }
+        else
+        {
+            foreach (var snapshot in _progressSnapshots.Values)
+            {
+                snapshot.IsPaused = true;
             }
         }
     }
@@ -296,7 +368,7 @@ public class TechTreeManager
     public bool IsResearching(string id)
     {
         if (string.IsNullOrWhiteSpace(id)) return false;
-        return _researching.ContainsKey(id);
+        return _progressSnapshots.ContainsKey(id);
     }
 
 //========================== 内部实现 ==========================
@@ -305,11 +377,19 @@ public class TechTreeManager
     {
         if (!_unlocked.Add(techId))
         {
-            _researching.Remove(techId);
+            _progressSnapshots.Remove(techId);
+            if (string.Equals(_activeResearchId, techId, StringComparison.OrdinalIgnoreCase))
+            {
+                _activeResearchId = string.Empty;
+            }
             return;
         }
 
-        _researching.Remove(techId);
+        _progressSnapshots.Remove(techId);
+        if (string.Equals(_activeResearchId, techId, StringComparison.OrdinalIgnoreCase))
+        {
+            _activeResearchId = string.Empty;
+        }
         if (_nodes.TryGetValue(techId,out var node))
         {
             ResearchCompleted?.Invoke(node);
@@ -336,19 +416,21 @@ public class TechTreeManager
 
     //========================== 内部结构体 & 存档结构 ==========================
 
-    private sealed class ResearchTask
+    private sealed class ResearchProgressSnapshot
     {
         public TechNodeData Node { get; }
         public int Cost { get; }
         public int Accumulated;
+        public bool IsPaused;
 
         public float ProgressRatio => Cost <= 0 ? 1f : Mathf.Clamp01(Accumulated / (float)Cost);
 
-        public ResearchTask(TechNodeData node)
+        public ResearchProgressSnapshot(TechNodeData node)
         {
             Node = node ?? throw new ArgumentNullException(nameof(node));
             Cost = Math.Max(0, node.cost);
             Accumulated = 0;
+            IsPaused = false;
         }
     }
 
@@ -362,8 +444,10 @@ public class TechTreeManager
         {
             public string id;
             public int accumulated;
+            public bool paused;
         }
 
         public List<ResearchingItem> researching = new List<ResearchingItem>();
+        public string activeResearchId = string.Empty;
     }
 }

@@ -32,6 +32,8 @@ public class UIItem_TechNode : MonoBehaviour
     public RectTransform LinePointEnter => linePoint_Enter;
     public RectTransform LinePointExport => linePoint_Export;
 
+    public string NodeId => _data != null ? _data.id : string.Empty;
+
     public void Bind(TechNodeData data, TechTreeManager manager, Action<string> onRequestResearch)
     {
         _data = data;
