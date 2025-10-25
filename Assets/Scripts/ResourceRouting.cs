@@ -101,6 +101,10 @@ public class ResourceRouting : MonoSingleton<ResourceRouting>
 
 
 
+    //-------------------------------科技树------------------------------------
+    [FoldoutGroup("科技树资源")]
+    public TechTreeAssets treeAssets;
+
 
 
 }

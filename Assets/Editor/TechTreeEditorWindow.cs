@@ -17,7 +17,7 @@ public class TechTreeEditorWindow : EditorWindow
         win.Show();
     }
 
-    private TechTree _currentTree;
+    private TechTreeAssets _currentTree;
     private TechTreeGraphView _graphView;
     private ObjectField _treeField;
     private bool _isDirty;
@@ -41,15 +41,15 @@ public class TechTreeEditorWindow : EditorWindow
 
         var toolbar = new Toolbar();
 
-        _treeField = new ObjectField("TechTree Asset")
+        _treeField = new ObjectField("TechTreeAssets Asset")
         {
-            objectType = typeof(TechTree),
+            objectType = typeof(TechTreeAssets),
             allowSceneObjects = false,
             value = _currentTree
         };
         _treeField.RegisterValueChangedCallback(evt =>
         {
-            var newTree = evt.newValue as TechTree;
+            var newTree = evt.newValue as TechTreeAssets;
             if (newTree != _currentTree)
             {
                 _currentTree = newTree;
@@ -75,7 +75,7 @@ public class TechTreeEditorWindow : EditorWindow
 
         if (_currentTree == null)
         {
-            var tip = new Label("请在上方选择一个 TechTree 资产进行编辑。")
+            var tip = new Label("请在上方选择一个 TechTreeAssets 资产进行编辑。")
             {
                 style =
                 {
@@ -144,7 +144,7 @@ public class TechTreeEditorWindow : EditorWindow
     {
         if (_currentTree == null)
         {
-            ShowNotification(new GUIContent("未选择 TechTree 资产"));
+            ShowNotification(new GUIContent("未选择 TechTreeAssets 资产"));
             return;
         }
 
@@ -185,7 +185,7 @@ public class TechTreeEditorWindow : EditorWindow
 
     private class TechTreeGraphView : GraphView
     {
-        private readonly TechTree _tree;
+        private readonly TechTreeAssets _tree;
         private readonly Action _markDirty;
 
         internal readonly PortEdgeConnectorListener edgeConnectorListener;
@@ -193,7 +193,7 @@ public class TechTreeEditorWindow : EditorWindow
         private readonly Dictionary<string, TechNodeView> _nodeViews = new Dictionary<string, TechNodeView>(StringComparer.OrdinalIgnoreCase);
         private readonly Vector2 _defaultNodeSize = new Vector2(240, 200);
 
-        public TechTreeGraphView(TechTree tree, Action markDirty)
+        public TechTreeGraphView(TechTreeAssets tree, Action markDirty)
         {
             _tree = tree;
             _markDirty = markDirty;
@@ -423,12 +423,12 @@ public class TechTreeEditorWindow : EditorWindow
             public Port inputPort { get; private set; }
             public Port outputPort { get; private set; }
 
-            private readonly TechTree _tree;
+            private readonly TechTreeAssets _tree;
             private readonly TechTreeGraphView _owner;
 
             private Image _iconImage;
 
-            public TechNodeView(TechNodeData data, TechTree tree, TechTreeGraphView owner)
+            public TechNodeView(TechNodeData data, TechTreeAssets tree, TechTreeGraphView owner)
             {
                 techData = data;
                 _tree = tree;

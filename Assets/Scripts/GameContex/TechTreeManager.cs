@@ -6,7 +6,7 @@ using UnityEngine;
 
 /// <summary>
 /// 科技树运行时管理器：
-/// 1) 从 TechTree 资源初始化节点
+/// 1) 从 TechTreeAssets 资源初始化节点
 /// 2) 记录与查询解锁状态
 /// 3) 计算“当前可研究”的节点（依赖满足、未解锁、未在研究中）
 /// 4) 维护“当前正在研究”的节点列表
@@ -16,7 +16,7 @@ using UnityEngine;
 public class TechTreeManager
 {
     // —— 数据源（编辑器里配的 ScriptableObject）——
-    private TechTree _tree; // 引用到你的 TechTree 资源（ScriptableObject）
+    private TechTreeAssets _tree; // 引用到你的 TechTreeAssets 资源（ScriptableObject）
 
     // —— 运行时状态 —— 
     private readonly Dictionary<string, TechNodeData> _nodes =
@@ -33,13 +33,18 @@ public class TechTreeManager
 
     //========================== 对外主功能 ==========================
 
+
+
+
     /// <summary>
-    /// 1) 通过 TechTree 资源初始化科技树。
+    /// 1) 通过 TechTreeAssets 资源初始化科技树。
     /// 可传入一批已解锁的ID（如来自存档）。
     /// </summary>
-    public void Init(TechTree treeAsset, IEnumerable<string> preUnlockedIds = null, string startingNodeId = null)
+    public void Init(IEnumerable<string> preUnlockedIds = null, string startingNodeId = null)
     {
-        _tree = treeAsset ?? throw new ArgumentNullException(nameof(treeAsset));
+
+
+        _tree = ResourceRouting.Instance.treeAssets;
 
         _nodes.Clear();
         foreach (var t in _tree.techList)
@@ -80,8 +85,8 @@ public class TechTreeManager
     {
         EnsureTreeBound();
 
-        // TechTree 已内置“依赖满足 → 可研究”的判定与筛选
-        // 参见 TechTree.AreDependenciesMet / GetAvailableTechs
+        // TechTreeAssets 已内置“依赖满足 → 可研究”的判定与筛选
+        // 参见 TechTreeAssets.AreDependenciesMet / GetAvailableTechs
         var available = _tree.GetAvailableTechs(_unlocked); // 依赖满足但未解锁的列表
         // 过滤掉已经在研究中的
         return available.Where(t => !_researching.ContainsKey(t.id)).ToList();
@@ -133,7 +138,7 @@ public class TechTreeManager
         if (!_nodes.TryGetValue(techId, out var node)) return false;
         if (_unlocked.Contains(techId)) return false;
 
-        // 依赖满足校验（TechTree 自带方法）
+        // 依赖满足校验（TechTreeAssets 自带方法）
         if (!_tree.AreDependenciesMet(techId, _unlocked)) return false;
 
         if (_researching.ContainsKey(techId)) return false;
@@ -290,7 +295,7 @@ public class TechTreeManager
     private void EnsureTreeBound()
     {
         if (_tree == null)
-            throw new InvalidOperationException("TechTreeManager 还未 Init，请先调用 Init(TechTree ...)。");
+            throw new InvalidOperationException("TechTreeManager 还未 Init，请先调用 Init(TechTreeAssets ...)。");
     }
 
     private string FindFirstRootId()

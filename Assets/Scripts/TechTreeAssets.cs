@@ -1,6 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum TechNodeState
+{
+    已研究,
+    可研究,
+    正在研究,
+    不可研究,
+}
+
+
 [System.Serializable]
 public class TechNodeData
 {
@@ -13,8 +22,8 @@ public class TechNodeData
     public Vector2 position;
 }
 
-[CreateAssetMenu(menuName = "LifeOn/TechTree", fileName = "TechTree")]
-public class TechTree : ScriptableObject
+[CreateAssetMenu(menuName = "LifeOn/TechTreeAssets", fileName = "TechTreeAssets")]
+public class TechTreeAssets : ScriptableObject
 {
     public List<TechNodeData> techList = new List<TechNodeData>();
 
