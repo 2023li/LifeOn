@@ -2,7 +2,7 @@ using UnityEngine.Tilemaps;
 using UnityEngine;
 using System;
 
-public class BuildingSelectionHighlighter : MonoBehaviour
+public class BuildingSelector : MonoBehaviour
 {
     [SerializeField] private TileBase highlightTile;
     private BuildingInstance _current;
@@ -44,16 +44,14 @@ public class BuildingSelectionHighlighter : MonoBehaviour
         {
             _current = building;
             GridSystem.Instance.SetHighlight(new GridSystem.HighlightSpec(building.Occupy, highlightTile ?? TileLib.GetTile(GameTileEnum.Tile_黄色)));
-
-            Event_SelectedBuilding?.Invoke(building);
         }
         else
         {
             _current = null;
             ClearHighlight();
-
-
         }
+
+        Event_SelectedBuilding?.Invoke(_current);
     }
 
     private void ClearHighlight()

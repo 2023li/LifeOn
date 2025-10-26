@@ -56,12 +56,22 @@ public class UIPanel_GameMain : PanelBase
         });
 
 
+        OnAwake_建筑信息();
+    }
 
+    private void OnEnable()
+    {
+        OnEnable_建筑信息();
     }
 
     private void Start()
     {
         Start_顶部HUD();
+    }
+
+    private void OnDisable()
+    {
+        OnDisable_建筑信息();
     }
 
     #region 顶部HUD
@@ -78,13 +88,74 @@ public class UIPanel_GameMain : PanelBase
         };
     }
 
-    #endregion 
+    #endregion
 
+
+
+
+    #region 建筑信息
     private RectTransform rt_建筑信息;
-    public void ShowBuildingInfo<T>()where T :BuildingInfoPanelBase
+
+    private void OnAwake_建筑信息()
     {
-        
+        buildingBriefCache = new Dictionary<string, BuildingBriefPanelBase>();
     }
+
+    private void OnEnable_建筑信息()
+    {
+        TheGame.Instance.BuildingSelector.Event_SelectedBuilding += ShowBuildingBrief;
+    }
+    private void OnDisable_建筑信息()
+    {
+        TheGame.Instance.BuildingSelector.Event_SelectedBuilding -= ShowBuildingBrief;
+    }
+
+
+    BuildingBriefPanelBase common;
+    private Dictionary<string, BuildingBriefPanelBase> buildingBriefCache;
+    private void ShowBuildingBrief(BuildingInstance building)
+    {
+        if (building == null)
+        {
+            // 如果没选中建筑，隐藏所有面板
+            foreach (var item in buildingBriefCache.Values)
+            {
+                if (item != null)
+                    item.gameObject.SetActive(false);
+            }
+            return;
+        }
+
+        // 1. 先隐藏所有已有面板
+        foreach (var item in buildingBriefCache.Values)
+        {
+            if (item != null)
+                item.gameObject.SetActive(false);
+        }
+
+        // 2. 确定要使用的面板预制体（通用或专用）
+        BuildingBriefPanelBase prefab = building.Def.UIPanelPrefab_Brief == null ? common : building.Def.UIPanelPrefab_Brief;
+        if (prefab == null)
+        {
+            Debug.LogWarning($"建筑 {building.Def.name} 没有关联的 BriefPanelPrefab，也没有设置通用的兜底");
+            return;
+        }
+
+        // 3. 根据 panelGuid 查找缓存
+        BuildingBriefPanelBase panelInstance;
+        if (!buildingBriefCache.TryGetValue(prefab.PanelGuid, out panelInstance) || panelInstance == null)
+        {
+            // 不存在则实例化
+            panelInstance = Instantiate(prefab, rt_建筑信息);
+            buildingBriefCache[prefab.PanelGuid] = panelInstance;
+        }
+
+        // 4. 显示该面板
+        panelInstance.Show(rt_建筑信息, building);
+    }
+
+
+    #endregion
 
 
 

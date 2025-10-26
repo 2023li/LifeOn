@@ -8,12 +8,29 @@ using UnityEngine;
 
 public class TheGame : MonoSingleton<TheGame>
 {
-    protected override bool IsDontDestroyOnLoad => true;
+
+    private BuildingSelector buildingSelector;
+    public BuildingSelector BuildingSelector { get { return buildingSelector; } }
+
+
+
+
+
+
+
+
+
+    protected override bool IsDontDestroyOnLoad => false;
 
     protected override void Awake()
     {
         base.Awake ();
         GameContext.Instance.Init();
+
+
+        buildingSelector = GetComponent<BuildingSelector>();
+
+
     }
     public void Start()
     {
@@ -22,10 +39,7 @@ public class TheGame : MonoSingleton<TheGame>
         _ = UIManager.Instance.ShowPanel<UIPanel_DebugGridInspector>(UIManager.UILayer.DebugInfo);
     }
 
-    public void GetAllBuildingClassify()
-    {
-
-    }
+ 
 
 
 

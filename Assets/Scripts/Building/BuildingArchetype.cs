@@ -20,7 +20,24 @@ public class BuildingArchetype : ScriptableObject
     public string DisplayName;       // "居民房"
     public int Size;
     public BuildingClassify classification = BuildingClassify.基础;
-    public BuildingInstance BuildingPrefab;    // Addressables/Prefab
+    [AssetsOnly]
+    public BuildingInstance BuildingPrefab;
+
+    [LabelText("建筑图标")]
+    public Sprite BuildingIcon;
+
+    [AssetsOnly,LabelText("建筑信息(简短)")]
+    public BuildingBriefPanelBase UIPanelPrefab_Brief;
+
+    [AssetsOnly, LabelText("建筑信息(详情)")]
+    public BuildingDetailedPanelBase UIPanelPrefab_Detailed;
+
+
+
+    [LabelText("简介"), MultiLineProperty(3)]
+    public string Introduction;
+
+
     //是否在建造面板显示
     [LabelText("显示在建造面板的条件")]
     [SerializeReference] 
@@ -31,8 +48,6 @@ public class BuildingArchetype : ScriptableObject
     [SerializeReference] 
     [Tooltip("留空则始终允许建造")]
     public List<Condition> AllowConstruction;
-
-
 
     [ListDrawerSettings(ShowFoldout = true, ShowIndexLabels = true, DraggableItems = true)]
     public List<BuildingLevelDef> Levels = new List<BuildingLevelDef>();

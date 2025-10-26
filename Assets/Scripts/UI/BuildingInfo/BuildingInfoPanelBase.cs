@@ -2,9 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using Moyo.Unity;
-public abstract class BuildingInfoPanelBase : PanelBase
+public abstract class BuildingInfoPanelBase : MonoBehaviour
 {
-    
+    public abstract void Show(BuildingInstance Bins);
     
 }

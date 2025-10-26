@@ -37,6 +37,8 @@ public class BuildingInstance : MonoBehaviour
 
 
     public string InstanceId { get; private set; } = Guid.NewGuid().ToString("N");
+
+    [LabelText("建筑定义数据")]
     public BuildingArchetype Def;
 
     [SerializeField, LabelText("建筑表现")]
@@ -45,28 +47,30 @@ public class BuildingInstance : MonoBehaviour
 
     public string DisplayName => Def != null ? Def.DisplayName : string.Empty;
 
-    [ShowInInspector, ReadOnly]
+    [ShowInInspector, ReadOnly,LabelText("等级")]
     public int LevelIndex { get; private set; } = 0; // 对应 Def.Levels 索引
 
-    [ShowInInspector, ReadOnly]
+    [ShowInInspector, ReadOnly,LabelText("人口")]
     public int Population { get; set; }
 
     [ShowInInspector, ReadOnly]
     public int Exp { get; set; }
+
     public Inventory Storage { get; private set; } // 仅仓库使用
 
+    [LabelText("提供供给的仓库")]
     public BuildingInstance AssignedStorage;       // 非仓库：从此仓库拉取资源
 
-    [ShowInInspector, ReadOnly]
+    [ShowInInspector, ReadOnly,LabelText("占用")]
     public Vector3Int[] Occupy { get; private set; } // 由放置系统设置
 
-    [ShowInInspector, ReadOnly]
+    [ShowInInspector, ReadOnly,LabelText("中心的坐标")]
     public Vector3 CenterInGrid { get; private set; }
 
-    [ShowInInspector, ReadOnly]
+    [ShowInInspector, ReadOnly,LabelText("中心是坐标交点")]
     public bool CenterIsCorner { get; private set; }
 
-    [ShowInInspector, ReadOnly]
+    [ShowInInspector, ReadOnly,LabelText("尺寸")]
     public int FootprintSize { get; private set; }
 
     private IGameContext _ctx;
