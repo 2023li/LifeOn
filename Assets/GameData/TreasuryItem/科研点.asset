@@ -15,4 +15,4 @@ MonoBehaviour:
   id: "TI_\u79D1\u7814\u70B9"
   display: "\u79D1\u7814\u70B9"
   icon: {fileID: 0}
-  showInTreasuryPanel: 1
+  showInTreasuryPanel: 0

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74bd412b95a1d834b822a47c5c499ab4, type: 3}
   m_Name: "\u91D1\u5E01"
   m_EditorClassIdentifier: 
-  id: TI_Gold
+  id: "TI_\u91D1\u5E01"
   display: "\u91D1\u5E01"
   icon: {fileID: 21300000, guid: dbcabf8f1f10d98438e8df38e89bd655, type: 3}
-  showInTreasuryPanel: 1
+  showInTreasuryPanel: 0
