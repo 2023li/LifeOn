@@ -158,20 +158,20 @@ public class NationalTreasury
     // ==============
 
     [Serializable]
-    public struct SaveItem
+    public struct NationalTreasury_SaveItem
     {
         public string id;   // TreasuryItem.Id
         public int amount;  // 数量
     }
 
-    public List<SaveItem> ToSave()
+    public List<NationalTreasury_SaveItem> ToSave()
     {
         EnsureInit();
-        var list = new List<SaveItem>(_amountByItem.Count);
+        var list = new List<NationalTreasury_SaveItem>(_amountByItem.Count);
         foreach (var kv in _amountByItem)
         {
             if (kv.Key == null) continue;
-            list.Add(new SaveItem { id = kv.Key.Id, amount = kv.Value });
+            list.Add(new NationalTreasury_SaveItem { id = kv.Key.Id, amount = kv.Value });
         }
         return list;
     }
@@ -180,7 +180,7 @@ public class NationalTreasury
     /// 从存档恢复。需要 catalog 能通过 Id 找回 TreasuryItem。
     /// 未知 Id 将给出告警但不报错。
     /// </summary>
-    public void FromSave(IEnumerable<SaveItem> items)
+    public void FromSave(IEnumerable<NationalTreasury_SaveItem> items)
     {
         EnsureInit();
         if (catalog == null)

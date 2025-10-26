@@ -1,10 +1,13 @@
 using UnityEngine.Tilemaps;
 using UnityEngine;
+using System;
 
 public class BuildingSelectionHighlighter : MonoBehaviour
 {
     [SerializeField] private TileBase highlightTile;
     private BuildingInstance _current;
+
+    public event Action<BuildingInstance> Event_SelectedBuilding;
 
     private void OnEnable()
     {
@@ -40,18 +43,15 @@ public class BuildingSelectionHighlighter : MonoBehaviour
         if (BuildingInstance.TryGetAtCell(cell, out var building) && building?.Occupy?.Length > 0)
         {
             _current = building;
-            GridSystem.Instance.SetHighlight(
-                new GridSystem.HighlightSpec(building.Occupy, highlightTile ?? TileLib.GetTile(GameTileEnum.Tile_黄色)));
+            GridSystem.Instance.SetHighlight(new GridSystem.HighlightSpec(building.Occupy, highlightTile ?? TileLib.GetTile(GameTileEnum.Tile_黄色)));
 
-
-            Debug.Log("设置高亮");
+            Event_SelectedBuilding?.Invoke(building);
         }
         else
         {
             _current = null;
             ClearHighlight();
 
-            Debug.Log("清除高亮");
 
         }
     }

@@ -32,7 +32,8 @@ public class BuildingArchetype : ScriptableObject
     [Tooltip("留空则始终允许建造")]
     public List<Condition> AllowConstruction;
 
-    
+
+
     [ListDrawerSettings(ShowFoldout = true, ShowIndexLabels = true, DraggableItems = true)]
     public List<BuildingLevelDef> Levels = new List<BuildingLevelDef>();
    
@@ -63,6 +64,11 @@ public class BuildingLevelDef
    
     [LabelText("基础最大岗位")]
     public int BaseMaxJobs;
+
+    
+    [LabelText("基础岗位吸引力/每岗位/每回合")]
+    public float BaseAttractivenessPerJob = 0f;
+
 
 
     [LabelText("条件属性修饰")]

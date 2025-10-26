@@ -19,7 +19,7 @@ MonoBehaviour:
     icon: {fileID: 0}
     cost: 1
     dependencies: []
-    position: {x: -429.37164, y: -194.84833}
+    position: {x: -480.66666, y: -195.33334}
   - id: T002
     name: "\u65B0\u79D1\u62801"
     description: 
@@ -27,7 +27,7 @@ MonoBehaviour:
     cost: 3
     dependencies:
     - T001
-    position: {x: -66, y: -195.33331}
+    position: {x: -182, y: -195.33331}
   - id: T003
     name: "\u65B0\u79D1\u62803"
     description: 
@@ -35,7 +35,7 @@ MonoBehaviour:
     cost: 3
     dependencies:
     - T002
-    position: {x: 466.6667, y: -321.33334}
+    position: {x: 260.6667, y: -346.6667}
   - id: T004
     name: "\u65B0\u79D1\u62804"
     description: 
@@ -43,7 +43,7 @@ MonoBehaviour:
     cost: 3
     dependencies:
     - T002
-    position: {x: 466.66663, y: -1.3333435}
+    position: {x: 260.6667, y: -30.666656}
   - id: T005
     name: "\u65B0\u79D1\u62805"
     description: 
@@ -52,7 +52,7 @@ MonoBehaviour:
     dependencies:
     - T003
     - T004
-    position: {x: 939.3334, y: -140}
+    position: {x: 770.26245, y: -234.33336}
   - id: T006
     name: "\u65B0\u79D1\u6280"
     description: 
@@ -60,4 +60,11 @@ MonoBehaviour:
     cost: 3
     dependencies:
     - T005
-    position: {x: 1374.6666, y: -96.66669}
+    position: {x: 1311.3333, y: -94.66669}
+  - id: tech_001
+    name: "\u65B0\u79D1\u6280 tech_001"
+    description: 
+    icon: {fileID: 0}
+    cost: 0
+    dependencies: []
+    position: {x: 1650.6666, y: -188}
