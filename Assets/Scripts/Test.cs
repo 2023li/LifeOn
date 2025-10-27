@@ -10,11 +10,21 @@ public class Test : MonoBehaviour
     // Start is called before the first frame update
 
 
+    private void Start()
+    {
+        TurnSystem.OnTurnPhaseChange += TestXX;
+    }
+
 
     [Button]
-    public void TestXX()
+    public void TestXX(TurnPhase phase)
     {
-        GameContext.Instance.TechTree.AddProgressToActiveResearch(1);
+
+        if (phase==TurnPhase.回合结束阶段)
+        {
+            GameContext.Instance.TechTree.AddProgressToActiveResearch(1);
+        }
+      
     }
 
 

@@ -13,58 +13,191 @@ MonoBehaviour:
   m_Name: TechTreeAssets
   m_EditorClassIdentifier: 
   techList:
-  - id: T001
-    name: "\u65B0\u79D1\u62800"
+  - id: "tech_\u542F\u8499"
+    name: "\u542F\u8499"
     description: 
     icon: {fileID: 0}
     cost: 1
     dependencies: []
-    position: {x: -480.66666, y: -195.33334}
-  - id: T002
-    name: "\u65B0\u79D1\u62801"
+    position: {x: -488.60178, y: -59.333344}
+  - id: "tech_\u519C\u4E1A"
+    name: "\u519C\u4E1A"
     description: 
     icon: {fileID: 0}
-    cost: 3
+    cost: 2
     dependencies:
-    - T001
-    position: {x: -182, y: -195.33331}
-  - id: T003
-    name: "\u65B0\u79D1\u62803"
+    - "tech_\u542F\u8499"
+    position: {x: -119.46329, y: -653.2224}
+  - id: "tech_\u72E9\u730E"
+    name: "\u72E9\u730E"
     description: 
     icon: {fileID: 0}
-    cost: 3
+    cost: 2
     dependencies:
-    - T002
-    position: {x: 260.6667, y: -346.6667}
-  - id: T004
-    name: "\u65B0\u79D1\u62804"
+    - "tech_\u542F\u8499"
+    position: {x: -119.333336, y: -349.45667}
+  - id: "tech_\u6587\u5B57"
+    name: "\u6587\u5B57"
     description: 
     icon: {fileID: 0}
-    cost: 3
+    cost: 4
     dependencies:
-    - T002
-    position: {x: 260.6667, y: -30.666656}
-  - id: T005
-    name: "\u65B0\u79D1\u62805"
+    - "tech_\u542F\u8499"
+    position: {x: -119.33336, y: -59.22336}
+  - id: "tech_\u5386\u6CD5"
+    name: "\u5386\u6CD5"
     description: 
     icon: {fileID: 0}
-    cost: 3
+    cost: 5
     dependencies:
-    - T003
-    - T004
-    position: {x: 770.26245, y: -234.33336}
-  - id: T006
-    name: "\u65B0\u79D1\u6280"
+    - "tech_\u519C\u4E1A"
+    position: {x: 262.46994, y: -653.3333}
+  - id: "tech_\u755C\u7267"
+    name: "\u755C\u7267"
     description: 
     icon: {fileID: 0}
-    cost: 3
+    cost: 10
     dependencies:
-    - T005
-    position: {x: 1311.3333, y: -94.66669}
-  - id: tech_001
-    name: "\u65B0\u79D1\u6280 tech_001"
+    - "tech_\u72E9\u730E"
+    position: {x: 262.66666, y: -349.99994}
+  - id: "tech_\u6CD5\u5F8B"
+    name: "\u6CD5\u5F8B"
     description: 
     icon: {fileID: 0}
-    cost: 0
-    dependencies: []
-    position: {x: 1650.6666, y: -188}
+    cost: 12
+    dependencies:
+    - "tech_\u6587\u5B57"
+    position: {x: 262.66666, y: -59.333332}
+  - id: "tech_\u6728\u5DE5\u672F"
+    name: "\u6728\u5DE5\u672F"
+    description: 
+    icon: {fileID: 0}
+    cost: 6
+    dependencies:
+    - "tech_\u6587\u5B57"
+    position: {x: 274.98666, y: 278.11334}
+  - id: "tech_\u5492\u8BED"
+    name: "\u5492\u8BED"
+    description: 
+    icon: {fileID: 0}
+    cost: 8
+    dependencies:
+    - "tech_\u6587\u5B57"
+    position: {x: 274.6667, y: 612.34265}
+  - id: "tech_\u8D27\u5E01"
+    name: "\u8D27\u5E01"
+    description: 
+    icon: {fileID: 0}
+    cost: 20
+    dependencies:
+    - "tech_\u5386\u6CD5"
+    - "tech_\u755C\u7267"
+    position: {x: 649.5266, y: -349.99994}
+  - id: "tech_\u6559\u80B2"
+    name: "\u6559\u80B2"
+    description: 
+    icon: {fileID: 0}
+    cost: 24
+    dependencies:
+    - "tech_\u6CD5\u5F8B"
+    position: {x: 649.3333, y: -59.333347}
+  - id: "tech_\u77F3\u5DE5\u672F"
+    name: "\u77F3\u5DE5\u672F"
+    description: 
+    icon: {fileID: 0}
+    cost: 14
+    dependencies:
+    - "tech_\u8F6E\u5B50"
+    position: {x: 1056.6666, y: 278}
+  - id: "tech_\u795E\u5B66"
+    name: "\u795E\u5B66"
+    description: 
+    icon: {fileID: 0}
+    cost: 24
+    dependencies:
+    - "tech_\u5492\u8BED"
+    position: {x: 649.3334, y: 612}
+  - id: "tech_\u54F2\u5B66"
+    name: "\u54F2\u5B66"
+    description: 
+    icon: {fileID: 0}
+    cost: 36
+    dependencies:
+    - "tech_\u6559\u80B2"
+    position: {x: 1056.6666, y: -59.333317}
+  - id: "tech_\u5EFA\u7B51\u5B66"
+    name: "\u5EFA\u7B51\u5B66"
+    description: 
+    icon: {fileID: 0}
+    cost: 36
+    dependencies:
+    - "tech_\u77F3\u5DE5\u672F"
+    position: {x: 1485.3334, y: 278.00006}
+  - id: "tech_\u5143\u7D20\u5B66"
+    name: "\u5143\u7D20\u5B66"
+    description: 
+    icon: {fileID: 0}
+    cost: 36
+    dependencies:
+    - "tech_\u795E\u5B66"
+    position: {x: 1056.6666, y: 612.0001}
+  - id: "tech_\u6570\u5B66"
+    name: "\u6570\u5B66"
+    description: 
+    icon: {fileID: 0}
+    cost: 52
+    dependencies:
+    - "tech_\u8D27\u5E01"
+    - "tech_\u54F2\u5B66"
+    position: {x: 1485.3334, y: -59.33328}
+  - id: "tech_\u8F6E\u5B50"
+    name: "\u8F6E\u5B50"
+    description: 
+    icon: {fileID: 0}
+    cost: 15
+    dependencies:
+    - "tech_\u6728\u5DE5\u672F"
+    position: {x: 649.3334, y: 278}
+  - id: "tech_\u5929\u6587\u5B66"
+    name: "\u5929\u6587\u5B66"
+    description: 
+    icon: {fileID: 0}
+    cost: 52
+    dependencies:
+    - "tech_\u5143\u7D20\u5B66"
+    position: {x: 1485.3334, y: 612.0001}
+  - id: "tech_\u5BFC\u822A\u672F"
+    name: "\u5BFC\u822A\u672F"
+    description: 
+    icon: {fileID: 0}
+    cost: 50
+    dependencies:
+    - "tech_\u5929\u6587\u5B66"
+    - "tech_\u5EFA\u7B51\u5B66"
+    position: {x: 1887.5004, y: 278.00003}
+  - id: "tech_\u7269\u7406\u5B66"
+    name: "\u7269\u7406\u5B66"
+    description: 
+    icon: {fileID: 0}
+    cost: 50
+    dependencies:
+    - "tech_\u6570\u5B66"
+    position: {x: 1887.3331, y: -59.333336}
+  - id: "tech_\u822A\u6D77"
+    name: "\u822A\u6D77"
+    description: 
+    icon: {fileID: 0}
+    cost: 50
+    dependencies:
+    - "tech_\u7269\u7406\u5B66"
+    - "tech_\u5BFC\u822A\u672F"
+    - "tech_\u8D38\u6613"
+    position: {x: 2301.8284, y: 278}
+  - id: "tech_\u8D38\u6613"
+    name: "\u8D38\u6613"
+    description: 
+    icon: {fileID: 0}
+    cost: 50
+    dependencies:
+    - "tech_\u8D27\u5E01"
+    position: {x: 1878.6669, y: -349.99994}

@@ -163,7 +163,7 @@ public class TechTreeEditorWindow : EditorWindow
 
         if (_currentTree == null) return;
 
-        // FIX: 传入通知委托，GraphView 内部用它来显示提示
+        // 传入通知委托，GraphView 内部用它来显示提示
         _graphView = new TechTreeGraphView(
             _currentTree,
             MarkDirty,
@@ -211,7 +211,7 @@ public class TechTreeEditorWindow : EditorWindow
             return;
         }
 
-        // 环依赖检测（FIX: 不在局部函数里直接写 out 变量）
+        // 环依赖检测
         if (HasCycle(_currentTree, out var cyclePath))
         {
             EditorUtility.DisplayDialog("保存失败：存在环依赖",
@@ -225,7 +225,7 @@ public class TechTreeEditorWindow : EditorWindow
         ShowNotification(new GUIContent("保存成功"));
     }
 
-    // FIX: 避免在局部函数中触碰 out 参数
+    // DFS 检测环
     private static bool HasCycle(TechTreeAssets tree, out List<string> cyclePath)
     {
         cyclePath = null;
@@ -272,7 +272,6 @@ public class TechTreeEditorWindow : EditorWindow
                         path.Add(cur);
                         if (!parent.TryGetValue(cur, out cur))
                         {
-                            // 理论不会发生，兜底跳出
                             cur = dep;
                             break;
                         }
@@ -304,7 +303,7 @@ public class TechTreeEditorWindow : EditorWindow
     {
         private readonly TechTreeAssets _tree;
         private readonly Action _markDirty;
-        private readonly Action<string> _notify; // FIX: 通知委托
+        private readonly Action<string> _notify; // 通知委托
 
         internal readonly PortEdgeConnectorListener edgeConnectorListener;
 
@@ -317,7 +316,6 @@ public class TechTreeEditorWindow : EditorWindow
         private bool _reloading = false;
         private bool _suppressGraphChanges = false;
 
-        // FIX: 构造函数增加 notify
         public TechTreeGraphView(TechTreeAssets tree, Action markDirty, Action<string> notify)
         {
             _tree = tree;
@@ -365,7 +363,7 @@ public class TechTreeEditorWindow : EditorWindow
             _reloading = true;
             _suppressGraphChanges = true;
 
-            // 清空现有图元素（不走你的删除数据逻辑）
+            // 清空现有图元素（仅移除图形元素）
             foreach (var e in graphElements.ToList())
                 RemoveElement(e);
 
@@ -420,7 +418,6 @@ public class TechTreeEditorWindow : EditorWindow
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
         {
             var compatible = new List<Port>();
-            // FIX: 避免使用 ports.ForEach（部分版本无该扩展）
             foreach (var p in ports)
             {
                 if (p != startPort && p.node != startPort.node &&
@@ -433,25 +430,12 @@ public class TechTreeEditorWindow : EditorWindow
             return compatible;
         }
 
-        private string GenerateUniqueId()
-        {
-            var existing = new HashSet<string>(
-                _tree.techList.Where(t => t != null && !string.IsNullOrEmpty(t.id))
-                              .Select(t => t.id),
-                StringComparer.OrdinalIgnoreCase);
-
-            int i = 1;
-            string id;
-            do { id = $"tech_{i:D3}"; i++; } while (existing.Contains(id));
-            return id;
-        }
-
         private void CreateTechNodeAt(Vector2 graphPos)
         {
             Undo.RecordObject(_tree, "Add Tech Node");
 
+            // 只使用 AddTech() 生成的 ID（不再进行二次修改）
             var newTech = _tree.AddTech("新科技", "", 0, null);
-            newTech.id = GenerateUniqueId();                 // 确保不为空且唯一
             newTech.name = $"新科技 {newTech.id}";
             newTech.position = graphPos;
             newTech.dependencies ??= new List<string>();
@@ -519,8 +503,8 @@ public class TechTreeEditorWindow : EditorWindow
 
                 inNode.techData.dependencies ??= new List<string>();
 
-                // 防重复依赖
-                if (inNode.techData.dependencies.Contains(outNode.techData.id, StringComparer.OrdinalIgnoreCase))
+                // 防重复依赖：如果数据已有依赖但界面缺线，补线即可
+                if (inNode.techData.dependencies.Any(d => string.Equals(d, outNode.techData.id, StringComparison.OrdinalIgnoreCase)))
                 {
                     var already = outNode.outputPort.connections.Any(e => e.input == inNode.inputPort);
                     if (!already)
@@ -535,11 +519,16 @@ public class TechTreeEditorWindow : EditorWindow
                     return;
 
                 Undo.RecordObject(_view._tree, "Add Dependency");
-                _view._tree.AddDependency(outNode.techData.id, inNode.techData.id);
-                _view.SetDirty();
-
-                var newEdge = outNode.outputPort.ConnectTo(inNode.inputPort);
-                graphView.AddElement(newEdge);
+                if (_view._tree.AddDependency(outNode.techData.id, inNode.techData.id))
+                {
+                    _view.SetDirty();
+                    var newEdge = outNode.outputPort.ConnectTo(inNode.inputPort);
+                    graphView.AddElement(newEdge);
+                }
+                else
+                {
+                    _view.Notify("添加依赖失败（ID 无效、重复或自依赖）");
+                }
             }
 
             // 端口到空白：新建节点并连接
@@ -549,8 +538,8 @@ public class TechTreeEditorWindow : EditorWindow
 
                 Undo.RecordObject(_view._tree, "Create Node By Drag");
 
+                // 只使用 AddTech() 生成的 ID（不再进行二次修改）
                 var newTech = _view._tree.AddTech("新科技", "", 0, null);
-                newTech.id = _view.GenerateUniqueId();
                 newTech.name = $"新科技 {newTech.id}";
                 newTech.position = graphPos;
                 newTech.dependencies ??= new List<string>();
@@ -560,18 +549,28 @@ public class TechTreeEditorWindow : EditorWindow
                 _view.AddElement(newNode);
                 _view._nodeViews[newTech.id] = newNode;
 
+                bool linked = false;
                 if (edge.output != null && edge.output.node is TechNodeView from)
                 {
-                    _view._tree.AddDependency(from.techData.id, newTech.id);
-                    var newEdge = from.outputPort.ConnectTo(newNode.inputPort);
-                    _view.AddElement(newEdge);
+                    if (_view._tree.AddDependency(from.techData.id, newTech.id))
+                    {
+                        var newEdge = from.outputPort.ConnectTo(newNode.inputPort);
+                        _view.AddElement(newEdge);
+                        linked = true;
+                    }
                 }
                 else if (edge.input != null && edge.input.node is TechNodeView to)
                 {
-                    _view._tree.AddDependency(newTech.id, to.techData.id);
-                    var newEdge = newNode.outputPort.ConnectTo(to.inputPort);
-                    _view.AddElement(newEdge);
+                    if (_view._tree.AddDependency(newTech.id, to.techData.id))
+                    {
+                        var newEdge = newNode.outputPort.ConnectTo(to.inputPort);
+                        _view.AddElement(newEdge);
+                        linked = true;
+                    }
                 }
+
+                if (!linked)
+                    _view.Notify("添加依赖失败（ID 无效、重复或自依赖）");
 
                 _view.SetDirty();
             }
@@ -626,7 +625,7 @@ public class TechTreeEditorWindow : EditorWindow
                     if (string.IsNullOrWhiteSpace(newId))
                     {
                         idField.SetValueWithoutNotify(oldId);
-                        _owner.Notify("ID 不能为空"); // FIX: 通过委托通知
+                        _owner.Notify("ID 不能为空");
                         return;
                     }
 
@@ -639,7 +638,7 @@ public class TechTreeEditorWindow : EditorWindow
                     if (duplicate)
                     {
                         idField.SetValueWithoutNotify(oldId);
-                        _owner.Notify($"ID \"{newId}\" 已存在"); // FIX
+                        _owner.Notify($"ID \"{newId}\" 已存在");
                         return;
                     }
 
@@ -647,6 +646,7 @@ public class TechTreeEditorWindow : EditorWindow
 
                     techData.id = newId;
 
+                    // 更新所有依赖中的引用
                     foreach (var n in _tree.techList)
                     {
                         if (n == null || n.dependencies == null) continue;
@@ -655,6 +655,10 @@ public class TechTreeEditorWindow : EditorWindow
                                 n.dependencies[i] = newId;
                     }
 
+                    // 同步更新字典（关键）
+                    _tree.NotifyIdChanged(oldId, newId, techData);
+
+                    // 更新视图索引
                     if (_owner._nodeViews.ContainsKey(oldId))
                     {
                         _owner._nodeViews.Remove(oldId);
