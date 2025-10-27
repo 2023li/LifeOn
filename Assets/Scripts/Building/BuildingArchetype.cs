@@ -10,26 +10,32 @@ public enum BuildingClassify
     市政,
     工业类,
     农业类,
+
+    其他,
 }
 
 
 [CreateAssetMenu(fileName = "BuildingArchetype", menuName = "Game/BuildingInstance/Archetype")]
 public class BuildingArchetype : ScriptableObject
 {
+    [LabelText("建筑唯一ID")]
     public string Id;                // "residence", "warehouse", "garden"
+    [LabelText("建筑名称")]
     public string DisplayName;       // "居民房"
+    [LabelText("建筑尺寸")]
     public int Size;
+    [LabelText("建筑分类")]
     public BuildingClassify classification = BuildingClassify.基础;
-    [AssetsOnly]
+    [AssetsOnly,LabelText("建筑预制体")]
     public BuildingInstance BuildingPrefab;
 
     [LabelText("建筑图标")]
     public Sprite BuildingIcon;
 
-    [AssetsOnly,LabelText("建筑信息(简短)")]
+    [AssetsOnly,LabelText("建筑信息UI预制体(简短)")]
     public BuildingBriefPanelBase UIPanelPrefab_Brief;
 
-    [AssetsOnly, LabelText("建筑信息(详情)")]
+    [AssetsOnly, LabelText("建筑信息UI预制体(详情)")]
     public BuildingDetailedPanelBase UIPanelPrefab_Detailed;
 
 

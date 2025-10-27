@@ -1,9 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Collections;
+using System.Threading.Tasks.Sources;
 
 public static class LOConstant
 {
+
+    public static class AssetsKey
+    {
+        public const string Address_SupplyLib = "SupplyLib";
+    }
 
     public static class SceneName
     {
