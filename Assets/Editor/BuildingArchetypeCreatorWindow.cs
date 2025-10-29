@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 // (Assuming necessary using directives for game-specific types like BuildingArchetype, SupplyDef, etc.)
+using Sirenix.OdinInspector;
 
 
 
@@ -12,8 +13,8 @@ public class BuildingArchetypeCreatorWindow : EditorWindow
     private string note_BerryBush = string.Empty;
 
     // (Optional) References to needed assets like SupplyDef for resources:
-    public SupplyDef foodSupply;   // Assign via inspector or find by ID
-    public SupplyDef berrySupply;  // Assign via inspector or find by ID
+    [SerializeField, LabelText("食物资源定义")] private SupplyDef _foodSupply;
+    [SerializeField, LabelText("浆果资源定义")] private SupplyDef _berrySupply;
 
     [MenuItem("SSBX/Building Archetype Creator")]
     public static void ShowWindow()
@@ -24,18 +25,30 @@ public class BuildingArchetypeCreatorWindow : EditorWindow
     private void OnGUI()
     {
         GUILayout.Label("居民房 (Residential House)", EditorStyles.boldLabel);
+        _foodSupply = (SupplyDef)EditorGUILayout.ObjectField("食物资源定义", _foodSupply, typeof(SupplyDef), false);
         note_Residential = EditorGUILayout.TextField("Note", note_Residential);
         if (GUILayout.Button("Generate 居民房 Archetype"))
         {
+            if (_foodSupply == null)
+            {
+                EditorUtility.DisplayDialog("缺少资源", "请先指定食物资源定义。", "确定");
+                return;
+            }
             CreateResidentialHouseArchetype();
         }
 
         GUILayout.Space(10);
 
         GUILayout.Label("野生浆果丛 (Wild Berry Bush)", EditorStyles.boldLabel);
+        _berrySupply = (SupplyDef)EditorGUILayout.ObjectField("浆果资源定义", _berrySupply, typeof(SupplyDef), false);
         note_BerryBush = EditorGUILayout.TextField("Note", note_BerryBush);
         if (GUILayout.Button("Generate 浆果丛 Archetype"))
         {
+            if (_berrySupply == null)
+            {
+                EditorUtility.DisplayDialog("缺少资源", "请先指定浆果资源定义。", "确定");
+                return;
+            }
             CreateWildBerryBushArchetype();
         }
     }
@@ -131,7 +144,7 @@ public class BuildingArchetypeCreatorWindow : EditorWindow
         // Ensure enough Food supply for the population
         feedRule.Conditions.Add(new HasResourceForPopulation
         {
-            Resource = foodSupply,         // SupplyDef for first-level food (e.g., "食物")
+            Resource = _foodSupply,        // SupplyDef for first-level food (e.g., "食物")
             AmountPerCapita = 1f,
             IgnoreIfPopulationZero = true
         });
@@ -139,7 +152,7 @@ public class BuildingArchetypeCreatorWindow : EditorWindow
         feedRule.OnSuccess = new List<Effect>();
         feedRule.OnSuccess.Add(new ConsumeResourcePerPopulation
         {
-            Resource = foodSupply,
+            Resource = _foodSupply,
             AmountPerCapita = 1f,
             IgnoreIfPopulationZero = true
         });
@@ -207,7 +220,7 @@ public class BuildingArchetypeCreatorWindow : EditorWindow
         produceRule.Conditions.Add(new InventoryNotFullCondition());
         // OnSuccess: add 2 berry units to self storage
         produceRule.OnSuccess = new List<Effect>();
-        SupplyAmount berryItem = new SupplyAmount { Resource = berrySupply, Amount = 2 };
+        SupplyAmount berryItem = new SupplyAmount { Resource = _berrySupply, Amount = 2 };
         produceRule.OnSuccess.Add(new AddToSelfStorage { Items = new[] { berryItem } });
         produceRule.OnFailure = new List<Effect>();  // no failure effect
         lvl0.Rules.Add(produceRule);
