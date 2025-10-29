@@ -78,6 +78,30 @@ public class NeverNo : Condition
     }
 }
 
+public class InventoryNotFullCondition : Condition
+{
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    {
+
+        Debug.LogWarning("InventoryNotFullCondition 未完成 只是占位");
+        why = "";
+        return true;
+    }
+}
+
+
+[Serializable]
+public class TechUnlockedCondition : Condition
+{
+    public string TechId;
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    {
+        why = "";
+        return ctx != null && ctx.TechTree != null && ctx.TechTree.IsUnlocked(TechId);
+    }
+}
+
+
 
 [Serializable]
 public class PopulationLessThan : Condition

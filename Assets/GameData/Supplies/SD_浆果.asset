@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfd2eb7a55367d745a9a6df889614dd7, type: 3}
   m_Name: "SD_\u6D46\u679C"
   m_EditorClassIdentifier: 
-  Id: 
-  DisplayName: 
-  Category: 
+  Id: "Supply_\u6D46\u679C"
+  DisplayName: "\u6D46\u679C"
+  Category: 1
   Icon: {fileID: 0}
-  BaseLossRate: 0
+  BaseLossRate: 0.04

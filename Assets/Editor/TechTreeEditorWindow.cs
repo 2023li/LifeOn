@@ -9,7 +9,7 @@ using UnityEditor.Experimental.GraphView;
 
 public class TechTreeEditorWindow : EditorWindow
 {
-    [MenuItem("Window/LifeOn/Tech Tree Editor")]
+    [MenuItem("SSBX/Tech Tree Editor")]
     public static void OpenWindow()
     {
         var win = GetWindow<TechTreeEditorWindow>();
