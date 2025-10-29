@@ -68,6 +68,11 @@ public abstract class Condition
     public abstract bool Evaluate(BuildingInstance self, IGameContext ctx, out string why);
 }
 
+
+
+
+
+
 [Serializable]
 public class NeverNo : Condition
 {
@@ -207,17 +212,7 @@ public class ExpAtLeast : Condition
     }
 }
 
-//[Serializable]
-//public class EnvGreaterThan : Condition
-//{
-//    public int Threshold = 1;
-//    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
-//    {
-//        why = "";
-//        int v = ctx.Environment.GetEnvAt(self.GridPos);
-//        return v > Threshold;
-//    }
-//}
+
 
 /// <summary>
 /// 选一：判断“本仓库存货占全网总库存的占比 > 阈值”

@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee61fcc490adb154f95c02cb2ab70f9a, type: 3}
+  m_Name: "Building_\u91CE\u751F\u6D46\u679C\u4E1B"
+  m_EditorClassIdentifier: 
+  Id: "Building_\u91CE\u751F\u6D46\u679C\u4E1B"
+  DisplayName: "\u91CE\u751F\u6D46\u679C\u4E1B"
+  Size: 2
+  classification: 3
+  BuildingPrefab: {fileID: 0}
+  BuildingIcon: {fileID: 0}
+  UIPanelPrefab_Brief: {fileID: 0}
+  UIPanelPrefab_Detailed: {fileID: 0}
+  Introduction: 
+  ShowInBuildPanel:
+  - rid: 1546075644629090333
+  AllowConstruction:
+  - rid: 1546075644629090334
+  Levels:
+  - BaseMaxPopulation: 0
+    BaseStorageCapacity: 20
+    ExpToNext: -1
+    BaseMaxJobs: 0
+    BaseAttractivenessPerJob: 0
+    ConditionalStatModifiers: []
+    ConditionsForAllowingUpgrades: []
+    Rules:
+    - rid: 1546075644629090335
+    ViewConfig:
+      DefaultAnimatorState: 
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: 1546075644629090333
+      type: {class: NeverNo, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 1546075644629090334
+      type: {class: NeverNo, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 1546075644629090335
+      type: {class: Rule, ns: , asm: Assembly-CSharp}
+      data:
+        Name: Berry Production
+        Description: "\u5E93\u5B58\u672A\u6EE1\u65F6\uFF0C\u6BCF\u56DE\u5408\u4EA7\u51FA
+          2 \u5355\u4F4D\u6D46\u679C"
+        Trigger: 2
+        Conditions:
+        - rid: 1546075644629090336
+        OnSuccess:
+        - rid: 1546075644629090337
+        OnFailure: []
+    - rid: 1546075644629090336
+      type: {class: InventoryNotFullCondition, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 1546075644629090337
+      type: {class: AddToSelfStorage, ns: , asm: Assembly-CSharp}
+      data:
+        Items:
+        - Resource: {fileID: 11400000, guid: 0df36ba6cd60a6f4eb2f2704de7a0149, type: 2}
+          Amount: 2
