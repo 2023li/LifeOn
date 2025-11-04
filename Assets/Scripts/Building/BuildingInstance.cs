@@ -81,7 +81,7 @@ public class BuildingInstance : MonoBehaviour
 
     public void Initialize(BuildingArchetype def)
     {
-        // transform.position = GridSystem.Instance.get
+        // pointTransform.position = GridSystem.Instance.get
         Def = def;
         _ctx = GameContext.Instance;
         TryInitStorageIfAny();

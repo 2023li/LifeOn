@@ -295,6 +295,97 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
 
     #endregion
 
+
+    public bool TryCreateBuildingAtWorld(Vector3 worldPos,BuildingArchetype buildingDef,out BuildingInstance instance,bool ignoreOccupy = false)
+    {
+        instance = null;
+
+        if (buildingDef == null)
+        {
+            Debug.LogWarning("TryCreateBuildingAtWorld: buildingDef 为空。");
+            return false;
+        }
+
+        if (buildingDef.BuildingPrefab == null)
+        {
+            Debug.LogWarning("TryCreateBuildingAtWorld: 建筑预制体未设置。");
+            return false;
+        }
+
+        // 1) 计算“中心/拐角”在网格坐标系中的连续坐标
+        //    奇数尺寸：使用包含 worldPos 的 cell 作为中心；
+        //    偶数尺寸：吸附到该 cell 附近的最近格拐角。
+        var grid = GridSystem.Instance.mapGrid;
+        Vector3Int cell = grid.WorldToCell(worldPos);
+        Vector3 cellCenterWorld = grid.GetCellCenterWorld(cell);
+
+        Vector2 centerLike;
+        // 对于奇数=格心坐标(整数), 偶数=格拐角坐标(整数格线交点)
+        bool isOdd = (buildingDef.Size & 1) == 1;
+
+        if(isOdd)
+        {
+            centerLike = new Vector2(cell.x, cell.y);
+        }
+        else
+        {
+            int cx = worldPos.x >= cellCenterWorld.x ? cell.x + 1 : cell.x;
+            int cy = worldPos.y >= cellCenterWorld.y ? cell.y + 1 : cell.y;
+            centerLike = new Vector2(cx, cy);
+        }
+
+        // 2) 计算占地格
+        var cellsEnum = CoordinateCalculator.GetBuildingCells(centerLike, buildingDef.Size);
+        var occupyCells = new
+        List<Vector3Int>(cellsEnum);
+
+        // 3) 占用校验（可选忽略）
+        if(!ignoreOccupy)
+        {
+            foreach (var c in occupyCells)
+            {
+                if(GridSystem.Instance.IsOccupy(c))
+                {
+                    Debug.LogWarning("TryCreateBuildingAtWorld: 目标区域存在占用，放置失败。");
+                    return false;
+                }
+            }
+        }
+
+        // 4) 计算与高亮一致的世界落锚点
+        Vector3 anchor = GetWorldAnchorFromCells(occupyCells);
+
+        // 5) 标记占用
+        foreach (var c in occupyCells)
+        {
+            GridSystem.Instance.SetOccupy(c);
+        }
+
+        // 6) 实例化并定位
+        var go = Instantiate(buildingDef.BuildingPrefab);
+        instance = go;
+        go.transform.SetPositionAndRotation(anchor, Quaternion.identity);
+
+        // 7) 计算 ConfigurePlacement 所需的中心与形状信息（与现有流程一致）
+        Vector2 center;
+        bool centerIsCorner;
+        int footprintSize;
+        if (!CoordinateCalculator.TryGetCenterFromCells(occupyCells, out center, out centerIsCorner, out footprintSize))
+        {
+            center = centerLike;
+            centerIsCorner = !isOdd;
+            footprintSize = buildingDef.Size;
+        }
+
+        go.ConfigurePlacement(occupyCells.ToArray(), new Vector3(center.x, center.y, 0f), centerIsCorner, footprintSize);
+        go.Initialize(buildingDef);
+
+        return true;
+    }
+
+
+
+
     #region UI：确认条
 
     private async void ShowConfirmBarAt(Vector3 anchorWorldPos)
