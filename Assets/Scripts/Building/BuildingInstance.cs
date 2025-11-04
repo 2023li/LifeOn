@@ -47,10 +47,10 @@ public class BuildingInstance : MonoBehaviour
 
     public string DisplayName => Def != null ? Def.DisplayName : string.Empty;
 
-    [ShowInInspector, ReadOnly,LabelText("等级")]
+    [ShowInInspector, ReadOnly, LabelText("等级")]
     public int LevelIndex { get; private set; } = 0; // 对应 Def.Levels 索引
 
-    [ShowInInspector, ReadOnly,LabelText("人口")]
+    [ShowInInspector, ReadOnly, LabelText("人口")]
     public int Population { get; set; }
 
     [ShowInInspector, ReadOnly]
@@ -61,16 +61,16 @@ public class BuildingInstance : MonoBehaviour
     [LabelText("提供供给的仓库")]
     public BuildingInstance AssignedStorage;       // 非仓库：从此仓库拉取资源
 
-    [ShowInInspector, ReadOnly,LabelText("占用")]
+    [ShowInInspector, ReadOnly, LabelText("占用")]
     public Vector3Int[] Occupy { get; private set; } // 由放置系统设置
 
-    [ShowInInspector, ReadOnly,LabelText("中心的坐标")]
+    [ShowInInspector, ReadOnly, LabelText("中心的坐标")]
     public Vector3 CenterInGrid { get; private set; }
 
-    [ShowInInspector, ReadOnly,LabelText("中心是坐标交点")]
+    [ShowInInspector, ReadOnly, LabelText("中心是坐标交点")]
     public bool CenterIsCorner { get; private set; }
 
-    [ShowInInspector, ReadOnly,LabelText("尺寸")]
+    [ShowInInspector, ReadOnly, LabelText("尺寸")]
     public int FootprintSize { get; private set; }
 
     private IGameContext _ctx;
@@ -81,11 +81,16 @@ public class BuildingInstance : MonoBehaviour
 
     public void Initialize(BuildingArchetype def)
     {
-       // transform.position = GridSystem.Instance.get
+        // transform.position = GridSystem.Instance.get
         Def = def;
         _ctx = GameContext.Instance;
         TryInitStorageIfAny();
         TryInitView();
+    }
+
+    private void Awake()
+    {
+       
     }
 
     private void OnEnable()
@@ -94,7 +99,7 @@ public class BuildingInstance : MonoBehaviour
         _activeInstances.Add(this);
     }
 
-   
+
 
     private void OnDisable()
     {
@@ -137,8 +142,6 @@ public class BuildingInstance : MonoBehaviour
         CenterInGrid = center;
         CenterIsCorner = centerIsCorner;
         FootprintSize = footprintSize;
-
-
     }
 
 
@@ -220,7 +223,11 @@ public class BuildingInstance : MonoBehaviour
         {
             return;
         }
-        _view?.PlayUpgrade(previousIndex, newIndex);
+
+        // 切静态外观 +（可选）播放升级动画
+        _view?.ApplyLevel(previousIndex, newIndex, playUpgradeAnim: true);
+
+        // 仅在 0 -> 1 时进行一次人口收敛与最低基线（保持原有逻辑）
         if (previousIndex == 0 && newIndex == 1)
         {
             int baseline = 2;
@@ -228,7 +235,6 @@ public class BuildingInstance : MonoBehaviour
             int target = Mathf.Clamp(Mathf.Max(Population, baseline), 0, max);
             Population = target;
         }
-        _view?.ApplyLevelState(newIndex);
     }
 
 
@@ -267,7 +273,9 @@ public class BuildingInstance : MonoBehaviour
         }
 
         _view.ConfigureLevels(_viewConfigsCache);
-        _view.ApplyLevelState(LevelIndex);
+
+        // 初始化/加载存档：只切静态外观并进入默认状态，不播放升级动画
+        _view.ApplyLevel(LevelIndex, LevelIndex, playUpgradeAnim: false);
     }
-    
+
 }

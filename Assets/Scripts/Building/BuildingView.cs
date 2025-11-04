@@ -21,10 +21,7 @@ public class BuildingView : MonoBehaviour
     public void ConfigureLevels(IReadOnlyList<BuildingLevelViewConfig> configs)
     {
         _levelConfigs.Clear();
-        if (configs == null)
-        {
-            return;
-        }
+        if (configs == null) { return; }
 
         for (int i = 0; i < configs.Count; i++)
         {
@@ -32,40 +29,56 @@ public class BuildingView : MonoBehaviour
         }
     }
 
-    public void ApplyLevelState(int levelIndex)
+    /// <summary>
+    /// 统一接口：切换到目标等级并根据需要播放升级动画。
+    /// - playUpgradeAnim == true：先切静态外观，再触发升级动画/特效；如果没有升级触发器，回退到默认动画。
+    /// - playUpgradeAnim == false：仅切静态外观并立即进入默认动画（用于加载存档）。
+    /// </summary>
+    public void ApplyLevel(int fromLevel, int toLevel, bool playUpgradeAnim)
     {
-        BuildingLevelViewConfig config = GetConfig(levelIndex);
+        BuildingLevelViewConfig config = GetConfig(toLevel);
         if (config == null)
         {
             ClearPersistentVisuals();
             return;
         }
 
-        ApplyAnimatorDefaults(config);
+        // 1) 先刷新静态外观（子预制体 / 常驻粒子）
         RefreshChildPrefab(config);
         RefreshPersistentParticle(config);
-    }
 
-    public void PlayUpgrade(int fromLevel, int toLevel)
-    {
-        BuildingLevelViewConfig config = GetConfig(toLevel);
-        if (config == null)
+        // 2) 动画策略
+        if (playUpgradeAnim)
         {
-            return;
+            bool triggered = false;
+
+            // 升级动画触发（如配置为空则不触发）
+            if (_animator != null && !string.IsNullOrEmpty(config.UpgradeTrigger))
+            {
+                _animator.SetTrigger(config.UpgradeTrigger);
+                triggered = true;
+            }
+
+            // 升级一次性特效
+            if (config.UpgradeEffectPrefab != null)
+            {
+                Transform parent = _particleRoot != null ? _particleRoot : transform;
+                GameObject effect = Instantiate(config.UpgradeEffectPrefab, parent);
+                effect.transform.localPosition = Vector3.zero;
+                effect.transform.localRotation = Quaternion.identity;
+                effect.transform.localScale = Vector3.one;
+            }
+
+            // 没有升级触发器时，回退到默认动画状态
+            if (!triggered)
+            {
+                ApplyAnimatorDefaults(config);
+            }
         }
-
-        if (_animator != null && !string.IsNullOrEmpty(config.UpgradeTrigger))
+        else
         {
-            _animator.SetTrigger(config.UpgradeTrigger);
-        }
-
-        if (config.UpgradeEffectPrefab != null)
-        {
-            Transform parent = _particleRoot != null ? _particleRoot : transform;
-            GameObject effect = Instantiate(config.UpgradeEffectPrefab, parent);
-            effect.transform.localPosition = Vector3.zero;
-            effect.transform.localRotation = Quaternion.identity;
-            effect.transform.localScale = Vector3.one;
+            // 不播放升级动画：直接进入默认状态（Idle等）
+            ApplyAnimatorDefaults(config);
         }
     }
 
@@ -75,16 +88,12 @@ public class BuildingView : MonoBehaviour
         {
             return null;
         }
-
         return _levelConfigs[levelIndex];
     }
 
     private void ApplyAnimatorDefaults(BuildingLevelViewConfig config)
     {
-        if (_animator == null || config == null)
-        {
-            return;
-        }
+        if (_animator == null || config == null) { return; }
 
         if (!string.IsNullOrEmpty(config.DefaultAnimatorTrigger))
         {

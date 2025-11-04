@@ -32,6 +32,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f0797159d2389a41ac4546771b7818e
+    m_Address: SupplyLib
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 924d2e9dd5e2b1947979efe8fd596024
     m_Address: UIPanel_GameMain
     m_ReadOnly: 0

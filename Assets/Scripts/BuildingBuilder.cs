@@ -243,24 +243,36 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
         }
 
         // 实例化 & 定位（若你的 BuildingInstance.Construction 内部会定位，可省略下面两行）
-
-        BuildingInstance b = Instantiate(currentBuildDef.BuildingPrefab);
-        b.transform.SetPositionAndRotation(anchor, Quaternion.identity); 
-        
-        Vector2 center;
-        bool centerIsCorner;
-        int footprintSize;
-        if (!CoordinateCalculator.TryGetCenterFromCells(tempBuildingCells, out center, out centerIsCorner, out footprintSize))
+        BuildingInstance b;
+        if (currentBuildDef.BuildingPrefab!=null)
         {
-            center = Vector2.zero;
-            centerIsCorner = false;
-            footprintSize = currentBuildDef != null ? currentBuildDef.Size : 0;
-        }
+          b = Instantiate(currentBuildDef.BuildingPrefab);
+          b.transform.SetPositionAndRotation(anchor, Quaternion.identity);
+            Vector2 center;
+            bool centerIsCorner;
+            int footprintSize;
+            if (!CoordinateCalculator.TryGetCenterFromCells(tempBuildingCells, out center, out centerIsCorner, out footprintSize))
+            {
+                center = Vector2.zero;
+                centerIsCorner = false;
+                footprintSize = currentBuildDef != null ? currentBuildDef.Size : 0;
+            }
 
-        Vector3Int[] occupy = tempBuildingCells.ToArray();
-        Vector3 centerVector = new Vector3(center.x, center.y, 0f);
-        b.ConfigurePlacement(occupy, centerVector, centerIsCorner, footprintSize);
-        b.Initialize(currentBuildDef);
+            Vector3Int[] occupy = tempBuildingCells.ToArray();
+            Vector3 centerVector = new Vector3(center.x, center.y, 0f);
+
+
+            b.ConfigurePlacement(occupy, centerVector, centerIsCorner, footprintSize);
+            b.Initialize(currentBuildDef);
+        }
+        else
+        {
+            Debug.LogWarning("建筑预制体未设置");
+        }
+        
+     
+        
+        
 
         Debug.Log("完成建造");
         process = ConstructionProcess.None;

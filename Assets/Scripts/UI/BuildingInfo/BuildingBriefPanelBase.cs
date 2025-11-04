@@ -14,12 +14,18 @@ public abstract class BuildingBriefPanelBase : MonoBehaviour
         panelGuid = Guid.NewGuid().ToString();
     }
 
-    public abstract void Show(BuildingInstance building);
+    protected abstract void ShowInfo(BuildingInstance building);
 
     public virtual void Show(RectTransform rectTransform, BuildingInstance building)
     {
+        if (rectTransform == null)
+        {
+            Debug.LogWarning("信息显示画布为空");
+        }
+
+
         // 尝试把自己当作 RectTransform 使用
-        var self = transform as RectTransform;
+        RectTransform self = transform as RectTransform;
 
         // 设为子物体（不保持世界坐标，方便直接贴合父节点）
         if (self != null)
@@ -52,7 +58,7 @@ public abstract class BuildingBriefPanelBase : MonoBehaviour
 
         // 激活并渲染内容
         gameObject.SetActive(true);
-        Show(building);
+        ShowInfo(building);
     }
 
 }

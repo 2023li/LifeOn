@@ -34,6 +34,11 @@ public static class LOConstant
         public const int Priority_相机监听鼠标滚轮 = 20;
     }
 
+    public static class Layer
+    {
+        public const string LayerStr_Building = "Building";
+        public const int LayerIndex_Building = 14;
+    }
 
     
 

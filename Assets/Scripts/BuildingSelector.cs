@@ -11,12 +11,10 @@ public class BuildingSelector : MonoBehaviour
 
     private void OnEnable()
     {
-       
             InputManager.Instance.OnMousePrimaryClick += HandleClick;
-       
-            
-        
-        
+
+
+        Event_SelectedBuilding += Test;
     }
    
 
@@ -40,6 +38,9 @@ public class BuildingSelector : MonoBehaviour
         }
 
         Vector3Int cell = GridSystem.Instance.GetScreenPointCoordinates(screenPoint);
+
+        Debug.Log(cell);
+
         if (BuildingInstance.TryGetAtCell(cell, out var building) && building?.Occupy?.Length > 0)
         {
             _current = building;
@@ -52,7 +53,10 @@ public class BuildingSelector : MonoBehaviour
         }
 
         Event_SelectedBuilding?.Invoke(_current);
+
+        
     }
+
 
     private void ClearHighlight()
     {
@@ -61,4 +65,13 @@ public class BuildingSelector : MonoBehaviour
             GridSystem.Instance.ClearHighlight();
         }
     }
+
+    private void Test(BuildingInstance bud)
+    {
+        if (bud!=null)
+        {
+            Debug.Log(bud.gameObject.name);
+        }
+    }
+
 }

@@ -21,15 +21,13 @@ public class TileLib : ScriptableObject
 
     private Dictionary<GameTileEnum, TileBase> dic_AllTiles;
     private static TileLib ins;
-    private static Task<TileLib> initTask;
-    private static bool loggedInitFailure;
+    private static bool loggedInitFailure = false;
 
     /// <summary>
     /// 获取对应的 Tile；若资源仍在加载或加载失败则返回 null。
     /// </summary>
     public static TileBase GetTile(GameTileEnum e)
     {
-        EnsureInitialized();
 
         if (ins == null || ins.dic_AllTiles == null)
         {
@@ -48,42 +46,13 @@ public class TileLib : ScriptableObject
     /// <summary>
     /// 确保静态 TileLib 实例加载完成；若异步仍在进行则直接返回，等待下一次访问。
     /// </summary>
-    private static void EnsureInitialized()
+    public static async Task Init()
     {
-        if (ins != null && ins.dic_AllTiles != null) return;
-
-        if (initTask == null)
-        {
-            initTask = AssetsManager.Instance.LoadAssetAsync<TileLib>("TileLib");
-            loggedInitFailure = false;
-        }
-
-        if (!initTask.IsCompleted) return;
-
-        if (initTask.IsFaulted)
-        {
-            Debug.LogException(initTask.Exception);
-            initTask = null;
-            return;
-        }
-
-        if (!initTask.IsCompletedSuccessfully)
-        {
-            Debug.LogError("[TileLib] 加载 TileLib 失败：任务未成功完成");
-            initTask = null;
-            return;
-        }
-
-        var asset = initTask.Result;
-        if (asset == null)
-        {
-            Debug.LogError("[TileLib] 加载 TileLib 失败：返回结果为空");
-            initTask = null;
-            return;
-        }
-
-        ins = asset;
-        BuildTileDictionary();
+        
+        
+         ins = await AssetsManager.Instance.LoadAssetAsync<TileLib>("TileLib");
+           
+         BuildTileDictionary();
     }
 
     private static void BuildTileDictionary()

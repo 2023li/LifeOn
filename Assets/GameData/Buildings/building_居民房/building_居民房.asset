@@ -16,7 +16,7 @@ MonoBehaviour:
   DisplayName: "\u5C45\u6C11\u623F"
   Size: 2
   classification: 0
-  BuildingPrefab: {fileID: 0}
+  BuildingPrefab: {fileID: 3831073936164517814, guid: 1898ff6dcc05dc54080912133c8be488, type: 3}
   BuildingIcon: {fileID: 0}
   UIPanelPrefab_Brief: {fileID: 0}
   UIPanelPrefab_Detailed: {fileID: 0}
@@ -34,7 +34,7 @@ MonoBehaviour:
     Rules:
     - rid: 1546075644629090321
     ViewConfig:
-      DefaultAnimatorState: 
+      DefaultAnimatorState: LV0
       DefaultAnimatorTrigger: 
       UpgradeTrigger: 
       PersistentParticlePrefab: {fileID: 0}
@@ -52,9 +52,9 @@ MonoBehaviour:
     - rid: 1546075644629090323
     - rid: 1546075644629090324
     ViewConfig:
-      DefaultAnimatorState: 
+      DefaultAnimatorState: LV1
       DefaultAnimatorTrigger: 
-      UpgradeTrigger: 
+      UpgradeTrigger: toLV1
       PersistentParticlePrefab: {fileID: 0}
       UpgradeEffectPrefab: {fileID: 0}
       ChildPrefab: {fileID: 0}

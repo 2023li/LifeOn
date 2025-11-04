@@ -119,7 +119,7 @@ public class UIPanel_DebugGridInspector : PanelBase
 
     private void HandleMousePrimaryClick(Vector2 screenPoint)
     {
-        Debug.Log("HandleMousePrimaryClick");
+       
         if (!GridSystem.HasInstance)
         {
             return;

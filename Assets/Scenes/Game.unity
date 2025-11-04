@@ -811,6 +811,30 @@ PrefabInstance:
       propertyPath: treeAssets
       value: 
       objectReference: {fileID: 11400000, guid: c6cf630beeb7f3743afdf42a2f12aea7, type: 2}
+    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: buildingCommonBriefPanel
+      value: 
+      objectReference: {fileID: 303513712239329178, guid: 1433dbd474baadf4e9c2ce491751bddf, type: 3}
+    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: buildingDefinitions.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: buildingDefinitions.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 9c0a75a814c42c94bbd5f54d7e0443ec, type: 2}
+    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: buildingDefinitions.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: 2f80924b70bbbd142ac600379dffb67b, type: 2}
+    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: buildingDefinitions.Array.data[2]
+      value: 
+      objectReference: {fileID: 11400000, guid: 2f80924b70bbbd142ac600379dffb67b, type: 2}
+    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: buildingDefinitions.Array.data[3]
+      value: 
+      objectReference: {fileID: 11400000, guid: 2f80924b70bbbd142ac600379dffb67b, type: 2}
     - target: {fileID: 8832982178575566358, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
       propertyPath: m_Name
       value: App

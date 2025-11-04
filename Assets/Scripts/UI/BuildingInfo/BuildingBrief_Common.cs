@@ -10,7 +10,7 @@ public class BuildingBrief_Common : BuildingBriefPanelBase
     public Image buildingIcon;
     public TMP_Text buildingName;
 
-    public override void Show(BuildingInstance building)
+    protected override void ShowInfo(BuildingInstance building)
     {
         if (building == null)
         {

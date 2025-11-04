@@ -3,16 +3,16 @@ using UnityEngine;
 using Moyo.Unity;
 using Sirenix.OdinInspector;
 using UnityEngine.Tilemaps;
+using System.Threading.Tasks;
+using System;
 
 
-public class ResourceRouting : MonoSingleton<ResourceRouting>
+public class ResourceRouting : MonoSingleton<ResourceRouting>,IMoyoEventListener<LOAppEvent>
 {
-    [LabelText("食物资源定义")]
-    [SerializeField] private SupplyDef foodSupply;
-    [LabelText("木材资源定义")]
-    [SerializeField] private SupplyDef woodSupply;
-    [LabelText("测试资源定义")]
-    [SerializeField] private SupplyDef testSupply;
+
+
+    [SerializeField,LabelText("建筑通用简短信息窗口"),FoldoutGroup("建筑资源")]
+    private BuildingBriefPanelBase buildingCommonBriefPanel;
 
 
 
@@ -21,14 +21,56 @@ public class ResourceRouting : MonoSingleton<ResourceRouting>
 
     private readonly Dictionary<string, BuildingArchetype> allBuildingDef = new Dictionary<string, BuildingArchetype>();
     private bool definitionsBuilt;
-    public SupplyDef FoodSupply => foodSupply;
-    public SupplyDef WoodSupply => woodSupply;
-    public SupplyDef TestSupply => testSupply;
+ 
+
+
+
+
+
+    private void OnEnable()
+    {
+        this?.MoyoEventStartListening();
+    }
+    private void OnDisable()
+    {
+        this?.MoyoEventStopListening();
+    }
+
+    public void OnMoyoEvent(LOAppEvent eventType)
+    {
+        switch (eventType.eventType)
+        {
+            case LOAppEventType.开始游戏:
+
+                GameResourcePreloading();
+
+                break;
+            default:
+                break;
+        }
+    }
+
+
+
+
     protected override void Initialize()
     {
         base.Initialize();
         BuildDefinitionsIfNeeded();
     }
+
+
+
+    /// <summary>
+    /// 资源预加载
+    /// </summary>
+    private async void GameResourcePreloading()
+    {
+
+        await TileLib.Init();
+        await SupplyLib.Init();
+    }
+
 
     /// <summary>按分类获取全部建筑定义。</summary>
     public List<BuildingArchetype> GetClassAllBuildingDef(BuildingClassify classify)
@@ -98,12 +140,32 @@ public class ResourceRouting : MonoSingleton<ResourceRouting>
         allBuildingDef[def.Id] = def;
     }
 
+    internal BuildingBriefPanelBase GetBuildingCommonBrie()
+    {
+
+
+        if (buildingCommonBriefPanel!=null )
+        {
+            return buildingCommonBriefPanel;
+        }
+
+        Debug.LogWarning("buildingCommonBriefPanel 未设置");
+        return null;
+
+    }
 
 
 
     //-------------------------------科技树------------------------------------
     [FoldoutGroup("科技树资源")]
     public TechTreeAssets treeAssets;
+
+
+
+
+
+
+
 
 
 

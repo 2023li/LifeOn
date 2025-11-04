@@ -59,6 +59,8 @@ public class UIPanel_GameMain : PanelBase
         OnAwake_建筑信息();
     }
 
+
+
     private void OnEnable()
     {
         OnEnable_建筑信息();
@@ -67,6 +69,7 @@ public class UIPanel_GameMain : PanelBase
     private void Start()
     {
         Start_顶部HUD();
+        OnStart_建筑信息();
     }
 
     private void OnDisable()
@@ -94,11 +97,18 @@ public class UIPanel_GameMain : PanelBase
 
 
     #region 建筑信息
-    private RectTransform rt_建筑信息;
+    [SerializeField] private RectTransform rt_建筑信息;
 
     private void OnAwake_建筑信息()
     {
         buildingBriefCache = new Dictionary<string, BuildingBriefPanelBase>();
+    }
+
+    private void OnStart_建筑信息()
+    {
+        buildingCommonBrie = ResourceRouting.Instance.GetBuildingCommonBrie();
+
+
     }
 
     private void OnEnable_建筑信息()
@@ -107,11 +117,15 @@ public class UIPanel_GameMain : PanelBase
     }
     private void OnDisable_建筑信息()
     {
-        TheGame.Instance.BuildingSelector.Event_SelectedBuilding -= ShowBuildingBrief;
+        if (TheGame.HasInstance)
+        {
+            TheGame.Instance.BuildingSelector.Event_SelectedBuilding -= ShowBuildingBrief;
+        }
+      
     }
 
 
-    BuildingBriefPanelBase common;
+    private BuildingBriefPanelBase buildingCommonBrie;
     private Dictionary<string, BuildingBriefPanelBase> buildingBriefCache;
     private void ShowBuildingBrief(BuildingInstance building)
     {
@@ -134,7 +148,7 @@ public class UIPanel_GameMain : PanelBase
         }
 
         // 2. 确定要使用的面板预制体（通用或专用）
-        BuildingBriefPanelBase prefab = building.Def.UIPanelPrefab_Brief == null ? common : building.Def.UIPanelPrefab_Brief;
+        BuildingBriefPanelBase prefab = building.Def.UIPanelPrefab_Brief == null ? buildingCommonBrie : building.Def.UIPanelPrefab_Brief;
         if (prefab == null)
         {
             Debug.LogWarning($"建筑 {building.Def.name} 没有关联的 BriefPanelPrefab，也没有设置通用的兜底");

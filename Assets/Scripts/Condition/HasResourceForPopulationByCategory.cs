@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 [Serializable]
@@ -6,6 +7,7 @@ public class HasResourceForPopulationByCategory : Condition
 {
     public SupplyCategory Category;
     [Min(0)] public float AmountPerCapita = 1f;
+    [LabelText("人口为0是忽略")]
     public bool IgnoreIfPopulationZero = true;
 
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
