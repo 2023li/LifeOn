@@ -9,9 +9,10 @@ using UnityEditor;
 
 public class BuildingPlaceholder : MonoBehaviour
 {
-   
+
 
     // 建议用 List 也可以，数组同样能显示
+    [LabelText("场景预制建筑")]
     public List<BuildingPos> preBuildings;
 
     [Button]

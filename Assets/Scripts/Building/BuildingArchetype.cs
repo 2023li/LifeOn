@@ -4,6 +4,14 @@ using System;
 using Sirenix.OdinInspector;
 
 
+[Flags]
+public enum WarehouseProperties
+{
+    物资,
+    粮食,
+
+}
+
 public enum BuildingClassify
 {
     基础,
@@ -26,11 +34,17 @@ public class BuildingArchetype : ScriptableObject
     public int Size;
     [LabelText("建筑分类")]
     public BuildingClassify classification = BuildingClassify.基础;
+
+
+
     [AssetsOnly,LabelText("建筑预制体")]
     public BuildingInstance BuildingPrefab;
 
     [LabelText("建筑图标")]
     public Sprite BuildingIcon;
+
+
+
 
     [AssetsOnly,LabelText("建筑信息UI预制体(简短)")]
     public BuildingBriefPanelBase UIPanelPrefab_Brief;
