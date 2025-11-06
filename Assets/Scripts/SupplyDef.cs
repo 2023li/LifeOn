@@ -31,6 +31,9 @@ public class SupplyDef : ScriptableObject
     [LabelText("图标")]
     public Sprite Icon;
 
+    [LabelText("占用单位")]
+    public int OccupationUnit = 1;
+
     [LabelText("基础运输半径")]
     public int BaseTransportationRadius = 5;
 

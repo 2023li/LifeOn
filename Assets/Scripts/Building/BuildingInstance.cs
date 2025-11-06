@@ -56,7 +56,6 @@ public class BuildingInstance : MonoBehaviour
     [ShowInInspector, ReadOnly]
     public int Exp { get; set; }
 
-    public Inventory Storage { get; private set; } // 仅仓库使用
 
     [LabelText("提供供给的仓库")]
     public BuildingInstance AssignedStorage;       // 非仓库：从此仓库拉取资源
@@ -106,15 +105,7 @@ public class BuildingInstance : MonoBehaviour
         TurnSystem.OnTurnPhaseChange -= FireRules;
         _activeInstances.Remove(this);
 
-        if (_ctx != null && _ctx.ResourceNetwork != null && Storage != null)
-        {
-            _ctx.ResourceNetwork.UnregisterStorage(Storage);
-        }
-
-        if (_ctx != null && _ctx.Environment != null)
-        {
-            _ctx.Environment.RemoveAura(InstanceId);
-        }
+      
     }
 
     void TryInitStorageIfAny()
@@ -125,14 +116,7 @@ public class BuildingInstance : MonoBehaviour
         }
 
         BuildingLevelDef level = Def.Levels[LevelIndex];
-        if (level.BaseStorageCapacity > 0)
-        {
-            Storage = new Inventory { Capacity = level.BaseStorageCapacity };
-            if (_ctx != null && _ctx.ResourceNetwork != null)
-            {
-                _ctx.ResourceNetwork.RegisterStorage(Storage);
-            }
-        }
+       
     }
 
     /// <summary>由建造器配置占地信息，便于环境计算。</summary>
@@ -203,11 +187,7 @@ public class BuildingInstance : MonoBehaviour
         LevelIndex = Mathf.Min(LevelIndex + 1, Def.Levels.Count - 1);
         Exp = 0;
 
-        // 重新初始化等级相关组件（例如容量变化）
-        if (_ctx != null && _ctx.ResourceNetwork != null && Storage != null)
-        {
-            _ctx.ResourceNetwork.UnregisterStorage(Storage);
-        }
+       
 
         TryInitStorageIfAny();
 
