@@ -57,8 +57,6 @@ public class BuildingInstance : MonoBehaviour
     public int Exp { get; set; }
 
 
-    [LabelText("提供供给的仓库")]
-    public BuildingInstance AssignedStorage;       // 非仓库：从此仓库拉取资源
 
     [ShowInInspector, ReadOnly, LabelText("占用")]
     public Vector3Int[] Occupy { get; private set; } // 由放置系统设置

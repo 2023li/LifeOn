@@ -9,10 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74bd412b95a1d834b822a47c5c499ab4, type: 3}
-  m_Name: "\u79D1\u7814\u70B9"
+  m_Script: {fileID: 11500000, guid: dfd2eb7a55367d745a9a6df889614dd7, type: 3}
+  m_Name: "SD_\u91D1\u5E01"
   m_EditorClassIdentifier: 
-  id: "TI_\u79D1\u7814\u70B9"
-  display: "\u79D1\u7814\u70B9"
-  icon: {fileID: 0}
-  showInTreasuryPanel: 0
+  Id: 
+  DisplayName: 
+  Category: 0
+  Icon: {fileID: 0}
+  DisplaySetting: 0
+  OccupationUnit: 1
+  BaseTransportationRadius: 5
+  BaseLossRate: 0

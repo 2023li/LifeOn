@@ -78,7 +78,11 @@ public class UIPanel_GameMain : PanelBase
     }
 
     #region 顶部HUD
-    [SerializeField,LabelText("文本_回合数")] TMP_Text text_TurnText;
+    
+    [FoldoutGroup("HUD"),SerializeField,LabelText("文本_回合数")] TMP_Text text_TurnText;
+
+    [FoldoutGroup("HUD"), SerializeField, LabelText("img_金币")] Image img_金币;
+    [FoldoutGroup("HUD"), SerializeField, LabelText("txt_金币")] TMP_Text txt_金币;
 
     public void Start_顶部HUD()
     {

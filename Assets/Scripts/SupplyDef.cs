@@ -10,10 +10,10 @@ public enum SupplyCategory
     独特,
     一级食物,
     二级食物,
-
-
-
 }
+
+
+
 
 
 [CreateAssetMenu(fileName = "SupplyDef_", menuName = "Game/SupplyDef")]
@@ -30,6 +30,9 @@ public class SupplyDef : ScriptableObject
 
     [LabelText("图标")]
     public Sprite Icon;
+
+    
+    public DisplayOption DisplaySetting = DisplayOption.常规;
 
     [LabelText("占用单位")]
     public int OccupationUnit = 1;
@@ -49,6 +52,16 @@ public class SupplyDef : ScriptableObject
         BaseLossRate = Mathf.Round(BaseLossRate / 0.005f) * 0.005f;
     }
 
+
+
+
+    public enum DisplayOption
+    {
+        常规,
+        不显示,
+        宝藏,
+        
+    }
 }
 
 [Serializable]

@@ -86,6 +86,7 @@ public class BuildingLevelDef
 
 
     [LabelText("仓库容量")]
+    [Tooltip("提供的全局容量增量")]
     public int BaseStorageCapacity;     // 仓库容量（仓库类）
 
 
