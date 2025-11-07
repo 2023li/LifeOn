@@ -12,22 +12,30 @@ public class Test : MonoBehaviour
 
     private void Start()
     {
-        TurnSystem.OnTurnPhaseChange += TestXX;
     }
 
 
+    public SupplyDef def;
     [Button]
-    public void TestXX(TurnPhase phase)
+    public void TestXX()
     {
 
-        if (phase==TurnPhase.回合结束阶段)
-        {
-            GameContext.Instance.TechTree.AddProgressToActiveResearch(1);
-        }
+        //if (phase==TurnPhase.回合结束阶段)
+        //{
+        //    GameContext.Instance.TechTree.AddProgressToActiveResearch(1);
+        //}
+
+
+        GameContext.Instance.ResourceNetwork.HighlightCoverage(def);
+
       
     }
 
 
 
+
    
+
+
+
 }

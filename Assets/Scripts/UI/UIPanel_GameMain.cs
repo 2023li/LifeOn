@@ -93,6 +93,11 @@ public class UIPanel_GameMain : PanelBase
                 text_TurnText.text = TurnSystem.Instance.NumberOfRounds.ToString();
             }
         };
+
+
+
+
+
     }
 
     #endregion

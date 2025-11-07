@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfd2eb7a55367d745a9a6df889614dd7, type: 3}
   m_Name: "SD_\u91D1\u5E01"
   m_EditorClassIdentifier: 
-  Id: 
-  DisplayName: 
+  Id: "sd_\u91D1\u5E01"
+  DisplayName: "\u91D1\u5E01"
   Category: 0
   Icon: {fileID: 0}
-  DisplaySetting: 0
-  OccupationUnit: 1
-  BaseTransportationRadius: 5
+  DisplaySetting: 1
+  OccupationUnit: 0
+  BaseTransportationRadius: -1
   BaseLossRate: 0

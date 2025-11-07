@@ -302,9 +302,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7b7222e45056cf47af0d5fa8e56c931, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Def: {fileID: 0}
+  Def: {fileID: 11400000, guid: 9c0a75a814c42c94bbd5f54d7e0443ec, type: 2}
   _view: {fileID: 7647223299056936507}
-  AssignedStorage: {fileID: 0}
   WorkersAssigned: 0
 --- !u!1 &8738672315109914515
 GameObject:

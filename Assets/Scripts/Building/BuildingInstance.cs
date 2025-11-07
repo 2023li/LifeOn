@@ -94,6 +94,11 @@ public class BuildingInstance : MonoBehaviour
     {
         TurnSystem.OnTurnPhaseChange += FireRules;
         _activeInstances.Add(this);
+
+        if (Def != null && _ctx?.ResourceNetwork != null)
+        {
+            TryInitStorageIfAny();
+        }
     }
 
 
@@ -103,18 +108,33 @@ public class BuildingInstance : MonoBehaviour
         TurnSystem.OnTurnPhaseChange -= FireRules;
         _activeInstances.Remove(this);
 
-      
+        if (_ctx?.ResourceNetwork != null)
+        {
+            _ctx.ResourceNetwork.UnregisterWarehouse(this);
+            // 如果以后有生产者注册，也可以在这里顺便注销
+        }
     }
 
     void TryInitStorageIfAny()
     {
-        if (Def == null)
+
+        if (Def == null || _ctx?.ResourceNetwork == null)
         {
             return;
         }
 
         BuildingLevelDef level = Def.Levels[LevelIndex];
-       
+        if (level == null)
+        {
+            return;
+        }
+
+        // 有 BaseStorageCapacity 就当仓库用（提供全局容量）
+        if (level.BaseStorageCapacity > 0)
+        {
+            _ctx.ResourceNetwork.RegisterWarehouse(this);
+        }
+
     }
 
     /// <summary>由建造器配置占地信息，便于环境计算。</summary>

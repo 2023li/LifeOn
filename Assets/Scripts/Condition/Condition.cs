@@ -73,6 +73,80 @@ public abstract class Condition
 
 
 
+/// <summary>
+/// 条件：尝试从 ResourceNetwork 消耗指定资源。
+/// Evaluate 调用成功时，会真实扣除资源。
+/// </summary>
+[Serializable]
+public class TryConsumeResourceCondition : Condition
+{
+    [LabelText("资源类型")]
+    public SupplyDef Resource;
+
+    [LabelText("消耗数量")]
+    public int Amount = 1;
+
+    [LabelText("需要在运输范围内")]
+    public bool RequireInRange = true;
+
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    {
+        why = string.Empty;
+
+        if (Resource == null)
+        {
+            why = "未指定资源类型。";
+            return false;
+        }
+
+        if (Amount <= 0)
+        {
+            why = "消耗数量必须为正数。";
+            return false;
+        }
+
+        if (ctx == null || ctx.ResourceNetwork == null)
+        {
+            why = "资源网络未初始化。";
+            return false;
+        }
+
+        var net = ctx.ResourceNetwork;
+
+        // 检查运输范围
+        if (RequireInRange && self != null)
+        {
+            var cell = new Vector3Int(
+                Mathf.RoundToInt(self.CenterInGrid.x),
+                Mathf.RoundToInt(self.CenterInGrid.y),
+                0);
+
+            if (!net.CanCellReceive(Resource, cell))
+            {
+                why = $"建筑不在 {Resource.DisplayName} 的运输范围内，无法消耗。";
+                return false;
+            }
+        }
+
+        // 尝试真正扣除资源
+        if (!net.TryConsumeResource(Resource, Amount, out var fail))
+        {
+            // fail 里已经有“库存不足”等具体原因
+            why = string.IsNullOrEmpty(fail)
+                ? $"消耗 {Resource.DisplayName} 失败。"
+                : fail;
+            return false;
+        }
+
+        // 成功扣除
+        return true;
+    }
+}
+
+
+
+
+
 [Serializable]
 public class NeverNo : Condition
 {
@@ -83,13 +157,42 @@ public class NeverNo : Condition
     }
 }
 
+/// <summary>
+/// 仓库是否满了的条件
+/// </summary>
 public class InventoryNotFullCondition : Condition
 {
+    [LabelText("目标资源类型")]
+    public SupplyDef Resource;
+
+    [LabelText("预期产量数量")]
+    public int Amount = 1;
+
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
     {
-
-        Debug.LogWarning("InventoryNotFullCondition 未完成 只是占位");
         why = "";
+
+        if (Resource == null)
+        {
+            // 未指定资源则不限制
+            return true;
+        }
+
+        if (ctx?.ResourceNetwork == null)
+        {
+            // 没有资源网络的情况下，你可以选择返回 false，这里暂定不阻塞
+            return true;
+        }
+
+        int need = Mathf.Max(1, Amount) * Resource.OccupationUnit;
+        int free = ctx.ResourceNetwork.GetFreeCapacity();
+
+        if (free < need)
+        {
+            why = "仓储容量不足，无法存放更多产出。";
+            return false;
+        }
+
         return true;
     }
 }

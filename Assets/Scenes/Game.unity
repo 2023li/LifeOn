@@ -223,6 +223,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9dce13d65ad8104d976f4258330b052, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  def: {fileID: 11400000, guid: 0df36ba6cd60a6f4eb2f2704de7a0149, type: 2}
 --- !u!1 &185239406
 GameObject:
   m_ObjectHideFlags: 0
@@ -709,7 +710,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   preBuildings:
   - pointTransform: {fileID: 115355271}
-    archetype: {fileID: 11400000, guid: 9c0a75a814c42c94bbd5f54d7e0443ec, type: 2}
+    archetype: {fileID: 11400000, guid: 8a10050131ee0d3468de8616d0f1b64c, type: 2}
 --- !u!4 &1170220040
 Transform:
   m_ObjectHideFlags: 0

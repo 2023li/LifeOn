@@ -61,14 +61,15 @@ MonoBehaviour:
         Conditions:
         - rid: 1546075644629090336
         OnSuccess:
-        - rid: 1546075644629090337
+        - rid: 7980267660001673216
         OnFailure: []
     - rid: 1546075644629090336
       type: {class: InventoryNotFullCondition, ns: , asm: Assembly-CSharp}
-      data: 
-    - rid: 1546075644629090337
-      type: {class: AddToSelfStorage, ns: , asm: Assembly-CSharp}
       data:
-        Items:
-        - Resource: {fileID: 11400000, guid: 0df36ba6cd60a6f4eb2f2704de7a0149, type: 2}
-          Amount: 2
+        Resource: {fileID: 0}
+        Amount: 1
+    - rid: 7980267660001673216
+      type: {class: ProduceResourceEffect, ns: , asm: Assembly-CSharp}
+      data:
+        Resource: {fileID: 11400000, guid: 0df36ba6cd60a6f4eb2f2704de7a0149, type: 2}
+        Amount: 1

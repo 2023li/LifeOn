@@ -37,6 +37,10 @@ public class SupplyDef : ScriptableObject
     [LabelText("占用单位")]
     public int OccupationUnit = 1;
 
+
+    [LabelText("耐久度")]
+    public int durability = 5;
+
     [LabelText("基础运输半径")]
     public int BaseTransportationRadius = 5;
 

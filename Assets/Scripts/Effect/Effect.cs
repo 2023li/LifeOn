@@ -11,6 +11,41 @@ public abstract class Effect
 
 
 [Serializable]
+public class ProduceResourceEffect : Effect
+{
+    public SupplyDef Resource;
+    public int Amount = 1;
+
+    public override void Apply(BuildingInstance self, IGameContext ctx)
+    {
+        if (self == null || Resource == null || ctx?.ResourceNetwork == null)
+        {
+
+            return;
+        }
+
+        ResourceNetwork net = ctx.ResourceNetwork;
+
+        // 记录该建筑是这个资源的生产者（供覆盖范围计算使用，幂等）
+        net.RegisterProducer(self, Resource);
+
+        if (!net.TryAddResource(Resource, Amount, out string why))
+        {
+            Debug.LogWarning(
+                $"[ProduceResourceEffect] 建筑 {self.DisplayName} 生产 {Resource.DisplayName} 失败：{why}", self);
+        }
+
+
+        Debug.Log("目前库存："+net.GetAmount(Resource));
+    }
+}
+
+
+
+
+
+
+[Serializable]
 public class ChangePopulation : Effect
 {
     public int Delta;
