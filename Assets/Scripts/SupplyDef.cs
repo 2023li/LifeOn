@@ -39,7 +39,8 @@ public class SupplyDef : ScriptableObject
 
 
     [LabelText("耐久度")]
-    public int durability = 5;
+    [Tooltip("能够传播的跳板数量")]
+    public int BaseDurability = 5;
 
     [LabelText("基础运输半径")]
     public int BaseTransportationRadius = 5;

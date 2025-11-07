@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using Sirenix.OdinInspector;
+using Sirenix.OdinInspector.Editor.Drawers;
 
 public class BuildingInstance : MonoBehaviour
 {
@@ -56,6 +57,8 @@ public class BuildingInstance : MonoBehaviour
     [ShowInInspector, ReadOnly]
     public int Exp { get; set; }
 
+    [ShowInInspector, ReadOnly]
+    public BuildingLevelDef CurrentLevelData => Def.Levels[LevelIndex];
 
 
     [ShowInInspector, ReadOnly, LabelText("占用")]
@@ -118,21 +121,16 @@ public class BuildingInstance : MonoBehaviour
     void TryInitStorageIfAny()
     {
 
-        if (Def == null || _ctx?.ResourceNetwork == null)
-        {
-            return;
-        }
+        var level = CurrentLevelData;
 
-        BuildingLevelDef level = Def.Levels[LevelIndex];
-        if (level == null)
-        {
-            return;
-        }
-
-        // 有 BaseStorageCapacity 就当仓库用（提供全局容量）
-        if (level.BaseStorageCapacity > 0)
+        // 如果当前建筑有基础存储容量或具备转运能力，则注册为仓库节点
+        if (level.BaseStorageCapacity > 0 || level.TransportationCapacity)
         {
             _ctx.ResourceNetwork.RegisterWarehouse(this);
+        }
+        else
+        {
+            _ctx.ResourceNetwork.UnregisterWarehouse(this);
         }
 
     }
@@ -275,5 +273,8 @@ public class BuildingInstance : MonoBehaviour
         // 初始化/加载存档：只切静态外观并进入默认状态，不播放升级动画
         _view.ApplyLevel(LevelIndex, LevelIndex, playUpgradeAnim: false);
     }
+
+
+    
 
 }

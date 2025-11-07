@@ -27,6 +27,12 @@ public class ResourceNetwork
     /// <summary>标记哪些资源的覆盖缓存已失效，需要重算。</summary>
     private readonly HashSet<SupplyDef> _dirtyCoverage = new HashSet<SupplyDef>();
 
+
+
+    // 新增：每种资源的供给链路径缓存（键：格子，值：该格子对应的供给链建筑节点列表）
+    private readonly Dictionary<SupplyDef, Dictionary<Vector3Int, List<BuildingInstance>>> _chainCache
+        = new Dictionary<SupplyDef, Dictionary<Vector3Int, List<BuildingInstance>>>();
+
     #region 公共API：资源增减
 
     public int GetAmount(SupplyDef resource)
@@ -229,7 +235,6 @@ public class ResourceNetwork
     public bool CanCellReceive(SupplyDef resource, Vector3Int cell)
     {
         if (resource == null) return false;
-
         var coverage = GetCoverage(resource);
         return coverage.Contains(cell);
     }
@@ -276,52 +281,126 @@ public class ResourceNetwork
     private HashSet<Vector3Int> ComputeCoverage(SupplyDef resource, HashSet<BuildingInstance> producers)
     {
         var result = new HashSet<Vector3Int>();
+        var cellChainMap = new Dictionary<Vector3Int, List<BuildingInstance>>(); // 临时映射格子到供给链
+
         int radius = resource.BaseTransportationRadius;
-        if (radius <= 0)
+        int maxDurability = resource.BaseDurability;
+        if (radius <= 0 || maxDurability <= 0 || producers == null)
+        {
+            _chainCache[resource] = new Dictionary<Vector3Int, List<BuildingInstance>>();
             return result;
+        }
 
-        // BFS 节点：生产者 + 仓库
-        var queue = new Queue<BuildingInstance>();
-        var visitedWarehouses = new HashSet<BuildingInstance>();
+        // 最短耗损记录：存储每个仓库被访问的最低耗损值
+        var bestCost = new Dictionary<BuildingInstance, int>();
+        var queue = new Queue<(BuildingInstance node, int cost, List<BuildingInstance> path)>();
 
-        // 1. 所有生产者作为起点
+        // 1. 所有生产者作为起点（耗损0）
         foreach (var producer in producers)
         {
             if (producer == null) continue;
-            queue.Enqueue(producer);
+            var startPath = new List<BuildingInstance> { producer };
+            queue.Enqueue((producer, 0, startPath));
 
-            var center = ToCell(producer.CenterInGrid);
-            MarkCoverage(center, radius, result);
+            // 覆盖生产者半径范围
+            Vector3Int centerCell = ToCell(producer.CenterInGrid);
+            MarkCoverageWithChain(centerCell, radius, startPath, result, cellChainMap);
         }
 
-        // 2. 从生产者出发寻找可连接的仓库，中继扩展覆盖
+        // 2. 宽度优先搜索传播链路
         while (queue.Count > 0)
         {
-            var current = queue.Dequeue();
-            var currentCenter = ToCell(current.CenterInGrid);
+            var (current, costSoFar, pathSoFar) = queue.Dequeue();
+            Vector3Int currentCenter = ToCell(current.CenterInGrid);
 
-            // 遍历所有仓库，找到在 radius 内且尚未访问的作为中继
+            // 尝试从当前节点连接下一个仓库
             foreach (var kv in _warehouses)
             {
-                var warehouse = kv.Key;
-                if (warehouse == null || visitedWarehouses.Contains(warehouse))
+                BuildingInstance warehouse = kv.Key;
+                if (warehouse == null) continue;
+                if (current == warehouse) continue; // 跳过自身
+                // 如果此仓库已以更低或相等耗损访问过，则跳过
+                if (bestCost.TryGetValue(warehouse, out int prevCost) && prevCost <= costSoFar + kv.Value/*或WarehouseComponent方式获取*/)
                     continue;
 
-                var wCenter = ToCell(warehouse.CenterInGrid);
-                int dist = GridDistance(currentCenter, wCenter);
-                if (dist <= radius)
-                {
-                    // 该仓库可由当前节点供给，作为中继
-                    visitedWarehouses.Add(warehouse);
-                    queue.Enqueue(warehouse);
+                // 判断距离是否在运输半径内
+                int dist = GridDistance(currentCenter, ToCell(warehouse.CenterInGrid));
+                if (dist > radius) continue;
 
-                    // 以这个仓库为中心继续扩散
-                    MarkCoverage(wCenter, radius, result);
-                }
+                // 计算经过该仓库的耗损
+                int wCost = 1;
+                bool comp = warehouse.CurrentLevelData.TransportationCapacity;
+                if (comp) wCost = warehouse.CurrentLevelData.TransportationConsumption;
+                int newCost = costSoFar + wCost;
+
+                // 耐久度是否超限
+                if (newCost > maxDurability) continue;
+
+                // 更新该仓库的最优耗损并加入队列
+                bestCost[warehouse] = newCost;
+                // 构建新的供给链路径
+                var newPath = new List<BuildingInstance>(pathSoFar) { warehouse };
+                queue.Enqueue((warehouse, newCost, newPath));
+
+                // 以该仓库为中心继续扩散覆盖，并记录链路
+                Vector3Int wCenterCell = ToCell(warehouse.CenterInGrid);
+                MarkCoverageWithChain(wCenterCell, radius, newPath, result, cellChainMap);
             }
         }
 
+        // 保存格子到链路的映射结果以供查询
+        _chainCache[resource] = cellChainMap;
         return result;
+    }
+
+
+
+    /// <summary>
+    /// 标记指定中心半径内的格子为可达，并记录每个格子的供给链路径。
+    /// </summary>
+    private void MarkCoverageWithChain(Vector3Int center, int radius, List<BuildingInstance> chainPath,
+                                       HashSet<Vector3Int> resultSet,
+                                       Dictionary<Vector3Int, List<BuildingInstance>> cellChainMap)
+    {
+        int cx = center.x;
+        int cy = center.y;
+        for (int dx = -radius; dx <= radius; dx++)
+        {
+            for (int dy = -radius; dy <= radius; dy++)
+            {
+                if (Mathf.Abs(dx) + Mathf.Abs(dy) <= radius)
+                {
+                    Vector3Int cell = new Vector3Int(cx + dx, cy + dy, 0);
+                    // 添加到覆盖结果
+                    resultSet.Add(cell);
+                    // 若该格子尚未记录链路，则记录当前链路
+                    if (!cellChainMap.ContainsKey(cell))
+                    {
+                        cellChainMap[cell] = new List<BuildingInstance>(chainPath);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+    public List<BuildingInstance> GetSupplyChainPath(SupplyDef resource, Vector3Int cell)
+    {
+        if (resource == null) return null;
+        // 确保覆盖已计算（如未计算则计算）
+        var coverage = GetCoverage(resource);
+        if (!coverage.Contains(cell))
+            return null; // 不可达
+
+        if (_chainCache.TryGetValue(resource, out var cellMap) &&
+            cellMap.TryGetValue(cell, out var chainPath))
+        {
+            // 返回链路拷贝，避免外部修改内部列表
+            return new List<BuildingInstance>(chainPath);
+        }
+        return null;
     }
 
     /// <summary>

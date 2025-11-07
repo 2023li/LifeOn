@@ -95,9 +95,12 @@ public class BuildingLevelDef
     public int ExpToNext = -1;      // 升级需要经验；-1 表示最高级
 
 
+    [LabelText("物资转运能力")]
+    public bool TransportationCapacity = false;
+    [LabelText("转运代价"),ShowIf(nameof(TransportationCapacity))]
+    public int TransportationConsumption = 3;
 
 
-   
     [LabelText("基础最大岗位")]
     public int BaseMaxJobs;
 
