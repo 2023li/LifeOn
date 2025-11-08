@@ -145,34 +145,73 @@ public class BuildingInstance : MonoBehaviour
     }
 
 
-    public void FireRules(TurnPhase trigger)
+
+
+
+    /// <summary>
+    /// 按执行时机批量执行当前等级下的规则。
+    /// </summary>
+    private void ExecuteRules(RuleExecuteTime executeTime, TurnPhase? phase = null)
     {
+        if (Def == null || Def.Levels == null || Def.Levels.Count == 0)
+            return;
+
         BuildingLevelDef lvl = Def.Levels[LevelIndex];
+        if (lvl.Rules == null || lvl.Rules.Count == 0)
+            return;
+
         foreach (Rule r in lvl.Rules)
         {
-            if (r.Trigger != trigger) { continue; }
-            bool ok = true; string why = "";
-            foreach (Condition c in r.Conditions)
+            if (r == null) continue;
+            if (r.ExecutePhase != executeTime) continue;
+
+            // 每回合执行：还需要匹配具体 TurnPhase
+            if (executeTime == RuleExecuteTime.每回合执行)
             {
-                if (!c.Evaluate(this, _ctx, out why))
+                if (!phase.HasValue) continue;
+                if (r.Trigger != phase.Value) continue;
+            }
+
+            bool ok = true;
+            string why = string.Empty;
+
+            if (r.Conditions != null)
+            {
+                foreach (Condition c in r.Conditions)
                 {
-                    ok = false; break;
+                    if (c == null) continue;
+                    if (!c.Evaluate(this, _ctx, out why))
+                    {
+                        ok = false;
+                        break;
+                    }
                 }
             }
+
             List<Effect> effects = ok ? r.OnSuccess : r.OnFailure;
+            if (effects == null) continue;
 
             foreach (Effect e in effects)
             {
-                e.Apply(this, _ctx);
+                e?.Apply(this, _ctx);
             }
         }
+    }
+    private void FireRules(TurnPhase trigger)
+    {
+        // 1. 执行“每回合执行”的规则
+        ExecuteRules(RuleExecuteTime.每回合执行, trigger);
 
-        // 升级自动化（也可仅靠规则里放 Upgrade 效果）
+        // 2. 升级自动化（保持原有逻辑）
+        BuildingLevelDef lvl = Def.Levels[LevelIndex];
         if (lvl.ExpToNext > 0 && Exp >= lvl.ExpToNext)
         {
             TryUpgrade(_ctx);
         }
     }
+
+
+
 
     public int GetMaxPopulation(IGameContext ctx)
     {
@@ -188,7 +227,7 @@ public class BuildingInstance : MonoBehaviour
     public bool TryUpgrade(IGameContext ctx)
     {
         BuildingLevelDef cur = Def.Levels[LevelIndex];
-        if (cur.ExpToNext <= 0) return false; // 无可升
+        if (cur.ExpToNext <= 0) return false;
         if (Exp < cur.ExpToNext) return false;
 
         IGameContext context = ctx ?? _ctx;
@@ -203,12 +242,10 @@ public class BuildingInstance : MonoBehaviour
         LevelIndex = Mathf.Min(LevelIndex + 1, Def.Levels.Count - 1);
         Exp = 0;
 
-       
-
         TryInitStorageIfAny();
-
         OnLevelChanged(previousIndex, LevelIndex, context);
-        // 等级变化后的瞬时触发（可选）
+
+
         return true;
     }
 
@@ -222,6 +259,10 @@ public class BuildingInstance : MonoBehaviour
 
         // 切静态外观 +（可选）播放升级动画
         _view?.ApplyLevel(previousIndex, newIndex, playUpgradeAnim: true);
+
+
+        // 升级成功后，执行“进入等级时执行”的规则（使用新等级的数据）
+        ExecuteRules(RuleExecuteTime.进入等级时执行);
 
         // 仅在 0 -> 1 时进行一次人口收敛与最低基线（保持原有逻辑）
         if (previousIndex == 0 && newIndex == 1)
@@ -272,9 +313,26 @@ public class BuildingInstance : MonoBehaviour
 
         // 初始化/加载存档：只切静态外观并进入默认状态，不播放升级动画
         _view.ApplyLevel(LevelIndex, LevelIndex, playUpgradeAnim: false);
+
+        ExecuteRules(RuleExecuteTime.进入等级时执行);
     }
 
 
-    
 
+    public void DestroyBuilding(BuildingInstance inst)
+    {
+        if (inst == null) return;
+
+        inst.ExecuteDemolishRules();   // 触发拆除规则（退款、返还人口、生成废墟等）
+        GameObject.Destroy(inst.gameObject);
+    }
+
+    /// <summary>
+    /// 外部在真正拆除建筑前调用。
+    /// 例如：BuildingManager.DestroyBuilding 时先调用本方法，再 Destroy(gameObject)。
+    /// </summary>
+    public void ExecuteDemolishRules()
+    {
+        ExecuteRules(RuleExecuteTime.拆除时执行);
+    }
 }

@@ -83,8 +83,6 @@ public class BuildingLevelDef
     public int BaseMaxPopulation;   // 人口上限基础值（居民类）
 
 
-
-
     [LabelText("仓库容量")]
     [Tooltip("提供的全局容量增量")]
     public int BaseStorageCapacity;     // 仓库容量（仓库类）
@@ -98,7 +96,7 @@ public class BuildingLevelDef
     [LabelText("物资转运能力")]
     public bool TransportationCapacity = false;
     [LabelText("转运代价"),ShowIf(nameof(TransportationCapacity))]
-    public int TransportationConsumption = 3;
+    public int BaseTransportationResistance = 3;
 
 
     [LabelText("基础最大岗位")]

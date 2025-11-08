@@ -6,7 +6,7 @@ using Sirenix.OdinInspector;
 
 public enum RuleExecuteTime
 {
-    升级后执行,
+    进入等级时执行,
 
     每回合执行,
 
@@ -30,15 +30,21 @@ public class Rule
             ? $"[{Trigger}] 条件{(Conditions?.Count ?? 0)} | 成功{(OnSuccess?.Count ?? 0)} | 失败{(OnFailure?.Count ?? 0)}"
             : Name;
 
-
+    [LabelText("执行时机")]
     public RuleExecuteTime ExecutePhase = RuleExecuteTime.每回合执行;
+
 
     [ShowIf(nameof(ExecutePhase),nameof(ExecutePerRound))]
     public TurnPhase Trigger = TurnPhase.结束准备阶段;
+
     [SerializeReference] public List<Condition> Conditions = new();
     [SerializeReference] public List<Effect> OnSuccess = new();
     [SerializeReference] public List<Effect> OnFailure = new();
 
+
+
+
+    
 
 
 

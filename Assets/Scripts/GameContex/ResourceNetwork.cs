@@ -330,7 +330,7 @@ public class ResourceNetwork
                 // 计算经过该仓库的耗损
                 int wCost = 1;
                 bool comp = warehouse.CurrentLevelData.TransportationCapacity;
-                if (comp) wCost = warehouse.CurrentLevelData.TransportationConsumption;
+                if (comp) wCost = warehouse.CurrentLevelData.BaseTransportationResistance;
                 int newCost = costSoFar + wCost;
 
                 // 耐久度是否超限
