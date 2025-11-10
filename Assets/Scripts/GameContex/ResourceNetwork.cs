@@ -303,7 +303,7 @@ public class ResourceNetwork
             queue.Enqueue((producer, 0, startPath));
 
             // 覆盖生产者半径范围
-            Vector3Int centerCell = ToCell(producer.CenterInGrid);
+            Vector3Int centerCell = ToCell(producer.CurrentCenterInGrid);
             MarkCoverageWithChain(centerCell, radius, startPath, result, cellChainMap);
         }
 
@@ -311,10 +311,10 @@ public class ResourceNetwork
         while (queue.Count > 0)
         {
             var (current, costSoFar, pathSoFar) = queue.Dequeue();
-            Vector3Int currentCenter = ToCell(current.CenterInGrid);
+            Vector3Int currentCenter = ToCell(current.CurrentCenterInGrid);
 
             // 尝试从当前节点连接下一个仓库
-            foreach (var kv in _warehouses)
+            foreach (KeyValuePair<BuildingInstance, int> kv in _warehouses)
             {
                 BuildingInstance warehouse = kv.Key;
                 if (warehouse == null) continue;
@@ -324,13 +324,13 @@ public class ResourceNetwork
                     continue;
 
                 // 判断距离是否在运输半径内
-                int dist = GridDistance(currentCenter, ToCell(warehouse.CenterInGrid));
+                int dist = GridDistance(currentCenter, ToCell(warehouse.CurrentCenterInGrid));
                 if (dist > radius) continue;
 
                 // 计算经过该仓库的耗损
                 int wCost = 1;
-                bool comp = warehouse.CurrentLevelData.TransportationCapacity;
-                if (comp) wCost = warehouse.CurrentLevelData.BaseTransportationResistance;
+                bool comp = warehouse.CurrentLevelData.TransportationCapacity(warehouse);
+                if (comp) wCost = warehouse.CurrentLevelData.GetTransportationResistance(warehouse);
                 int newCost = costSoFar + wCost;
 
                 // 耐久度是否超限
@@ -343,7 +343,7 @@ public class ResourceNetwork
                 queue.Enqueue((warehouse, newCost, newPath));
 
                 // 以该仓库为中心继续扩散覆盖，并记录链路
-                Vector3Int wCenterCell = ToCell(warehouse.CenterInGrid);
+                Vector3Int wCenterCell = ToCell(warehouse.CurrentCenterInGrid);
                 MarkCoverageWithChain(wCenterCell, radius, newPath, result, cellChainMap);
             }
         }
@@ -456,14 +456,14 @@ public class ResourceNetwork
             return 0;
 
         var levels = building.Def.Levels;
-        if (levels == null || building.LevelIndex < 0 || building.LevelIndex >= building.Def.Levels.Count)
+        if (levels == null || building.CurrrentLevelIndex < 0 || building.CurrrentLevelIndex >= building.Def.Levels.Count)
             return 0;
 
-        var levelDef = levels[building.LevelIndex];
+        var levelDef = levels[building.CurrrentLevelIndex];
         if (levelDef == null)
             return 0;
 
-        return Mathf.Max(0, levelDef.BaseStorageCapacity);
+        return Mathf.Max(0, levelDef.GetStorageCapacity(building));
     }
 
     /// <summary>

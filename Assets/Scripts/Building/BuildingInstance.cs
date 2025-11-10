@@ -2,11 +2,9 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor.Drawers;
 
 public class BuildingInstance : MonoBehaviour
 {
-
     #region 静态
     private static readonly HashSet<BuildingInstance> _activeInstances = new();
 
@@ -16,12 +14,12 @@ public class BuildingInstance : MonoBehaviour
     {
         foreach (BuildingInstance candidate in _activeInstances)
         {
-            if (candidate == null || candidate.Occupy == null)
+            if (candidate == null || candidate.CurrentOccupy == null)
             {
                 continue;
             }
 
-            foreach (Vector3Int occupyCell in candidate.Occupy)
+            foreach (Vector3Int occupyCell in candidate.CurrentOccupy)
             {
                 if (occupyCell == cell)
                 {
@@ -37,6 +35,10 @@ public class BuildingInstance : MonoBehaviour
     #endregion
 
 
+
+
+
+
     public string InstanceId { get; private set; } = Guid.NewGuid().ToString("N");
 
     [LabelText("建筑定义数据")]
@@ -44,28 +46,47 @@ public class BuildingInstance : MonoBehaviour
 
     [SerializeField, LabelText("建筑表现")]
     private BuildingView _view;
+
     private readonly List<BuildingLevelViewConfig> _viewConfigsCache = new();
 
     public string DisplayName => Def != null ? Def.DisplayName : string.Empty;
 
     [ShowInInspector, ReadOnly, LabelText("等级")]
-    public int LevelIndex { get; private set; } = 0; // 对应 Def.Levels 索引
+    public int CurrrentLevelIndex { get; private set; } = 0; // 对应 Def.Levels 索引
 
     [ShowInInspector, ReadOnly, LabelText("人口")]
-    public int Population { get; set; }
+    public int CurrentPopulation { get; set; }
+
+    [ShowInInspector, ReadOnly, LabelText("当前工人")]
+    public int CurrentWorkers; // 当前分配在该建筑的工人数量
+
+  
+
+    [ShowInInspector, ReadOnly,LabelText("岗位吸引力")]
+    public float GetEmploymentAttractiveness()
+    {
+        /*政府补贴这个行为应该如何定义？
+         * 是一个规则吗？
+         * 不太像 如果是规则 每回合扣钱可以处理 但是增加的吸引力应该如何处理？
+         * 是个一次性的效果
+         * 如果拆分为2条规则呢？
+         * 
+         */
+        return GetLevelData().BaseAttractivenessPerJob;
+    }
+   
 
     [ShowInInspector, ReadOnly]
-    public int Exp { get; set; }
+    public int CurrentExp { get; set; }
 
     [ShowInInspector, ReadOnly]
-    public BuildingLevelDef CurrentLevelData => Def.Levels[LevelIndex];
-
+    public BuildingLevelDef CurrentLevelData => Def.Levels[CurrrentLevelIndex];
 
     [ShowInInspector, ReadOnly, LabelText("占用")]
-    public Vector3Int[] Occupy { get; private set; } // 由放置系统设置
+    public Vector3Int[] CurrentOccupy { get; private set; } // 由放置系统设置
 
     [ShowInInspector, ReadOnly, LabelText("中心的坐标")]
-    public Vector3 CenterInGrid { get; private set; }
+    public Vector3 CurrentCenterInGrid { get; private set; }
 
     [ShowInInspector, ReadOnly, LabelText("中心是坐标交点")]
     public bool CenterIsCorner { get; private set; }
@@ -73,164 +94,201 @@ public class BuildingInstance : MonoBehaviour
     [ShowInInspector, ReadOnly, LabelText("尺寸")]
     public int FootprintSize { get; private set; }
 
-    private IGameContext _ctx;
-
-    public int WorkersAssigned; // 当前分配在该建筑的工人数量
+    public IGameContext Ctx { get; private set; }
 
 
+    #region
+    private Dictionary<string, int> tempInt;
+    private Dictionary<string, float> tempFloat;
+    private Dictionary<string, string> tmepString;
+
+    #endregion
+
+
+    /// <summary>
+    /// 运行时添加的规则（卡牌、Buff、科技等可往这里塞）。
+    /// </summary>
+    private List<Rule> currentRules;
+
+    #region 运行时规则操作
+
+    /// <summary>
+    /// 添加运行时 Rule。
+    /// </summary>
+    public void AddRunTimeRule(Rule newRule)
+    {
+        if (newRule == null)
+        {
+            return;
+        }
+
+        currentRules ??= new List<Rule>(10);
+        currentRules.Add(newRule);
+        if (newRule.ExecutePhase== RuleExecuteTime.规则启用时)
+        {
+            ExecuteRules(RuleExecuteTime.规则启用时);
+        }
+    }
+
+    /// <summary>
+    /// 移除指定运行时 Rule（可选：当 Buff 结束等）。
+    /// </summary>
+    public bool RemoveRunTimeRule(Rule rule)
+    {
+        if (rule == null || currentRules == null)
+        {
+            return false;
+        }
+
+        return currentRules.Remove(rule);
+    }
+
+    /// <summary>
+    /// 按条件移除一批运行时 Rule，方便做清理。
+    /// 例如：一次性规则执行完后，根据自定义标记移除。
+    /// </summary>
+    public void RemoveRunTimeRules(Predicate<Rule> match)
+    {
+        if (match == null || currentRules == null)
+        {
+            return;
+        }
+
+        currentRules.RemoveAll(match);
+    }
+
+    #endregion
 
     public void Initialize(BuildingArchetype def)
     {
-        // pointTransform.position = GridSystem.Instance.get
         Def = def;
-        _ctx = GameContext.Instance;
+        Ctx = GameContext.Instance;
         TryInitStorageIfAny();
         TryInitView();
     }
 
-    private void Awake()
-    {
-       
-    }
-
     private void OnEnable()
     {
-        TurnSystem.OnTurnPhaseChange += FireRules;
+        TurnSystem.OnTurnPhaseChange += FirePermanentRules;
         _activeInstances.Add(this);
 
-        if (Def != null && _ctx?.ResourceNetwork != null)
+        if (Def != null && Ctx?.ResourceNetwork != null)
         {
             TryInitStorageIfAny();
         }
     }
 
-
-
     private void OnDisable()
     {
-        TurnSystem.OnTurnPhaseChange -= FireRules;
+        TurnSystem.OnTurnPhaseChange -= FirePermanentRules;
         _activeInstances.Remove(this);
 
-        if (_ctx?.ResourceNetwork != null)
+        if (Ctx?.ResourceNetwork != null)
         {
-            _ctx.ResourceNetwork.UnregisterWarehouse(this);
+            Ctx.ResourceNetwork.UnregisterWarehouse(this);
             // 如果以后有生产者注册，也可以在这里顺便注销
         }
     }
 
-    void TryInitStorageIfAny()
+    private void TryInitStorageIfAny()
     {
-
-        var level = CurrentLevelData;
+        BuildingLevelDef level = CurrentLevelData;
 
         // 如果当前建筑有基础存储容量或具备转运能力，则注册为仓库节点
-        if (level.BaseStorageCapacity > 0 || level.TransportationCapacity)
+        if (level.GetStorageCapacity(this) > 0 || level.TransportationCapacity(this))
         {
-            _ctx.ResourceNetwork.RegisterWarehouse(this);
+            Ctx.ResourceNetwork.RegisterWarehouse(this);
         }
         else
         {
-            _ctx.ResourceNetwork.UnregisterWarehouse(this);
+            Ctx.ResourceNetwork.UnregisterWarehouse(this);
         }
-
     }
 
     /// <summary>由建造器配置占地信息，便于环境计算。</summary>
     public void ConfigurePlacement(Vector3Int[] occupyCells, Vector3 center, bool centerIsCorner, int footprintSize)
     {
-        Occupy = occupyCells ?? Array.Empty<Vector3Int>();
-        CenterInGrid = center;
+        CurrentOccupy = occupyCells ?? Array.Empty<Vector3Int>();
+        CurrentCenterInGrid = center;
         CenterIsCorner = centerIsCorner;
         FootprintSize = footprintSize;
     }
 
 
-
-
-
     /// <summary>
-    /// 按执行时机批量执行当前等级下的规则。
+    /// 按执行时机批量执行 当前等级规则 + 运行时规则。
     /// </summary>
     private void ExecuteRules(RuleExecuteTime executeTime, TurnPhase? phase = null)
     {
-        if (Def == null || Def.Levels == null || Def.Levels.Count == 0)
-            return;
+        if (Def == null || Def.Levels == null || Def.Levels.Count == 0
+  )
+            return
+    ;
 
-        BuildingLevelDef lvl = Def.Levels[LevelIndex];
-        if (lvl.Rules == null || lvl.Rules.Count == 0)
-            return;
+        BuildingLevelDef lvl = Def.Levels[CurrrentLevelIndex];
 
-        foreach (Rule r in lvl.Rules)
+        // 1. 当前等级静态规则
+        if (lvl?.Rules != null && lvl.Rules.Count > 0)
         {
-            if (r == null) continue;
-            if (r.ExecutePhase != executeTime) continue;
-
-            // 每回合执行：还需要匹配具体 TurnPhase
-            if (executeTime == RuleExecuteTime.每回合执行)
+            foreach (Rule r in lvl.Rules)
             {
-                if (!phase.HasValue) continue;
-                if (r.Trigger != phase.Value) continue;
+                r?.Execute(executeTime, phase, this, Ctx);
             }
+        }
 
-            bool ok = true;
-            string why = string.Empty;
-
-            if (r.Conditions != null)
+        // 2. 运行时规则
+        if (currentRules != null && currentRules.Count > 0)
+        {
+            var snapshot = currentRules.ToArray(); // 防止执行过程中被修改
+            foreach (Rule r in snapshot)
             {
-                foreach (Condition c in r.Conditions)
-                {
-                    if (c == null) continue;
-                    if (!c.Evaluate(this, _ctx, out why))
-                    {
-                        ok = false;
-                        break;
-                    }
-                }
-            }
-
-            List<Effect> effects = ok ? r.OnSuccess : r.OnFailure;
-            if (effects == null) continue;
-
-            foreach (Effect e in effects)
-            {
-                e?.Apply(this, _ctx);
+                r?.Execute(executeTime, phase,this, Ctx);
             }
         }
     }
-    private void FireRules(TurnPhase trigger)
+
+    private void FirePermanentRules(TurnPhase trigger)
     {
-        // 1. 执行“每回合执行”的规则
+        // 1. 执行“每回合执行”的规则（静态 + 运行时）
         ExecuteRules(RuleExecuteTime.每回合执行, trigger);
 
         // 2. 升级自动化（保持原有逻辑）
-        BuildingLevelDef lvl = Def.Levels[LevelIndex];
-        if (lvl.ExpToNext > 0 && Exp >= lvl.ExpToNext)
+        if (Def == null || Def.Levels == null || Def.Levels.Count == 0)
         {
-            TryUpgrade(_ctx);
+            return;
+        }
+
+        BuildingLevelDef lvl = Def.Levels[CurrrentLevelIndex];
+        if (lvl.GetExpToNext(this) > 0 && CurrentExp >= lvl.GetExpToNext(this))
+        {
+            TryUpgrade(Ctx);
         }
     }
 
-
-
-
-    public int GetMaxPopulation(IGameContext ctx)
+    public BuildingLevelDef GetLevelData()
     {
-        BuildingLevelDef lvl = Def.Levels[LevelIndex];
-        int max = lvl.BaseMaxPopulation;
-        foreach (var sm in lvl.ConditionalStatModifiers)
-        {
-            max = sm.Modify(this, ctx, max);
-        }
-        return max;
+        return Def.Levels[CurrrentLevelIndex];
     }
 
     public bool TryUpgrade(IGameContext ctx)
     {
-        BuildingLevelDef cur = Def.Levels[LevelIndex];
-        if (cur.ExpToNext <= 0) return false;
-        if (Exp < cur.ExpToNext) return false;
+        if (Def == null || Def.Levels == null || Def.Levels.Count == 0)
+        {
+            return false;
+        }
 
-        IGameContext context = ctx ?? _ctx;
+        BuildingLevelDef cur = Def.Levels[CurrrentLevelIndex];
+        if (cur.GetExpToNext(this) <= 0)
+        {
+            return false;
+        }
+
+        if (CurrentExp < cur.GetExpToNext(this))
+        {
+            return false;
+        }
+
+        IGameContext context = ctx ?? Ctx;
         if (!ConditionUtility.TryEvaluateConditions(cur.ConditionsForAllowingUpgrades, this, context, out string reason))
         {
             string message = string.IsNullOrWhiteSpace(reason) ? "未满足升级条件" : reason;
@@ -238,17 +296,15 @@ public class BuildingInstance : MonoBehaviour
             return false;
         }
 
-        int previousIndex = LevelIndex;
-        LevelIndex = Mathf.Min(LevelIndex + 1, Def.Levels.Count - 1);
-        Exp = 0;
+        int previousIndex = CurrrentLevelIndex;
+        CurrrentLevelIndex = Mathf.Min(CurrrentLevelIndex + 1, Def.Levels.Count - 1);
+        CurrentExp = 0;
 
         TryInitStorageIfAny();
-        OnLevelChanged(previousIndex, LevelIndex, context);
-
+        OnLevelChanged(previousIndex, CurrrentLevelIndex, context);
 
         return true;
     }
-
 
     private void OnLevelChanged(int previousIndex, int newIndex, IGameContext ctx)
     {
@@ -260,48 +316,32 @@ public class BuildingInstance : MonoBehaviour
         // 切静态外观 +（可选）播放升级动画
         _view?.ApplyLevel(previousIndex, newIndex, playUpgradeAnim: true);
 
-
-        // 升级成功后，执行“进入等级时执行”的规则（使用新等级的数据）
-        ExecuteRules(RuleExecuteTime.进入等级时执行);
+        // 升级成功后，执行“规则启用时”的规则（使用新等级的数据，含运行时规则）
+        ExecuteRules(RuleExecuteTime.规则启用时);
 
         // 仅在 0 -> 1 时进行一次人口收敛与最低基线（保持原有逻辑）
         if (previousIndex == 0 && newIndex == 1)
         {
             int baseline = 2;
-            int max = GetMaxPopulation(ctx);
-            int target = Mathf.Clamp(Mathf.Max(Population, baseline), 0, max);
-            Population = target;
+            int max = GetLevelData().GetMaxPopulation(this);
+            int target = Mathf.Clamp(Mathf.Max(CurrentPopulation, baseline), 0, max);
+            CurrentPopulation = target;
         }
-    }
-
-
-    public int GetMaxJobs(IGameContext ctx)
-    {
-        BuildingLevelDef lvl = Def.Levels[LevelIndex];
-        return Mathf.Max(0, lvl.BaseMaxJobs);
-    }
-    public void AssignWorkers(int count)
-    {
-        IGameContext ctx = _ctx;
-        WorkersAssigned = Mathf.Clamp(count, 0, GetMaxJobs(ctx));
     }
 
     private void TryInitView()
     {
-        if (Def == null)
-        {
-            return;
-        }
-
         if (_view == null)
         {
             _view = GetComponentInChildren<BuildingView>();
         }
 
-        if (_view == null)
+        if (Def == null|| _view == null)
         {
             return;
         }
+
+
 
         _viewConfigsCache.Clear();
         foreach (BuildingLevelDef level in Def.Levels)
@@ -312,16 +352,21 @@ public class BuildingInstance : MonoBehaviour
         _view.ConfigureLevels(_viewConfigsCache);
 
         // 初始化/加载存档：只切静态外观并进入默认状态，不播放升级动画
-        _view.ApplyLevel(LevelIndex, LevelIndex, playUpgradeAnim: false);
+        _view.ApplyLevel(CurrrentLevelIndex, CurrrentLevelIndex, playUpgradeAnim: false);
 
-        ExecuteRules(RuleExecuteTime.进入等级时执行);
+        // 进入当前等级时执行对应规则（静态 + 运行时）
+        ExecuteRules(RuleExecuteTime.规则启用时);
     }
 
-
-
+    /// <summary>
+    /// 外部调用，用于销毁指定建筑实例。
+    /// </summary>
     public void DestroyBuilding(BuildingInstance inst)
     {
-        if (inst == null) return;
+        if (inst == null)
+        {
+            return;
+        }
 
         inst.ExecuteDemolishRules();   // 触发拆除规则（退款、返还人口、生成废墟等）
         GameObject.Destroy(inst.gameObject);

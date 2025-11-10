@@ -51,7 +51,7 @@ public class EnvironmentBonus : StatModifier
             return current;
         }
 
-        if (self == null || self.Occupy == null || self.Occupy.Length == 0)
+        if (self == null || self.CurrentOccupy == null || self.CurrentOccupy.Length == 0)
         {
             return current;
         }
@@ -66,9 +66,9 @@ public class EnvironmentBonus : StatModifier
             AuraRequirement requirement = Requirements[i];
             bool satisfied = false;
 
-            for (int c = 0; c < self.Occupy.Length; c++)
+            for (int c = 0; c < self.CurrentOccupy.Length; c++)
             {
-                Vector3Int cell = self.Occupy[c];
+                Vector3Int cell = self.CurrentOccupy[c];
                 int value = ctx.Environment.GetValue(cell, requirement.Category);
                 if (value >= requirement.MinValue)
                 {

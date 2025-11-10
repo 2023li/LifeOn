@@ -25,11 +25,23 @@ MonoBehaviour:
   AllowConstruction: []
   Levels:
   - BaseMaxPopulation: 0
+    EnableStatModifier_MaxPopulation: 0
+    SM_Population: []
     BaseStorageCapacity: 0
+    EnableStatModifier_StorageCapacity: 0
+    SM_StorageCapacity: []
     ExpToNext: 3
+    EnableStatModifier_ExpToNext: 0
+    SM_ExpToNext: []
+    TransportationCondition:
+      rid: 7980267684381065216
+    BaseTransportationResistance: 3
+    EnableStatModifier_TransportationResistance: 0
+    SM_TransportationResistance: []
     BaseMaxJobs: 0
+    EnableStatModifier_MaxJobs: 0
+    SM_MaxJobs: []
     BaseAttractivenessPerJob: 0
-    ConditionalStatModifiers: []
     ConditionsForAllowingUpgrades: []
     Rules:
     - rid: 1546075644629090321
@@ -41,11 +53,23 @@ MonoBehaviour:
       UpgradeEffectPrefab: {fileID: 0}
       ChildPrefab: {fileID: 0}
   - BaseMaxPopulation: 5
+    EnableStatModifier_MaxPopulation: 0
+    SM_Population: []
     BaseStorageCapacity: 0
+    EnableStatModifier_StorageCapacity: 0
+    SM_StorageCapacity: []
     ExpToNext: 10
+    EnableStatModifier_ExpToNext: 0
+    SM_ExpToNext: []
+    TransportationCondition:
+      rid: -2
+    BaseTransportationResistance: 3
+    EnableStatModifier_TransportationResistance: 0
+    SM_TransportationResistance: []
     BaseMaxJobs: 0
+    EnableStatModifier_MaxJobs: 0
+    SM_MaxJobs: []
     BaseAttractivenessPerJob: 0
-    ConditionalStatModifiers: []
     ConditionsForAllowingUpgrades:
     - rid: 1546075644629090322
     Rules:
@@ -61,11 +85,14 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 1546075644629090321
       type: {class: Rule, ns: , asm: Assembly-CSharp}
       data:
         Name: Lv0 EndTurn Exp
         Description: "\u56DE\u5408\u7ED3\u675F\u65F6 +1 \u7ECF\u9A8C"
+        ExecutePhase: 1
         Trigger: 3
         Conditions: []
         OnSuccess:
@@ -80,6 +107,7 @@ MonoBehaviour:
       data:
         Name: Feeding
         Description: "\u6D88\u8017\u98DF\u7269\u4F9B\u517B\u4EBA\u53E3\uFF0C\u4EBA\u53E3\u589E\u51CF"
+        ExecutePhase: 1
         Trigger: 1
         Conditions:
         - rid: 1546075644629090326
@@ -95,6 +123,7 @@ MonoBehaviour:
         Name: FullPop Exp Bonus
         Description: "\u4EBA\u53E3\u5DF2\u6EE1\u65F6\uFF0C\u6BCF\u56DE\u5408\u989D\u5916
           +1 \u7ECF\u9A8C"
+        ExecutePhase: 1
         Trigger: 3
         Conditions:
         - rid: 1546075644629090331
@@ -138,3 +167,6 @@ MonoBehaviour:
       type: {class: AddExp, ns: , asm: Assembly-CSharp}
       data:
         Amount: 1
+    - rid: 7980267684381065216
+      type: {class: NeverNo, ns: , asm: Assembly-CSharp}
+      data: 

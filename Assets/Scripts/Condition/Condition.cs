@@ -59,9 +59,6 @@ public static class ConditionUtility
 
 
 
-
-
-
 [Serializable]
 public abstract class Condition
 {
@@ -78,7 +75,7 @@ public abstract class Condition
 /// Evaluate 调用成功时，会真实扣除资源。
 /// </summary>
 [Serializable]
-public class TryConsumeResourceCondition : Condition
+public class C_消耗资源 : Condition
 {
     [LabelText("资源类型")]
     public SupplyDef Resource;
@@ -117,8 +114,8 @@ public class TryConsumeResourceCondition : Condition
         if (RequireInRange && self != null)
         {
             var cell = new Vector3Int(
-                Mathf.RoundToInt(self.CenterInGrid.x),
-                Mathf.RoundToInt(self.CenterInGrid.y),
+                Mathf.RoundToInt(self.CurrentCenterInGrid.x),
+                Mathf.RoundToInt(self.CurrentCenterInGrid.y),
                 0);
 
             if (!net.CanCellReceive(Resource, cell))
@@ -144,11 +141,8 @@ public class TryConsumeResourceCondition : Condition
 }
 
 
-
-
-
 [Serializable]
-public class NeverNo : Condition
+public class C_永远不 : Condition
 {
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
     {
@@ -157,49 +151,9 @@ public class NeverNo : Condition
     }
 }
 
-/// <summary>
-/// 仓库是否满了的条件
-/// </summary>
-public class InventoryNotFullCondition : Condition
-{
-    [LabelText("目标资源类型")]
-    public SupplyDef Resource;
-
-    [LabelText("预期产量数量")]
-    public int Amount = 1;
-
-    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
-    {
-        why = "";
-
-        if (Resource == null)
-        {
-            // 未指定资源则不限制
-            return true;
-        }
-
-        if (ctx?.ResourceNetwork == null)
-        {
-            // 没有资源网络的情况下，你可以选择返回 false，这里暂定不阻塞
-            return true;
-        }
-
-        int need = Mathf.Max(1, Amount) * Resource.OccupationUnit;
-        int free = ctx.ResourceNetwork.GetFreeCapacity();
-
-        if (free < need)
-        {
-            why = "仓储容量不足，无法存放更多产出。";
-            return false;
-        }
-
-        return true;
-    }
-}
-
 
 [Serializable]
-public class TechUnlockedCondition : Condition
+public class C_需要科技 : Condition
 {
     public string TechId;
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
@@ -207,6 +161,33 @@ public class TechUnlockedCondition : Condition
         why = "";
         return ctx != null && ctx.TechTree != null && ctx.TechTree.IsUnlocked(TechId);
     }
+}
+
+
+
+// Rules/Conditions.cs ——追加
+[Serializable]
+public class C_工人大于等于 : Condition
+{
+    public int Min;
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    { why = ""; return self.CurrentWorkers >= Min; }
+}
+
+[Serializable]
+public class C_工人少于 : Condition
+{
+    public int MaxExclusive;
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    { why = ""; return self.CurrentWorkers < MaxExclusive; }
+}
+
+[Serializable]
+public class WorkersEquals : Condition
+{
+    public int Count;
+    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
+    { why = ""; return self.CurrentWorkers == Count; }
 }
 
 
@@ -219,11 +200,9 @@ public class PopulationLessThan : Condition
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
     {
         why = "";
-        return self.Population < MaxExclusive;
+        return self.CurrentPopulation < MaxExclusive;
     }
 }
-
-
 
 [Serializable]
 public class PopulationAtLeast : Condition
@@ -232,50 +211,6 @@ public class PopulationAtLeast : Condition
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
     {
         why = "";
-        return self.Population >= Min;
+        return self.CurrentPopulation >= Min;
     }
 }
-
-[Serializable]
-public class ExpAtLeast : Condition
-{
-    public int Min;
-    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
-    {
-        why = "";
-        return self.Exp >= Min;
-    }
-}
-
-
-
-
-
-
-
-// Rules/Conditions.cs ——追加
-[Serializable]
-public class WorkersAtLeast : Condition
-{
-    public int Min;
-    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
-    { why = ""; return self.WorkersAssigned >= Min; }
-}
-
-[Serializable]
-public class WorkersLessThan : Condition
-{
-    public int MaxExclusive;
-    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
-    { why = ""; return self.WorkersAssigned < MaxExclusive; }
-}
-
-[Serializable]
-public class WorkersEquals : Condition
-{
-    public int Count;
-    public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
-    { why = ""; return self.WorkersAssigned == Count; }
-}
-
-

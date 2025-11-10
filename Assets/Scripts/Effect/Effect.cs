@@ -11,7 +11,7 @@ public abstract class Effect
 
 
 [Serializable]
-public class ProduceResourceEffect : Effect
+public class Effect_生产资源 : Effect
 {
     public SupplyDef Resource;
     public int Amount = 1;
@@ -32,7 +32,7 @@ public class ProduceResourceEffect : Effect
         if (!net.TryAddResource(Resource, Amount, out string why))
         {
             Debug.LogWarning(
-                $"[ProduceResourceEffect] 建筑 {self.DisplayName} 生产 {Resource.DisplayName} 失败：{why}", self);
+                $"[Effect_生产资源] 建筑 {self.DisplayName} 生产 {Resource.DisplayName} 失败：{why}", self);
         }
 
 
@@ -41,43 +41,31 @@ public class ProduceResourceEffect : Effect
 }
 
 
-
-
-
-
 [Serializable]
-public class ChangePopulation : Effect
+public class Effect_改变人口 : Effect
 {
     public int Delta;
     public override void Apply(BuildingInstance self, IGameContext ctx)
     {
-        int max = self.GetMaxPopulation(ctx);
-        self.Population = Mathf.Clamp(self.Population + Delta, 0, max);
+        int max = self.GetLevelData().GetMaxPopulation(self);
+        self.CurrentPopulation = Mathf.Clamp(self.CurrentPopulation + Delta, 0, max);
     }
 }
 
+
 [Serializable]
-public class AddExp : Effect
+public class Effect_增加经验 : Effect
 {
     public int Amount = 1;
     public override void Apply(BuildingInstance self, IGameContext ctx)
     {
-        self.Exp += Amount;
-
-        Debug.Log("增加经验",self);
+        self.CurrentExp += Amount;
     }
 
 
 }
 
-[Serializable]
-public class UpgradeToNextLevel : Effect
-{
-    public override void Apply(BuildingInstance self, IGameContext ctx)
-    {
-        self.TryUpgrade(ctx);
-    }
-}
+
 
 
 
@@ -102,7 +90,7 @@ public class ApplyEnvironmentAura : Effect
             return;
         }
 
-        Vector3 center = self.CenterInGrid;
+        Vector3 center = self.CurrentCenterInGrid;
         bool centerIsCorner = self.CenterIsCorner;
         ctx.Environment.ApplyAura(self.InstanceId, center, centerIsCorner, Category, Rings);
     }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/*
+
 [AddComponentMenu("LifeOn/Employment/Employment System")]
 public class EmploymentSystem : MonoBehaviour
 {
@@ -82,10 +84,10 @@ public class EmploymentSystem : MonoBehaviour
 
         foreach (var b in buildings)
         {
-            int pop = Mathf.Max(0, b.Population);
+            int pop = Mathf.Max(0, b.CurrentPopulation);
             if (pop <= 0) continue;
 
-            Vector3Int home = RoundToCell(b.CenterInGrid);
+            Vector3Int home = RoundToCell(b.CurrentCenterInGrid);
             for (int i = 0; i < pop && _workers.Count < MaxWorkersPerRebuild; i++)
                 _workers.Add(new WorkerAgent { Id = id++, HomeCell = home });
         }
@@ -102,15 +104,15 @@ public class EmploymentSystem : MonoBehaviour
             if (maxJobs <= 0) continue;
 
             float baseAttr = 0f;
-            var lvl = (b.Def != null && b.Def.Levels != null && b.Def.Levels.Count > b.LevelIndex)
-                ? b.Def.Levels[b.LevelIndex] : null;
+            var lvl = (b.Def != null && b.Def.Levels != null && b.Def.Levels.Count > b.CurrrentLevelIndex)
+                ? b.Def.Levels[b.CurrrentLevelIndex] : null;
             if (lvl != null)
             {
                 baseAttr = Mathf.Max(0f, lvl.BaseAttractivenessPerJob);
             }
 
 
-            Vector3Int cell = RoundToCell(b.CenterInGrid);
+            Vector3Int cell = RoundToCell(b.CurrentCenterInGrid);
             var subsidy = b.GetComponent<EmploymentSubsidy>();
             for (int i = 0; i < maxJobs; i++)
             {
@@ -206,7 +208,7 @@ public class EmploymentSystem : MonoBehaviour
         foreach (var b in buildings)
         {
             int c = counts.TryGetValue(b, out int v) ? v : 0;
-            b.AssignWorkers(c); // 写回 WorkersAssigned（你的生产效果会读取它）
+            b.AssignWorkers(c); // 写回 CurrentWorkers（你的生产效果会读取它）
         }
     }
 
@@ -218,16 +220,16 @@ public class EmploymentSystem : MonoBehaviour
         if (building == null) return 0f;
 
         int maxJobs = building.GetMaxJobs(GameContext.Instance);
-        int current = Mathf.Clamp(building.WorkersAssigned, 0, maxJobs);
+        int current = Mathf.Clamp(building.CurrentWorkers, 0, maxJobs);
         int need = Mathf.Max(0, maxJobs - current);
         if (need == 0) return 0f;
 
         float baseAttr = 0f;
-        BuildingLevelDef lvl = (building.Def != null && building.Def.Levels != null && building.Def.Levels.Count > building.LevelIndex)
-            ? building.Def.Levels[building.LevelIndex] : null;
+        BuildingLevelDef lvl = (building.Def != null && building.Def.Levels != null && building.Def.Levels.Count > building.CurrrentLevelIndex)
+            ? building.Def.Levels[building.CurrrentLevelIndex] : null;
         if (lvl != null) baseAttr = Mathf.Max(0f, lvl.BaseAttractivenessPerJob);
 
-        Vector3Int workCell = RoundToCell(building.CenterInGrid);
+        Vector3Int workCell = RoundToCell(building.CurrentCenterInGrid);
 
         var demands = new List<float>();
 
@@ -267,3 +269,4 @@ public class EmploymentSystem : MonoBehaviour
         return curve[curve.Count - 1];
     }
 }
+*/

@@ -41,10 +41,10 @@ public class BuildingSelector : MonoBehaviour
 
         Debug.Log(cell);
 
-        if (BuildingInstance.TryGetAtCell(cell, out var building) && building?.Occupy?.Length > 0)
+        if (BuildingInstance.TryGetAtCell(cell, out var building) && building?.CurrentOccupy?.Length > 0)
         {
             _current = building;
-            GridSystem.Instance.SetHighlight(new GridSystem.HighlightSpec(building.Occupy, highlightTile ?? TileLib.GetTile(GameTileEnum.Tile_黄色)));
+            GridSystem.Instance.SetHighlight(new GridSystem.HighlightSpec(building.CurrentOccupy, highlightTile ?? TileLib.GetTile(GameTileEnum.Tile_黄色)));
         }
         else
         {
