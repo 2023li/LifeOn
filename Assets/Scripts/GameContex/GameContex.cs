@@ -9,6 +9,7 @@ public interface IGameContext
     ResourceNetwork ResourceNetwork { get; }
     TechTreeManager TechTree { get; }
 
+    HumanResourcesNetwork HumanResourcesNetwork { get; }
     CityEnvironment Environment { get; }
 
 }
@@ -21,7 +22,7 @@ public class GameContext : Singleton<GameContext>, IGameContext
     private ResourceNetwork resourceNetwork = new ResourceNetwork();
     private TechTreeManager techTree = new TechTreeManager();
     private CityEnvironment environment = new CityEnvironment();
-
+    private HumanResourcesNetwork humanResourcesNetwork = new HumanResourcesNetwork();
     /// <summary>资源网络：负责仓库注册、库存查询。</summary>
     public ResourceNetwork ResourceNetwork => resourceNetwork;
 
@@ -30,6 +31,8 @@ public class GameContext : Singleton<GameContext>, IGameContext
 
     /// <summary>城市环境：用于处理治安、医疗、美化等光环。</summary>
     public CityEnvironment Environment => environment;
+
+    public HumanResourcesNetwork HumanResourcesNetwork => humanResourcesNetwork;
 
     public void Init()
     {
@@ -49,6 +52,11 @@ public class GameContext : Singleton<GameContext>, IGameContext
         if (environment == null)
         {
             environment = new CityEnvironment();
+        }
+
+        if (humanResourcesNetwork == null)
+        {
+            humanResourcesNetwork = new HumanResourcesNetwork();
         }
 
 

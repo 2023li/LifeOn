@@ -47,8 +47,7 @@ public class Effect_改变人口 : Effect
     public int Delta;
     public override void Apply(BuildingInstance self, IGameContext ctx)
     {
-        int max = self.GetLevelData().GetMaxPopulation(self);
-        self.CurrentPopulation = Mathf.Clamp(self.CurrentPopulation + Delta, 0, max);
+        throw new NotImplementedException();
     }
 }
 
@@ -59,7 +58,7 @@ public class Effect_增加经验 : Effect
     public int Amount = 1;
     public override void Apply(BuildingInstance self, IGameContext ctx)
     {
-        self.CurrentExp += Amount;
+       // self.CurrentExp += Amount;
     }
 
 

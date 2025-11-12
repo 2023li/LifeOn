@@ -40,8 +40,6 @@ public enum TurnPhase
 [AddComponentMenu("LifeOn/Turn System")]
 public class TurnSystem : MonoSingleton<TurnSystem>
 {
-
-
     public int NumberOfRounds { get; private set; }
 
     public static event Action<TurnPhase> OnTurnPhaseChange;

@@ -4,130 +4,59 @@ using UnityEngine.Tilemaps;
 
 /// <summary>
 /// 资源网络：集中管理所有资源的库存、容量和运输覆盖范围。
-/// 职责：资源的添加/消耗、仓库容量管理、运输覆盖计算等。
+/// 容量提供者（仓库）与转运节点（运输建筑）完全解耦。
 /// </summary>
 public class ResourceNetwork
 {
-    /// <summary>全局资源库存：按资源类型（SupplyDef）存储当前数量。</summary>
+    // ========= 基础数据 =========
+
+    /// <summary>全局资源库存：按资源类型存储当前数量。</summary>
     private readonly Dictionary<SupplyDef, int> _resourceAmounts = new Dictionary<SupplyDef, int>();
 
-    /// <summary>总容量上限（由所有仓库提供），以及当前已用容量。</summary>
+    /// <summary>总容量上限（由所有容量提供者提供）与已用容量。</summary>
     private int _totalCapacity;
     private int _usedCapacity;
 
-    /// <summary>已注册的仓库实例及其容量（键：仓库建筑实例，值：该仓库提供的容量）。</summary>
-    private readonly Dictionary<BuildingInstance, int> _warehouses = new Dictionary<BuildingInstance, int>();
+    /// <summary>
+    /// 容量提供者：
+    /// 键：建筑实例；值：该建筑当前提供的容量。
+    /// 满足 Runtime_StorageCapacity > 0 即可。
+    /// </summary>
+    private readonly Dictionary<BuildingInstance, int> _capacityProviders =
+        new Dictionary<BuildingInstance, int>();
 
-    /// <summary>按资源记录的生产者列表（谁在生产什么资源）。</summary>
-    private readonly Dictionary<SupplyDef, HashSet<BuildingInstance>> _producersByResource = new Dictionary<SupplyDef, HashSet<BuildingInstance>>();
+    /// <summary>
+    /// 转运节点：
+    /// 仅 CurrentTransportationAbility == true 的建筑。
+    /// 是否有容量无关。
+    /// </summary>
+    private readonly HashSet<BuildingInstance> _transportNodes =
+        new HashSet<BuildingInstance>();
 
-    /// <summary>按资源缓存的覆盖范围（可达格子集合）。</summary>
-    private readonly Dictionary<SupplyDef, HashSet<Vector3Int>> _coverageCache = new Dictionary<SupplyDef, HashSet<Vector3Int>>();
+    /// <summary>按资源记录的生产者列表。</summary>
+    private readonly Dictionary<SupplyDef, HashSet<BuildingInstance>> _producersByResource =
+        new Dictionary<SupplyDef, HashSet<BuildingInstance>>();
 
-    /// <summary>标记哪些资源的覆盖缓存已失效，需要重算。</summary>
+    /// <summary>按资源缓存的覆盖范围。</summary>
+    private readonly Dictionary<SupplyDef, HashSet<Vector3Int>> _coverageCache =
+        new Dictionary<SupplyDef, HashSet<Vector3Int>>();
+
+    /// <summary>标记哪些资源的覆盖需要重算。</summary>
     private readonly HashSet<SupplyDef> _dirtyCoverage = new HashSet<SupplyDef>();
 
+    /// <summary>供给链缓存：资源 -> (格子 -> 建筑链)。</summary>
+    private readonly Dictionary<SupplyDef, Dictionary<Vector3Int, List<BuildingInstance>>> _chainCache =
+        new Dictionary<SupplyDef, Dictionary<Vector3Int, List<BuildingInstance>>>();
 
+    private static readonly HashSet<Vector3Int> EmptyHashSet = new HashSet<Vector3Int>();
 
-    // 新增：每种资源的供给链路径缓存（键：格子，值：该格子对应的供给链建筑节点列表）
-    private readonly Dictionary<SupplyDef, Dictionary<Vector3Int, List<BuildingInstance>>> _chainCache
-        = new Dictionary<SupplyDef, Dictionary<Vector3Int, List<BuildingInstance>>>();
-
-    #region 公共API：资源增减
+    // ========= 资源增减 =========
 
     public int GetAmount(SupplyDef resource)
     {
-        if (resource == null)
-            return 0;
-
-        return _resourceAmounts.TryGetValue(resource, out var amount) ? amount : 0;
+        if (resource == null) return 0;
+        return _resourceAmounts.TryGetValue(resource, out var v) ? v : 0;
     }
-
-
-
-    /// <summary>
-    /// 尝试添加指定资源数量到网络中。
-    /// 若总容量不足以存放，则不添加并返回 false，同时给出失败原因。
-    /// </summary>
-    public bool TryAddResource(SupplyDef resource, int amount, out string reason)
-    {
-        reason = string.Empty;
-
-        if (resource == null || amount <= 0)
-        {
-            reason = "资源无效或数量必须为正数。";
-            return false;
-        }
-
-        int capacityNeeded = amount * resource.OccupationUnit;
-        int freeCapacity = _totalCapacity - _usedCapacity;
-
-        if (capacityNeeded > freeCapacity)
-        {
-            reason = $"容量不足：需要 {capacityNeeded}，当前剩余 {freeCapacity}。";
-            return false;
-        }
-
-        if (_resourceAmounts.TryGetValue(resource, out int current))
-        {
-            long newAmount = (long)current + amount;
-            if (newAmount > int.MaxValue)
-            {
-                reason = "库存溢出：数量过大。";
-                return false;
-            }
-            _resourceAmounts[resource] = (int)newAmount;
-        }
-        else
-        {
-            _resourceAmounts[resource] = amount;
-        }
-
-        _usedCapacity += capacityNeeded;
-        if (_usedCapacity < 0) _usedCapacity = 0;
-
-        return true;
-    }
-
-    /// <summary>
-    /// 尝试消耗指定资源数量。
-    /// 若库存不足，则不消耗并返回 false，给出原因。
-    /// </summary>
-    public bool TryConsumeResource(SupplyDef resource, int amount, out string reason)
-    {
-        reason = string.Empty;
-
-        if (resource == null || amount <= 0)
-        {
-            reason = "资源无效或数量必须为正数。";
-            return false;
-        }
-
-        if (!_resourceAmounts.TryGetValue(resource, out int current) || current < amount)
-        {
-            int available = current > 0 ? current : 0;
-            reason = $"库存不足：{resource.DisplayName} 仅有 {available}，需要 {amount}。";
-            return false;
-        }
-
-        int newAmount = current - amount;
-        if (newAmount <= 0)
-            _resourceAmounts.Remove(resource);
-        else
-            _resourceAmounts[resource] = newAmount;
-
-        int capacityFreed = amount * resource.OccupationUnit;
-        _usedCapacity -= capacityFreed;
-        if (_usedCapacity < 0) _usedCapacity = 0;
-
-        return true;
-    }
-
-    #endregion
-
-    #region 公共API：生产者 & 仓库注册
-
-
 
     public int GetFreeCapacity()
     {
@@ -135,14 +64,78 @@ public class ResourceNetwork
         return free > 0 ? free : 0;
     }
 
-    /// <summary>
-    /// 注册一个生产指定资源的生产者建筑。
-    /// 建议在建筑开始具备生产能力时调用。
-    /// </summary>
+    public bool TryAddResource(SupplyDef resource, int amount, out string reason)
+    {
+        reason = string.Empty;
+
+        if (resource == null || amount <= 0)
+        {
+            reason = "资源无效或数量必须为正数";
+            return false;
+        }
+
+        int need = amount * resource.OccupationUnit;
+        int free = _totalCapacity - _usedCapacity;
+        if (need > free)
+        {
+            reason = $"容量不足，需要 {need}，仅剩 {free}";
+            return false;
+        }
+
+        if (_resourceAmounts.TryGetValue(resource, out var current))
+        {
+            long nv = (long)current + amount;
+            if (nv > int.MaxValue)
+            {
+                reason = "数量过大，超出上限";
+                return false;
+            }
+            _resourceAmounts[resource] = (int)nv;
+        }
+        else
+        {
+            _resourceAmounts[resource] = amount;
+        }
+
+        _usedCapacity += need;
+        if (_usedCapacity < 0) _usedCapacity = 0;
+        return true;
+    }
+
+    public bool TryConsumeResource(SupplyDef resource, int amount, out string reason)
+    {
+        reason = string.Empty;
+
+        if (resource == null || amount <= 0)
+        {
+            reason = "资源无效或数量必须为正数";
+            return false;
+        }
+
+        if (!_resourceAmounts.TryGetValue(resource, out var current) || current < amount)
+        {
+            int have = current > 0 ? current : 0;
+            reason = $"库存不足：需要 {amount}，仅有 {have}";
+            return false;
+        }
+
+        int nv = current - amount;
+        if (nv <= 0)
+            _resourceAmounts.Remove(resource);
+        else
+            _resourceAmounts[resource] = nv;
+
+        int freed = amount * resource.OccupationUnit;
+        _usedCapacity -= freed;
+        if (_usedCapacity < 0) _usedCapacity = 0;
+        return true;
+    }
+
+    // ========= 生产者注册 =========
+
     public void RegisterProducer(BuildingInstance producer, SupplyDef resource)
     {
-        if (producer == null || resource == null)
-            return;
+        if (producer == null || resource == null) return;
 
         if (!_producersByResource.TryGetValue(resource, out var set))
         {
@@ -151,87 +144,94 @@ public class ResourceNetwork
         }
 
         if (set.Add(producer))
-        {
             InvalidateCoverage(resource);
-        }
     }
 
-    /// <summary>
-    /// 注销一个生产者建筑（建筑销毁、停产等）。
-    /// </summary>
     public void UnregisterProducer(BuildingInstance producer, SupplyDef resource)
     {
-        if (producer == null || resource == null)
-            return;
+        if (producer == null || resource == null) return;
 
-        if (_producersByResource.TryGetValue(resource, out var set))
+        if (_producersByResource.TryGetValue(resource, out var set)
+            && set.Remove(producer))
         {
-            if (set.Remove(producer))
-            {
-                InvalidateCoverage(resource);
-                if (set.Count == 0)
-                    _producersByResource.Remove(resource);
-            }
+            InvalidateCoverage(resource);
+            if (set.Count == 0)
+                _producersByResource.Remove(resource);
         }
     }
 
-    /// <summary>
-    /// 注册一个仓库建筑，从而增加全局容量，并影响覆盖范围（所有资源）。
-    /// </summary>
-    public void RegisterWarehouse(BuildingInstance warehouse)
+    // ========= 容量提供者注册 =========
+
+    /// <summary>注册 / 更新容量提供者（Runtime_StorageCapacity > 0）。</summary>
+    public void RegisterCapacityProvider(BuildingInstance building)
     {
-        if (warehouse == null) return;
+        if (building == null) return;
 
-        int capacity = GetBuildingCapacity(warehouse);
+        int capacity = Mathf.Max(0, building.Runtime_StorageCapacity);
         if (capacity <= 0)
-            return; // 不是仓库
-
-        if (_warehouses.TryGetValue(warehouse, out int old))
         {
-            if (old == capacity)
-                return;
+            UnregisterCapacityProvider(building);
+            return;
+        }
 
-            _warehouses[warehouse] = capacity;
+        if (_capacityProviders.TryGetValue(building, out var old))
+        {
+            if (old == capacity) return;
+            _capacityProviders[building] = capacity;
             _totalCapacity += (capacity - old);
         }
         else
         {
-            _warehouses.Add(warehouse, capacity);
+            _capacityProviders[building] = capacity;
             _totalCapacity += capacity;
         }
 
         if (_totalCapacity < 0) _totalCapacity = 0;
-
-        // 仓库位置变化会影响所有资源覆盖
-        InvalidateAllCoverage();
+        // 容量变化不影响覆盖，不用刷新覆盖。
     }
 
-    /// <summary>
-    /// 移除一个已注册的仓库建筑，减少全局容量，并影响覆盖范围（所有资源）。
-    /// </summary>
-    public void UnregisterWarehouse(BuildingInstance warehouse)
+    public void UnregisterCapacityProvider(BuildingInstance building)
     {
-        if (warehouse == null) return;
+        if (building == null) return;
 
-        if (_warehouses.TryGetValue(warehouse, out int capacity))
+        if (_capacityProviders.TryGetValue(building, out var cap))
         {
-            _warehouses.Remove(warehouse);
-            _totalCapacity -= capacity;
+            _capacityProviders.Remove(building);
+            _totalCapacity -= cap;
             if (_totalCapacity < 0) _totalCapacity = 0;
-
-            // 不强制删超出的资源，由设计决定；此处仅阻止继续增加。
-            InvalidateAllCoverage();
         }
     }
 
-    #endregion
+    // ========= 转运节点注册 =========
 
-    #region 公共API：覆盖 &可达性查询（带缓存）
+    /// <summary>注册转运节点（仅根据运输能力）。</summary>
+    public void RegisterTransportNode(BuildingInstance building)
+    {
+        if (building == null || !building.CurrentTransportationAbility)
+            return;
 
-    /// <summary>
-    /// 判断某格子是否能够接收到指定资源。
-    /// 结果使用覆盖缓存，如结构有变动才会重算。
-    /// </summary>
+        if (_transportNodes.Add(building))
+            InvalidateAllCoverage();
+    }
+
+    public void UnregisterTransportNode(BuildingInstance building)
+    {
+        if (building == null) return;
+
+        if (_transportNodes.Remove(building))
+            InvalidateAllCoverage();
+    }
+
+    /// <summary>当已注册转运点的位置 / 阻力变化时调用。</summary>
+    public void NotifyTransportNodeChanged(BuildingInstance building)
+    {
+        if (building == null) return;
+        if (_transportNodes.Contains(building))
+            InvalidateAllCoverage();
+    }
+
+    // ========= 覆盖查询 =========
+
     public bool CanCellReceive(SupplyDef resource, Vector3Int cell)
     {
         if (resource == null) return false;
@@ -239,173 +239,160 @@ public class ResourceNetwork
         return coverage.Contains(cell);
     }
 
-    /// <summary>
-    /// 获取指定资源当前可达的所有格子（缓存复用）。
-    /// 注意：返回的是内部集合引用，外部请只读使用，不要修改。
-    /// </summary>
     public HashSet<Vector3Int> GetCoverage(SupplyDef resource)
     {
         if (resource == null)
             return EmptyHashSet;
 
-        // 无生产者，直接空
-        if (!_producersByResource.TryGetValue(resource, out var producers) || producers.Count == 0)
+        if (!_producersByResource.TryGetValue(resource, out var producers)
+            || producers == null || producers.Count == 0)
         {
             _coverageCache[resource] = EmptyHashSet;
             _dirtyCoverage.Remove(resource);
+            _chainCache[resource] = new Dictionary<Vector3Int, List<BuildingInstance>>();
             return EmptyHashSet;
         }
 
-        // 有缓存且未标记为脏，则直接返回
-        if (_coverageCache.TryGetValue(resource, out var cached) && !_dirtyCoverage.Contains(resource))
+        if (_coverageCache.TryGetValue(resource, out var cached)
+            && !_dirtyCoverage.Contains(resource))
+        {
             return cached;
+        }
 
-        // 需要重算
         var computed = ComputeCoverage(resource, producers);
         _coverageCache[resource] = computed;
         _dirtyCoverage.Remove(resource);
         return computed;
     }
 
-    private static readonly HashSet<Vector3Int> EmptyHashSet = new HashSet<Vector3Int>();
+    // ========= 覆盖计算（核心：生产者 + 转运节点） =========
 
-    #endregion
-
-    #region 覆盖计算实现
-
-    /// <summary>
-    /// 实际计算覆盖范围：
-    /// 从所有生产者出发，以资源运输半径扩散；
-    /// 在半径内连到仓库则作为中继点继续扩散，实现“仓库链路扩展”。
-    /// </summary>
     private HashSet<Vector3Int> ComputeCoverage(SupplyDef resource, HashSet<BuildingInstance> producers)
     {
         var result = new HashSet<Vector3Int>();
-        var cellChainMap = new Dictionary<Vector3Int, List<BuildingInstance>>(); // 临时映射格子到供给链
+        var cellChainMap = new Dictionary<Vector3Int, List<BuildingInstance>>();
 
         int radius = resource.BaseTransportationRadius;
         int maxDurability = resource.BaseDurability;
-        if (radius <= 0 || maxDurability <= 0 || producers == null)
+        if (radius <= 0 || maxDurability <= 0)
         {
             _chainCache[resource] = new Dictionary<Vector3Int, List<BuildingInstance>>();
             return result;
         }
 
-        // 最短耗损记录：存储每个仓库被访问的最低耗损值
         var bestCost = new Dictionary<BuildingInstance, int>();
         var queue = new Queue<(BuildingInstance node, int cost, List<BuildingInstance> path)>();
 
-        // 1. 所有生产者作为起点（耗损0）
+        // 1. 所有生产者作为起点（耗损 0）
         foreach (var producer in producers)
         {
             if (producer == null) continue;
+
             var startPath = new List<BuildingInstance> { producer };
             queue.Enqueue((producer, 0, startPath));
 
-            // 覆盖生产者半径范围
-            Vector3Int centerCell = ToCell(producer.CurrentCenterInGrid);
+            var centerCell = ToCell(producer.CurrentCenterInGrid);
             MarkCoverageWithChain(centerCell, radius, startPath, result, cellChainMap);
         }
 
-        // 2. 宽度优先搜索传播链路
+        // 固定一份转运节点列表
+        var nodes = new List<BuildingInstance>(_transportNodes);
+
+        // 2. BFS：只在转运节点之间跳转
         while (queue.Count > 0)
         {
             var (current, costSoFar, pathSoFar) = queue.Dequeue();
-            Vector3Int currentCenter = ToCell(current.CurrentCenterInGrid);
+            var currentCenter = ToCell(current.CurrentCenterInGrid);
 
-            // 尝试从当前节点连接下一个仓库
-            foreach (KeyValuePair<BuildingInstance, int> kv in _warehouses)
+            foreach (var node in nodes)
             {
-                BuildingInstance warehouse = kv.Key;
-                if (warehouse == null) continue;
-                if (current == warehouse) continue; // 跳过自身
-                // 如果此仓库已以更低或相等耗损访问过，则跳过
-                if (bestCost.TryGetValue(warehouse, out int prevCost) && prevCost <= costSoFar + kv.Value/*或WarehouseComponent方式获取*/)
+                if (node == null || node == current)
                     continue;
 
-                // 判断距离是否在运输半径内
-                int dist = GridDistance(currentCenter, ToCell(warehouse.CurrentCenterInGrid));
-                if (dist > radius) continue;
+                int dist = GridDistance(currentCenter, ToCell(node.CurrentCenterInGrid));
+                if (dist > radius)
+                    continue;
 
-                // 计算经过该仓库的耗损
-                int wCost = 1;
-                bool comp = warehouse.CurrentLevelData.TransportationCapacity(warehouse);
-                if (comp) wCost = warehouse.CurrentLevelData.GetTransportationResistance(warehouse);
-                int newCost = costSoFar + wCost;
+                int resistance = Mathf.Max(1, node.CurrentTransportationResistance);
+                int newCost = costSoFar + resistance;
+                if (newCost > maxDurability)
+                    continue;
 
-                // 耐久度是否超限
-                if (newCost > maxDurability) continue;
+                if (bestCost.TryGetValue(node, out var prev) && prev <= newCost)
+                    continue;
 
-                // 更新该仓库的最优耗损并加入队列
-                bestCost[warehouse] = newCost;
-                // 构建新的供给链路径
-                var newPath = new List<BuildingInstance>(pathSoFar) { warehouse };
-                queue.Enqueue((warehouse, newCost, newPath));
+                bestCost[node] = newCost;
 
-                // 以该仓库为中心继续扩散覆盖，并记录链路
-                Vector3Int wCenterCell = ToCell(warehouse.CurrentCenterInGrid);
-                MarkCoverageWithChain(wCenterCell, radius, newPath, result, cellChainMap);
+                var newPath = new List<BuildingInstance>(pathSoFar) { node };
+                queue.Enqueue((node, newCost, newPath));
+
+                var nodeCenter = ToCell(node.CurrentCenterInGrid);
+                MarkCoverageWithChain(nodeCenter, radius, newPath, result, cellChainMap);
             }
         }
 
-        // 保存格子到链路的映射结果以供查询
         _chainCache[resource] = cellChainMap;
         return result;
     }
 
-
-
-    /// <summary>
-    /// 标记指定中心半径内的格子为可达，并记录每个格子的供给链路径。
-    /// </summary>
-    private void MarkCoverageWithChain(Vector3Int center, int radius, List<BuildingInstance> chainPath,
-                                       HashSet<Vector3Int> resultSet,
-                                       Dictionary<Vector3Int, List<BuildingInstance>> cellChainMap)
+    private void MarkCoverageWithChain(
+        Vector3Int center,
+        int radius,
+        List<BuildingInstance> chainPath,
+        HashSet<Vector3Int> resultSet,
+        Dictionary<Vector3Int, List<BuildingInstance>> cellChainMap)
     {
         int cx = center.x;
         int cy = center.y;
+
         for (int dx = -radius; dx <= radius; dx++)
         {
             for (int dy = -radius; dy <= radius; dy++)
             {
-                if (Mathf.Abs(dx) + Mathf.Abs(dy) <= radius)
-                {
-                    Vector3Int cell = new Vector3Int(cx + dx, cy + dy, 0);
-                    // 添加到覆盖结果
-                    resultSet.Add(cell);
-                    // 若该格子尚未记录链路，则记录当前链路
-                    if (!cellChainMap.ContainsKey(cell))
-                    {
-                        cellChainMap[cell] = new List<BuildingInstance>(chainPath);
-                    }
-                }
+                if (Mathf.Abs(dx) + Mathf.Abs(dy) > radius)
+                    continue;
+
+                var cell = new Vector3Int(cx + dx, cy + dy, 0);
+                resultSet.Add(cell);
+
+                if (!cellChainMap.ContainsKey(cell))
+                    cellChainMap[cell] = new List<BuildingInstance>(chainPath);
             }
         }
     }
 
-
-
-
     public List<BuildingInstance> GetSupplyChainPath(SupplyDef resource, Vector3Int cell)
     {
         if (resource == null) return null;
-        // 确保覆盖已计算（如未计算则计算）
+
         var coverage = GetCoverage(resource);
         if (!coverage.Contains(cell))
-            return null; // 不可达
+            return null;
 
-        if (_chainCache.TryGetValue(resource, out var cellMap) &&
-            cellMap.TryGetValue(cell, out var chainPath))
+        if (_chainCache.TryGetValue(resource, out var map)
+            && map.TryGetValue(cell, out var path))
         {
-            // 返回链路拷贝，避免外部修改内部列表
-            return new List<BuildingInstance>(chainPath);
+            return new List<BuildingInstance>(path);
         }
+
         return null;
     }
 
-    /// <summary>
-    /// 将世界坐标/浮点网格坐标转换为格子坐标（向最近格取整）。
-    /// </summary>
+    // ========= 工具 & 缓存 =========
+
+    private void InvalidateCoverage(SupplyDef resource)
+    {
+        if (resource == null) return;
+        _dirtyCoverage.Add(resource);
+    }
+
+    private void InvalidateAllCoverage()
+    {
+        _coverageCache.Clear();
+        _dirtyCoverage.Clear();
+        _chainCache.Clear();
+    }
+
     private Vector3Int ToCell(Vector3 pos)
     {
         return new Vector3Int(
@@ -414,105 +401,22 @@ public class ResourceNetwork
             0);
     }
 
-    /// <summary>
-    /// 标记以某个中心为起点、指定曼哈顿半径内的所有格子为可达。
-    /// （如果你有更精细的寻路代价，可在这里替换实现）
-    /// </summary>
-    private void MarkCoverage(Vector3Int center, int radius, HashSet<Vector3Int> resultSet)
-    {
-        int cx = center.x;
-        int cy = center.y;
-
-        for (int dx = -radius; dx <= radius; dx++)
-        {
-            for (int dy = -radius; dy <= radius; dy++)
-            {
-                if (Mathf.Abs(dx) + Mathf.Abs(dy) <= radius)
-                {
-                    resultSet.Add(new Vector3Int(cx + dx, cy + dy, 0));
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// 计算两个格子间的曼哈顿距离。
-    /// </summary>
     private int GridDistance(Vector3Int a, Vector3Int b)
     {
         return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
     }
 
-    #endregion
+    // ========= 可视化调试 =========
 
-    #region 工具 & 缓存失效
-
-    /// <summary>
-    /// 获取建筑实例的容量（当前等级的 BaseStorageCapacity），非仓库则为0。
-    /// </summary>
-    private int GetBuildingCapacity(BuildingInstance building)
-    {
-        if (building == null || building.Def == null)
-            return 0;
-
-        var levels = building.Def.Levels;
-        if (levels == null || building.CurrrentLevelIndex < 0 || building.CurrrentLevelIndex >= building.Def.Levels.Count)
-            return 0;
-
-        var levelDef = levels[building.CurrrentLevelIndex];
-        if (levelDef == null)
-            return 0;
-
-        return Mathf.Max(0, levelDef.GetStorageCapacity(building));
-    }
-
-    /// <summary>
-    /// 标记某资源的覆盖缓存失效。
-    /// </summary>
-    private void InvalidateCoverage(SupplyDef resource)
-    {
-        if (resource == null) return;
-        _dirtyCoverage.Add(resource);
-    }
-
-    /// <summary>
-    /// 标记所有资源的覆盖缓存失效。
-    /// 仓库结构变化时调用。
-    /// </summary>
-    private void InvalidateAllCoverage()
-    {
-        _coverageCache.Clear();
-        _dirtyCoverage.Clear();
-    }
-
-    #endregion
-
-
-
-
-
-    #region 可视化 / 调试
-
-    /// <summary>
-    /// 高亮展示指定资源当前的可达范围。
-    /// - 使用 ResourceNetwork 的覆盖缓存（GetCoverage）
-    /// - 使用 GridSystem 的特效图层高亮
-    /// </summary>
-    /// <param name="resource">要展示的资源类型</param>
-    /// <param name="tile">
-    /// 可选：指定高亮用的 Tile。
-    /// 若为 null，则使用 GridSystem 中配置的默认高亮 Tile。
-    /// </param>
     public void HighlightCoverage(SupplyDef resource, TileBase tile = null)
     {
         var grid = GridSystem.Instance;
         if (grid == null)
         {
-            Debug.LogWarning("[ResourceNetwork] HighlightCoverage 调用失败：找不到 GridSystem 实例。");
+            Debug.LogWarning("[ResourceNetwork] HighlightCoverage 失败：GridSystem 实例不存在");
             return;
         }
 
-        // 未指定资源：理解为清理高亮
         if (resource == null)
         {
             grid.ClearHighlight();
@@ -520,8 +424,6 @@ public class ResourceNetwork
         }
 
         var coverage = GetCoverage(resource);
-
-        // 没有覆盖：清理高亮即可，避免残影
         if (coverage == null || coverage.Count == 0)
         {
             grid.ClearHighlight();
@@ -529,19 +431,8 @@ public class ResourceNetwork
         }
 
         if (tile != null)
-        {
             grid.SetHighlight(coverage, tile);
-        }
         else
-        {
-            // 使用 GridSystem 的默认 visualizationTile
             grid.SetHighlight(coverage);
-        }
     }
-
-    #endregion
-
-
-
-
 }

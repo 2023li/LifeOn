@@ -30,21 +30,14 @@ MonoBehaviour:
     BaseStorageCapacity: 0
     EnableStatModifier_StorageCapacity: 0
     SM_StorageCapacity: []
-    ExpToNext: 3
-    EnableStatModifier_ExpToNext: 0
     SM_ExpToNext: []
-    TransportationCondition:
-      rid: 7980267684381065216
-    BaseTransportationResistance: 3
-    EnableStatModifier_TransportationResistance: 0
-    SM_TransportationResistance: []
     BaseMaxJobs: 0
     EnableStatModifier_MaxJobs: 0
     SM_MaxJobs: []
+    TransportationCondition:
+      rid: 7980267684381065216
+    SM_TransportationResistance: []
     BaseAttractivenessPerJob: 0
-    ConditionsForAllowingUpgrades: []
-    Rules:
-    - rid: 1546075644629090321
     ViewConfig:
       DefaultAnimatorState: LV0
       DefaultAnimatorTrigger: 
@@ -52,29 +45,23 @@ MonoBehaviour:
       PersistentParticlePrefab: {fileID: 0}
       UpgradeEffectPrefab: {fileID: 0}
       ChildPrefab: {fileID: 0}
+    ConditionsForAllowingUpgrades: []
+    Rules:
+    - rid: 1546075644629090321
   - BaseMaxPopulation: 5
     EnableStatModifier_MaxPopulation: 0
     SM_Population: []
     BaseStorageCapacity: 0
     EnableStatModifier_StorageCapacity: 0
     SM_StorageCapacity: []
-    ExpToNext: 10
-    EnableStatModifier_ExpToNext: 0
     SM_ExpToNext: []
-    TransportationCondition:
-      rid: -2
-    BaseTransportationResistance: 3
-    EnableStatModifier_TransportationResistance: 0
-    SM_TransportationResistance: []
     BaseMaxJobs: 0
     EnableStatModifier_MaxJobs: 0
     SM_MaxJobs: []
+    TransportationCondition:
+      rid: -2
+    SM_TransportationResistance: []
     BaseAttractivenessPerJob: 0
-    ConditionsForAllowingUpgrades:
-    - rid: 1546075644629090322
-    Rules:
-    - rid: 1546075644629090323
-    - rid: 1546075644629090324
     ViewConfig:
       DefaultAnimatorState: LV1
       DefaultAnimatorTrigger: 
@@ -82,6 +69,11 @@ MonoBehaviour:
       PersistentParticlePrefab: {fileID: 0}
       UpgradeEffectPrefab: {fileID: 0}
       ChildPrefab: {fileID: 0}
+    ConditionsForAllowingUpgrades:
+    - rid: 1546075644629090322
+    Rules:
+    - rid: 1546075644629090323
+    - rid: 1546075644629090324
   references:
     version: 2
     RefIds:
@@ -169,4 +161,3 @@ MonoBehaviour:
         Amount: 1
     - rid: 7980267684381065216
       type: {class: NeverNo, ns: , asm: Assembly-CSharp}
-      data: 

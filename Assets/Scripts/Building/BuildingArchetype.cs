@@ -80,186 +80,34 @@ public class BuildingLevelDef
 {
     // —— 基础属性（根据建筑不同使用其子集）——
     [SerializeField,HorizontalGroup("人口"),LabelText("基础最大人口")]
-    private int BaseMaxPopulation;   // 人口上限基础值（居民类）
-    [SerializeField, HorizontalGroup("人口"), LabelText("启用修饰")]
-    private bool EnableStatModifier_MaxPopulation = false;
-
-    [SerializeReference,ShowIf(nameof(EnableStatModifier_MaxPopulation)),LabelText("人口修饰")]
-    private List<StatModifier> SM_Population;
-    public int GetMaxPopulation(BuildingInstance self)
-    {
-        int value = BaseMaxPopulation;
-
-        if (EnableStatModifier_MaxPopulation && SM_Population != null)
-        {
-            for (int i = 0; i < SM_Population.Count; i++)
-            {
-                var modifier = SM_Population[i];
-                if (modifier != null)
-                {
-                    value = modifier.Modify(self, self.Ctx, value);
-                }
-            }
-        }
-
-        // 最大人口不允许为负，做一下下限保护
-        return Mathf.Max(0, value);
-    }
+    public int BaseMaxPopulation;   // 人口上限基础值（居民类）
+  
+  
 
 
 
     [SerializeField,HorizontalGroup("库存容量"),LabelText("仓库容量"),Tooltip("提供的全局容量增量")]
-    private int BaseStorageCapacity;     // 仓库容量（仓库类）
-    [SerializeField, HorizontalGroup("库存容量"), LabelText("启用修饰")]
-    private bool EnableStatModifier_StorageCapacity = false;
-    [SerializeReference, ShowIf(nameof(EnableStatModifier_StorageCapacity)), LabelText("容量修饰")]
-    private List<StatModifier> SM_StorageCapacity;
-    public int GetStorageCapacity(BuildingInstance self)
-    {
-        int value = BaseStorageCapacity;
-
-        if (EnableStatModifier_StorageCapacity && SM_StorageCapacity != null)
-        {
-            for (int i = 0; i < SM_StorageCapacity.Count; i++)
-            {
-                var modifier = SM_StorageCapacity[i];
-                if (modifier != null)
-                {
-                    value = modifier.Modify(self,self.Ctx, value);
-                }
-            }
-        }
-
-        // 仓库容量同样不允许为负
-        return Mathf.Max(0, value);
-    }
+    public int BaseStorageCapacity;     // 仓库容量（仓库类）
+   
+  
 
 
     [LabelText("升级所需经验"),HorizontalGroup("EXP")]
-    private int ExpToNext = -1;      // 升级需要经验；-1 表示最高级
-    [LabelText("启用修饰"),HorizontalGroup("EXP")]
-    private bool EnableStatModifier_ExpToNext = false;
-    [SerializeReference, ShowIf(nameof(EnableStatModifier_ExpToNext)), LabelText("升级经验修饰")]
-    private List<StatModifier> SM_ExpToNext;
-    /// <summary>
-    /// 获取应用修饰后的升级所需经验。
-    /// 若基础值为 -1，视为已满级，不再应用修饰，直接返回 -1。
-    /// </summary>
-    public int GetExpToNext(BuildingInstance self)
-    {
-        if (ExpToNext < 0)
-        {
-            return -1;
-        }
-
-        int value = ExpToNext;
-
-        if (EnableStatModifier_ExpToNext && SM_ExpToNext != null)
-        {
-            for (int i = 0; i < SM_ExpToNext.Count; i++)
-            {
-                var modifier = SM_ExpToNext[i];
-                if (modifier != null)
-                {
-                    value = modifier.Modify(self, self.Ctx, value);
-                }
-            }
-        }
-
-        // 升级经验至少为 1，避免被减成 0 或负数导致升级逻辑异常
-        return Mathf.Max(1, value);
-    }
-
+    public int ExpToNext = -1;      // 升级需要经验；-1 表示最高级
+ 
+   
 
 
 
     [SerializeField, LabelText("基础最大岗位"), HorizontalGroup("岗位")]
-    private int BaseMaxJobs;
+    public int BaseMaxJobs;
 
-    [SerializeField, LabelText("启用修饰"), HorizontalGroup("岗位")]
-    private bool EnableStatModifier_MaxJobs = false;
-    [SerializeReference, ShowIf(nameof(EnableStatModifier_MaxJobs)), LabelText("岗位数量修饰")]
-    private List<StatModifier> SM_MaxJobs;
-    /// <summary>
-    /// 获取应用修饰后的最大岗位数。
-    /// </summary>
-    public int GetMaxJobs(BuildingInstance self)
-    {
-        int value = BaseMaxJobs;
-
-        if (EnableStatModifier_MaxJobs && SM_MaxJobs != null)
-        {
-            for (int i = 0; i < SM_MaxJobs.Count; i++)
-            {
-                var modifier = SM_MaxJobs[i];
-                if (modifier != null)
-                {
-                    value = modifier.Modify(self, self.Ctx, value);
-                }
-            }
-        }
-
-        // 岗位数量至少为 0
-        return Mathf.Max(0, value);
-    }
+   
 
 
-
-    [SerializeReference,HorizontalGroup("转运能力"),LabelText("物资转运能力")]
-    private Condition TransportationCondition;
-    [LabelText("转运代价"), HorizontalGroup("转运能力"),ShowIf("@TransportationCondition != null")]
-    private int BaseTransportationResistance = 3;
-    [LabelText("启用修饰"), HorizontalGroup("转运能力"), ShowIf("@TransportationCondition != null")]
-    private bool EnableStatModifier_TransportationResistance = false;
-    [LabelText("转运代价修饰"), ShowIf(nameof(EnableStatModifier_TransportationResistance)),SerializeReference]
-    private List<StatModifier> SM_TransportationResistance;
-
-    //转运阻力
-    public int GetTransportationResistance(BuildingInstance self)
-    {
-        if (BaseTransportationResistance < 1)
-        {
-           
-            return 1;
-        }
-
-        int value = BaseTransportationResistance;
-
-        if (EnableStatModifier_TransportationResistance && SM_TransportationResistance != null)
-        {
-            for (int i = 0; i < SM_TransportationResistance.Count; i++)
-            {
-                var modifier = SM_TransportationResistance[i];
-                if (modifier != null)
-                {
-                    value = modifier.Modify(self, self.Ctx, value);
-                }
-            }
-        }
-
-        // 升级经验至少为 1，避免被减成 0 或负数导致升级逻辑异常
-        return Mathf.Max(1, value);
-    }
-
-    //转运能力
-    public bool TransportationCapacity(BuildingInstance self)
-    {
-        bool b =  TransportationCondition.Evaluate(self,self.Ctx,out string why);
-        if (!b&&!string.IsNullOrEmpty(why))
-        {
-            Debug.LogWarning(why, self.gameObject);
-        }
-        return b;
-
-    }
-
-
-
-
-
-  
-
-
+    [LabelText("转运代价"), HorizontalGroup("转运能力")]
+    public int BaseTransportationResistance = 3;
+   
 
     [LabelText("基础岗位吸引力")]
     public float BaseAttractivenessPerJob = 0f;
