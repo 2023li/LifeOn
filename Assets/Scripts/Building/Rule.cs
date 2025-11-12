@@ -4,19 +4,12 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 
 
-public enum RuleExecuteTime
-{
-    规则启用时,
 
-    每回合执行,
-
-    拆除时执行,
-}
 
 [Serializable]
-public abstract class Rule
+public abstract class Rule:ICloneable
 {
-    public  virtual string ElementLabel { get; set; } = "未命名";
+    public  virtual string RuleName { get; set; } = "未命名";
 
 
 
@@ -38,13 +31,18 @@ public abstract class Rule
 
     }
 
-    
+    public abstract object Clone();
+  
 }
 
 
 
 public class R_就业 : Rule
 {
+    public override object Clone()
+    {
+        return new R_就业();
+    }
 
     public override void OnUpdate(BuildingInstance self, TurnPhase phase)
     {

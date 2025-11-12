@@ -11,63 +11,45 @@ public class HumanResourcesNetwork
     public int TotalWorkers => _totalWork;
     public int Unemployed => Mathf.Max(0, _totalPop - _totalWork);
 
-    public void RegisterOrUpdate(BuildingInstance b)
+
+    public void Register(BuildingInstance building)
     {
-        if (b == null) return;
-        int newPop = Mathf.Max(0, b.CurrentPopulation);
-        int newWk = Mathf.Clamp(b.CurrentWorkers, 0, newPop);
-
-        if (newPop == 0 && newWk == 0) { Unregister(b); return; }
-
-        int oldPop = _pop.TryGetValue(b, out var p) ? p : 0;
-        int oldWk = _work.TryGetValue(b, out var w) ? w : 0;
-
-        _pop[b] = newPop;
-        _work[b] = newWk;
-        _totalPop += (newPop - oldPop);
-        _totalWork += (newWk - oldWk);
-        if (_totalPop < 0) _totalPop = 0;
-        if (_totalWork < 0) _totalWork = 0;
+        if (!_pop.ContainsKey(building))
+        {
+            _pop.Add(building, building.CurrentPopulation);
+        }
+        if (!_work.ContainsKey(building))
+        {
+            _work.Add(building,building.CurrentWorkers);
+        }
+        building.OnStateChanged += Handle_BuildingStateChange;
+    }
+    public void UnRegister(BuildingInstance building)
+    {
+        if (_pop.ContainsKey(building))
+        {
+            _pop.Remove(building);
+        }
+        if (_work.ContainsKey(building))
+        {
+            _work.Remove(building);
+        }
+        building.OnStateChanged -= Handle_BuildingStateChange;
     }
 
-    public void Unregister(BuildingInstance b)
+
+
+    private void Handle_BuildingStateChange(BuildingInstance building,BuildingStateValueType type)
     {
-        if (b == null) return;
-        if (_pop.TryGetValue(b, out var pop)) { _totalPop -= pop; _pop.Remove(b); }
-        if (_work.TryGetValue(b, out var wk)) { _totalWork -= wk; _work.Remove(b); }
-        if (_totalPop < 0) _totalPop = 0;
-        if (_totalWork < 0) _totalWork = 0;
+        switch (type)
+        { 
+            case BuildingStateValueType.CurrentPopulation:
+                break;
+            case BuildingStateValueType.CurrentWorkers:
+                break;
+
+        }
     }
 
-    public int TryAssignWorkers(BuildingInstance b, int request)
-    {
-        if (b == null || request <= 0) return 0;
-        int pop = _pop.TryGetValue(b, out var p) ? p : 0;
-        int cur = _work.TryGetValue(b, out var w) ? w : 0;
 
-        int room = Mathf.Max(0, pop - cur);
-        int take = Mathf.Clamp(request, 0, Mathf.Min(Unemployed, room));
-        if (take <= 0) return 0;
-
-        b.CurrentWorkers = cur + take; // 由属性触发 RegisterOrUpdate
-        return take;
-    }
-
-    public int ReleaseWorkers(BuildingInstance b, int count)
-    {
-        if (b == null || count <= 0) return 0;
-        int cur = _work.TryGetValue(b, out var w) ? w : 0;
-        int rel = Mathf.Clamp(count, 0, cur);
-        if (rel <= 0) return 0;
-
-        b.CurrentWorkers = cur - rel; // 由属性触发 RegisterOrUpdate
-        return rel;
-    }
-
-    public (int population, int workers) GetBuildingStats(BuildingInstance b)
-    {
-        int pop = _pop.TryGetValue(b, out var p) ? p : 0;
-        int wk = _work.TryGetValue(b, out var w) ? w : 0;
-        return (pop, wk);
-    }
 }

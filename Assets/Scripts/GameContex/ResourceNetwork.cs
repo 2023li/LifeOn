@@ -20,7 +20,7 @@ public class ResourceNetwork
     /// <summary>
     /// 容量提供者：
     /// 键：建筑实例；值：该建筑当前提供的容量。
-    /// 满足 Runtime_StorageCapacity > 0 即可。
+    /// 满足 RO_MaxStorageCapacity > 0 即可。
     /// </summary>
     private readonly Dictionary<BuildingInstance, int> _capacityProviders =
         new Dictionary<BuildingInstance, int>();
@@ -162,12 +162,12 @@ public class ResourceNetwork
 
     // ========= 容量提供者注册 =========
 
-    /// <summary>注册 / 更新容量提供者（Runtime_StorageCapacity > 0）。</summary>
+    /// <summary>注册 / 更新容量提供者（RO_MaxStorageCapacity > 0）。</summary>
     public void RegisterCapacityProvider(BuildingInstance building)
     {
         if (building == null) return;
 
-        int capacity = Mathf.Max(0, building.Runtime_StorageCapacity);
+        int capacity = Mathf.Max(0, building.RO_MaxStorageCapacity);
         if (capacity <= 0)
         {
             UnregisterCapacityProvider(building);
@@ -313,7 +313,7 @@ public class ResourceNetwork
                 if (dist > radius)
                     continue;
 
-                int resistance = Mathf.Max(1, node.CurrentTransportationResistance);
+                int resistance = Mathf.Max(1, node.RO_TransportationResistance);
                 int newCost = costSoFar + resistance;
                 if (newCost > maxDurability)
                     continue;

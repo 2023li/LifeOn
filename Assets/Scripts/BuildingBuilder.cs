@@ -262,8 +262,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
             Vector3 centerVector = new Vector3(center.x, center.y, 0f);
 
 
-            b.ConfigurePlacement(occupy, centerVector, centerIsCorner, footprintSize);
-            b.Initialize(currentBuildDef);
+            b.Initialize(currentBuildDef, occupy, centerVector, centerIsCorner);
         }
         else
         {
@@ -377,8 +376,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
             footprintSize = buildingDef.Size;
         }
 
-        go.ConfigurePlacement(occupyCells.ToArray(), new Vector3(center.x, center.y, 0f), centerIsCorner, footprintSize);
-        go.Initialize(buildingDef);
+        go.Initialize(buildingDef, occupyCells.ToArray(), new Vector3(center.x, center.y, 0f), centerIsCorner);
 
         return true;
     }
