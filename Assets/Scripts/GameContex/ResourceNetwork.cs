@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -8,6 +9,9 @@ using UnityEngine.Tilemaps;
 /// </summary>
 public class ResourceNetwork
 {
+
+
+    public event Action OnResourceNetworkStateChange;
     // ========= 基础数据 =========
 
     /// <summary>全局资源库存：按资源类型存储当前数量。</summary>
@@ -17,21 +21,23 @@ public class ResourceNetwork
     private int _totalCapacity;
     private int _usedCapacity;
 
+    public int TotalCapacity { get { return _totalCapacity; } }
+    public int UsedCapacity { get { return _usedCapacity; } }
+
     /// <summary>
     /// 容量提供者：
     /// 键：建筑实例；值：该建筑当前提供的容量。
     /// 满足 RO_MaxStorageCapacity > 0 即可。
     /// </summary>
-    private readonly Dictionary<BuildingInstance, int> _capacityProviders =
-        new Dictionary<BuildingInstance, int>();
+    private readonly Dictionary<BuildingInstance, int> _capacityProviders = new Dictionary<BuildingInstance, int>();
 
     /// <summary>
     /// 转运节点：
-    /// 仅 CurrentTransportationAbility == true 的建筑。
-    /// 是否有容量无关。
+    /// 用字典记录是否允许转运：
+    ///   key  = 建筑
+    ///   value = 当前帧是否允许作为转运节点（CurrentTransportationAbility）
     /// </summary>
-    private readonly HashSet<BuildingInstance> _transportNodes =
-        new HashSet<BuildingInstance>();
+    private readonly Dictionary<BuildingInstance, bool> _transportNodes = new Dictionary<BuildingInstance, bool>();
 
     /// <summary>按资源记录的生产者列表。</summary>
     private readonly Dictionary<SupplyDef, HashSet<BuildingInstance>> _producersByResource =
@@ -58,6 +64,10 @@ public class ResourceNetwork
         return _resourceAmounts.TryGetValue(resource, out var v) ? v : 0;
     }
 
+    /// <summary>
+    /// 获取可用库存
+    /// </summary>
+    /// <returns>可用库存</returns>
     public int GetFreeCapacity()
     {
         int free = _totalCapacity - _usedCapacity;
@@ -99,6 +109,9 @@ public class ResourceNetwork
 
         _usedCapacity += need;
         if (_usedCapacity < 0) _usedCapacity = 0;
+
+        OnResourceNetworkStateChange?.Invoke();
+
         return true;
     }
 
@@ -145,6 +158,9 @@ public class ResourceNetwork
 
         if (set.Add(producer))
             InvalidateCoverage(resource);
+
+        OnResourceNetworkStateChange?.Invoke();
+
     }
 
     public void UnregisterProducer(BuildingInstance producer, SupplyDef resource)
@@ -160,74 +176,158 @@ public class ResourceNetwork
         }
     }
 
-    // ========= 容量提供者注册 =========
+    // ========= 建筑注册 / 反注册 =========
 
-    /// <summary>注册 / 更新容量提供者（RO_MaxStorageCapacity > 0）。</summary>
-    public void RegisterCapacityProvider(BuildingInstance building)
+    /// <summary>
+    /// 注册一个建筑到资源网络。
+    /// 同时作为：容量提供者 + 运输节点（由其当前运力决定是否参与路径计算）。
+    /// </summary>
+    public void Register(BuildingInstance building)
     {
-        if (building == null) return;
-
-        int capacity = Mathf.Max(0, building.RO_MaxStorageCapacity);
-        if (capacity <= 0)
-        {
-            UnregisterCapacityProvider(building);
+        if (building == null)
             return;
+
+        // ---- 容量提供者处理 ----
+        int newCapacity = Mathf.Max(0, building.RO_MaxStorageCapacity);
+
+        // 先移除旧记录，避免重复注册导致异常或容量叠加错误
+        if (_capacityProviders.TryGetValue(building, out var oldCapacity))
+        {
+            _totalCapacity -= oldCapacity;
+            _capacityProviders.Remove(building);
         }
 
-        if (_capacityProviders.TryGetValue(building, out var old))
+        // 只有容量>0 的建筑才视为仓库
+        if (newCapacity > 0)
         {
-            if (old == capacity) return;
-            _capacityProviders[building] = capacity;
-            _totalCapacity += (capacity - old);
-        }
-        else
-        {
-            _capacityProviders[building] = capacity;
-            _totalCapacity += capacity;
+            _capacityProviders[building] = newCapacity;
+            _totalCapacity += newCapacity;
         }
 
-        if (_totalCapacity < 0) _totalCapacity = 0;
-        // 容量变化不影响覆盖，不用刷新覆盖。
+        if (_totalCapacity < 0)
+            _totalCapacity = 0;
+
+        // ---- 运输节点处理 ----
+        bool canTransport = building.CurrentTransportationAbility;
+        _transportNodes[building] = canTransport;
+
+        // 建筑加入/离开网络都可能影响覆盖范围
+        ClearAllCoverage();
+
+        // 为了避免重复订阅，先尝试取消再订阅一次
+        building.OnStateChanged -= Handle_BuildingValueChange;
+        building.OnStateChanged += Handle_BuildingValueChange;
+
+
+        OnResourceNetworkStateChange?.Invoke();
     }
 
-    public void UnregisterCapacityProvider(BuildingInstance building)
+    /// <summary>
+    /// 将建筑从资源网络中移除。
+    /// </summary>
+    public void UnRegister(BuildingInstance building)
     {
-        if (building == null) return;
+        if (building == null)
+            return;
 
-        if (_capacityProviders.TryGetValue(building, out var cap))
+        // ---- 容量提供者移除 ----
+        if (_capacityProviders.TryGetValue(building, out var oldCapacity))
         {
             _capacityProviders.Remove(building);
-            _totalCapacity -= cap;
-            if (_totalCapacity < 0) _totalCapacity = 0;
+            _totalCapacity -= oldCapacity;
+            if (_totalCapacity < 0)
+                _totalCapacity = 0;
         }
+
+        // ---- 运输节点移除 ----
+        if (_transportNodes.ContainsKey(building))
+        {
+            _transportNodes.Remove(building);
+        }
+
+        ClearAllCoverage();
+
+        building.OnStateChanged -= Handle_BuildingValueChange;
+
+
+        OnResourceNetworkStateChange?.Invoke();
     }
 
-    // ========= 转运节点注册 =========
-
-    /// <summary>注册转运节点（仅根据运输能力）。</summary>
-    public void RegisterTransportNode(BuildingInstance building)
+    private void Handle_BuildingValueChange(BuildingInstance instance, BuildingStateValueType type)
     {
-        if (building == null || !building.CurrentTransportationAbility)
-            return;
+        switch (type)
+        {
+            // 等级变化：可能会间接影响多项数值（容量、运力等）
+            // 这里不直接处理，由具体数值事件来刷新。
+            case BuildingStateValueType.LevelIndex:
+                break;
 
-        if (_transportNodes.Add(building))
-            InvalidateAllCoverage();
+            case BuildingStateValueType.CurrentExp:
+            case BuildingStateValueType.ExpToNext:
+            case BuildingStateValueType.MaxPopulation:
+            case BuildingStateValueType.CurrentPopulation:
+            case BuildingStateValueType.CurrentWorkers:
+            case BuildingStateValueType.就业吸引力:
+                // 这些与资源网络无直接关系
+                break;
+
+            // 仓库容量变化
+            case BuildingStateValueType.MaxStorageCapacity:
+                {
+                    int newCap = Mathf.Max(0, instance.RO_MaxStorageCapacity);
+
+                    if (_capacityProviders.TryGetValue(instance, out var oldCap))
+                    {
+                        _totalCapacity -= oldCap;
+                        _capacityProviders.Remove(instance);
+                    }
+
+                    if (newCap > 0)
+                    {
+                        _capacityProviders[instance] = newCap;
+                        _totalCapacity += newCap;
+                    }
+
+                    if (_totalCapacity < 0)
+                        _totalCapacity = 0;
+
+                    break;
+                }
+
+            // 是否允许作为运输节点
+            case BuildingStateValueType.TransportationAbility:
+                {
+                    bool canTransport = instance.CurrentTransportationAbility;
+                    _transportNodes[instance] = canTransport;
+
+                    // 运力开关变化会改变可达范围
+                    ClearAllCoverage();
+                    break;
+                }
+
+            // 运输阻力变化
+            case BuildingStateValueType.TransportationResistance:
+                // 阻力影响可达路径与损耗，直接清空覆盖缓存
+                ClearAllCoverage();
+                break;
+        }
+
+
+        OnResourceNetworkStateChange?.Invoke();
     }
 
-    public void UnregisterTransportNode(BuildingInstance building)
-    {
-        if (building == null) return;
+    // ========= 转运节点位置/阻力变化通知 =========
 
-        if (_transportNodes.Remove(building))
-            InvalidateAllCoverage();
-    }
-
-    /// <summary>当已注册转运点的位置 / 阻力变化时调用。</summary>
+    /// <summary>
+    /// 当已注册转运点的位置 / 阻力变化时调用（例如建筑移动）。
+    /// </summary>
     public void NotifyTransportNodeChanged(BuildingInstance building)
     {
         if (building == null) return;
-        if (_transportNodes.Contains(building))
-            InvalidateAllCoverage();
+
+        // 仅当当前是有效的运输节点时才重算覆盖
+        if (_transportNodes.ContainsKey(building) && _transportNodes[building])
+            ClearAllCoverage();
     }
 
     // ========= 覆盖查询 =========
@@ -239,6 +339,8 @@ public class ResourceNetwork
         return coverage.Contains(cell);
     }
 
+   
+    // 获取覆盖范围
     public HashSet<Vector3Int> GetCoverage(SupplyDef resource)
     {
         if (resource == null)
@@ -295,8 +397,13 @@ public class ResourceNetwork
             MarkCoverageWithChain(centerCell, radius, startPath, result, cellChainMap);
         }
 
-        // 固定一份转运节点列表
-        var nodes = new List<BuildingInstance>(_transportNodes);
+        // 固定一份“有效”转运节点列表（只保留当前允许转运的建筑）
+        var nodes = new List<BuildingInstance>();
+        foreach (var kvp in _transportNodes)
+        {
+            if (kvp.Key != null && kvp.Value)
+                nodes.Add(kvp.Key);
+        }
 
         // 2. BFS：只在转运节点之间跳转
         while (queue.Count > 0)
@@ -386,7 +493,7 @@ public class ResourceNetwork
         _dirtyCoverage.Add(resource);
     }
 
-    private void InvalidateAllCoverage()
+    private void ClearAllCoverage()
     {
         _coverageCache.Clear();
         _dirtyCoverage.Clear();

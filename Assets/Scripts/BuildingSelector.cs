@@ -39,8 +39,6 @@ public class BuildingSelector : MonoBehaviour
 
         Vector3Int cell = GridSystem.Instance.GetScreenPointCoordinates(screenPoint);
 
-        Debug.Log(cell);
-
         if (BuildingInstance.TryGetAtCell(cell, out var building) && building?.CurrentOccupy?.Length > 0)
         {
             _current = building;

@@ -9,6 +9,9 @@ using UnityEngine.UI;
 public class UIPanel_GameMain : PanelBase
 {
 
+    private IGameContext ctx;
+
+
     [SerializeField, LabelText("Btn_打开建造")] private Button btn_打开建造;
 
     [SerializeField, LabelText("Btn_结束回合")] private Button btn_下回合;
@@ -44,15 +47,11 @@ public class UIPanel_GameMain : PanelBase
         btn_打开科技面板.onClick.AddListener(() =>
         {
             panel_科技面板.gameObject.SetActive(true);
-
-
-
         });
+
         btn_关闭科技面板.onClick.AddListener(() =>
         {
             panel_科技面板.gameObject.SetActive(false);
-
-
         });
 
 
@@ -68,8 +67,11 @@ public class UIPanel_GameMain : PanelBase
 
     private void Start()
     {
+        ctx = GameContext.Instance;
+
         Start_顶部HUD();
         OnStart_建筑信息();
+
     }
 
     private void OnDisable()
@@ -84,8 +86,14 @@ public class UIPanel_GameMain : PanelBase
     [FoldoutGroup("HUD"), SerializeField, LabelText("img_金币")] Image img_金币;
     [FoldoutGroup("HUD"), SerializeField, LabelText("txt_金币")] TMP_Text txt_金币;
 
+    [FoldoutGroup("HUD"), SerializeField, LabelText("img_库存")] Image img_库存;
+    [FoldoutGroup("HUD"), SerializeField, LabelText("txt_库存")] TMP_Text txt_库存;
+
+
+
     public void Start_顶部HUD()
     {
+        //监听回合变更
         TurnSystem.OnTurnPhaseChange += (p) =>
         {
             if (p==TurnPhase.开始准备阶段)
@@ -94,10 +102,12 @@ public class UIPanel_GameMain : PanelBase
             }
         };
 
+        GameContext.Instance.ResourceNetwork.OnResourceNetworkStateChange += () =>
+        {
+            txt_库存.text = $"库存：{ctx.ResourceNetwork.UsedCapacity}/{ctx.ResourceNetwork.TotalCapacity}";
+        };
 
-
-
-
+        txt_库存.text = $"库存：{ctx.ResourceNetwork.UsedCapacity}/{ctx.ResourceNetwork.TotalCapacity}";
     }
 
     #endregion

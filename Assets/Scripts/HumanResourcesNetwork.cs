@@ -1,15 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Linq;
+using System;
 public class HumanResourcesNetwork
 {
+    public event Action OnHumanResourcesChange;
+
     private readonly Dictionary<BuildingInstance, int> _pop = new();
     private readonly Dictionary<BuildingInstance, int> _work = new();
-    private int _totalPop, _totalWork;
 
-    public int TotalPopulation => _totalPop;
-    public int TotalWorkers => _totalWork;
-    public int Unemployed => Mathf.Max(0, _totalPop - _totalWork);
+    public int TotalPopulation => _pop.Values.Sum();
+    public int TotalWorkers => _work.Values.Sum();
+    public int Unemployed => Mathf.Max(0, TotalPopulation - TotalWorkers);
 
 
     public void Register(BuildingInstance building)
@@ -44,11 +46,22 @@ public class HumanResourcesNetwork
         switch (type)
         { 
             case BuildingStateValueType.CurrentPopulation:
+                if (_pop.ContainsKey(building))
+                {
+                    _pop[building] = building.CurrentPopulation;
+                }
+
                 break;
             case BuildingStateValueType.CurrentWorkers:
+
+                if (_work.ContainsKey(building))
+                {
+                    _work[building] = building.CurrentWorkers;
+                }
                 break;
 
         }
+        OnHumanResourcesChange?.Invoke();
     }
 
 

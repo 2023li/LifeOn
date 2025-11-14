@@ -11,7 +11,7 @@ public enum BuildingStateValueType
     MaxPopulation,
     CurrentPopulation,
     CurrentWorkers,
-    StorageCapacity,
+    MaxStorageCapacity,
     TransportationAbility,
     TransportationResistance,
     就业吸引力,
@@ -109,7 +109,7 @@ public class BuildingInstance : MonoBehaviour
 
     [LabelText("建筑定义数据")]
     public BuildingArchetype Def;
-    public string DisplayName => Def.DisplayName;
+    public string DisplayName =>Def==null? "未知数据" : Def.DisplayName;
 
 
     //----------------------------等级-----------------------------------
@@ -139,6 +139,10 @@ public class BuildingInstance : MonoBehaviour
     {
         get
         {
+            if (GetLevelData()==null)
+            {
+                return 0; 
+            }
             //计算基础值的修正
             float fBase = (GetLevelData().ExpToNext + statModifiers.Base_ExpToNextAdd) * statModifiers.Base_ExpToNextMul;
             float fBonus = statModifiers.Bonus_ExpToNextMul * statModifiers.Bonus_ExpToNextAdd;
@@ -155,6 +159,11 @@ public class BuildingInstance : MonoBehaviour
     {
         get
         {
+            if (GetLevelData() == null)
+            {
+                return 0;
+            }
+
             //计算基础值的修正
             float fBase = (GetLevelData().BaseMaxPopulation + statModifiers.Base_MaxPopulationAdd) * statModifiers.Base_MaxPopulationMul;
             float fBonus = statModifiers.Bonus_MaxPopulationAdd * statModifiers.Bonus_MaxPopulationMul;
@@ -182,14 +191,31 @@ public class BuildingInstance : MonoBehaviour
     private int _currentWorkers;
     public int CurrentWorkers
     {
+
+        set
+        {
+            if (value<=Ctx.HumanResourcesNetwork.Unemployed)
+            {
+                _currentWorkers = value;
+                OnStateChanged?.Invoke(this,BuildingStateValueType.CurrentWorkers);
+            }
+        }
+
         get => _currentWorkers;
     }
+
+
 
     [ShowInInspector, ReadOnly, LabelText("岗位吸引力")]
     public float CurrentJobAttractiveness
     {
         get
         {
+            if (GetLevelData() == null)
+            {
+                return 0;
+            }
+
             //计算基础值的修正
             float fBase = (GetLevelData().BaseAttractivenessPerJob + statModifiers.Base_JobAttractivenessAdd) * statModifiers.Base_JobAttractivenessMul;
             float fBonus = statModifiers.Bonus_JobAttractivenessAdd * statModifiers.Bonus_JobAttractivenessMul;
@@ -205,6 +231,11 @@ public class BuildingInstance : MonoBehaviour
     {
         get
         {
+            if (GetLevelData() == null)
+            {
+                return 0;
+            }
+
             //计算基础值的修正
             float fBase = (GetLevelData().BaseStorageCapacity + statModifiers.Base_StorageCapacityAdd) * statModifiers.Base_StorageCapacityMul;
             float fBonus = statModifiers.Bonus_StorageCapacityAdd * statModifiers.Bonus_StorageCapacityMul;
@@ -212,6 +243,8 @@ public class BuildingInstance : MonoBehaviour
             return (int)f;
         }
     }
+
+  
 
     [ShowInInspector, ReadOnly, LabelText("允许转运")]
     private bool _currentTransportationAbility;
@@ -234,12 +267,18 @@ public class BuildingInstance : MonoBehaviour
     {
         get
         {
+            if (GetLevelData() == null)
+            {
+                return 0;
+            }
+
             float fBase = (GetLevelData().BaseTransportationResistance + statModifiers.Base_TransportationResistanceAdd) * statModifiers.Base_TransportationResistanceMul;
             float fBonus = statModifiers.Bonus_TransportationResistanceAdd * statModifiers.Bonus_TransportationResistanceMul;
             float f = (fBase + fBonus) * statModifiers.Final_TransportationResistanceMul;
             return Mathf.Max(0, Mathf.RoundToInt(f));
         }
     }
+  
 
     //----------------------------地图占用（这些一般不触发状态事件，如需要也可改同样写法）-----------------------------------
 
@@ -343,12 +382,15 @@ public class BuildingInstance : MonoBehaviour
 
 
         LoadLevelRules(CurrentLevelIndex);
+        //第一次需要立刻调用一次
+        DelayChangeRuleDic();
+
     }
 
     private void RegisterToGame()
     {
         Ctx.HumanResourcesNetwork.Register(this);
-
+        Ctx.ResourceNetwork.Register(this);
         TurnSystem.OnTurnPhaseChange += HandleTurnPhase;
 
     }
@@ -357,7 +399,7 @@ public class BuildingInstance : MonoBehaviour
     private void UnRegisterToGame()
     {
         Ctx.HumanResourcesNetwork.UnRegister(this);
-
+        Ctx.ResourceNetwork.UnRegister(this);
         TurnSystem.OnTurnPhaseChange -= HandleTurnPhase;
     }
 
@@ -473,7 +515,7 @@ public class BuildingInstance : MonoBehaviour
         OnStateChanged?.Invoke(this, BuildingStateValueType.LevelIndex);
         OnStateChanged?.Invoke(this, BuildingStateValueType.ExpToNext);
         OnStateChanged?.Invoke(this, BuildingStateValueType.MaxPopulation);
-        OnStateChanged?.Invoke(this, BuildingStateValueType.StorageCapacity);
+        OnStateChanged?.Invoke(this, BuildingStateValueType.MaxStorageCapacity);
         OnStateChanged?.Invoke(this, BuildingStateValueType.就业吸引力);
 
         return true;

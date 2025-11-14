@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ee61fcc490adb154f95c02cb2ab70f9a, type: 3}
-  m_Name: "building_\u5C45\u6C11\u623F"
+  m_Name: "Building_\u5C45\u6C11\u623F"
   m_EditorClassIdentifier: 
-  Id: "building_\u5C45\u6C11\u623F"
-  DisplayName: "\u5C45\u6C11\u623F"
+  Id: "\u5C40\u6C11\u623F"
+  DisplayName: "\u5C40\u6C11\u623F"
   Size: 2
   classification: 0
   BuildingPrefab: {fileID: 3831073936164517814, guid: 1898ff6dcc05dc54080912133c8be488, type: 3}
@@ -25,21 +25,13 @@ MonoBehaviour:
   AllowConstruction: []
   Levels:
   - BaseMaxPopulation: 0
-    EnableStatModifier_MaxPopulation: 0
-    SM_Population: []
     BaseStorageCapacity: 0
-    EnableStatModifier_StorageCapacity: 0
-    SM_StorageCapacity: []
-    SM_ExpToNext: []
+    ExpToNext: 2
     BaseMaxJobs: 0
-    EnableStatModifier_MaxJobs: 0
-    SM_MaxJobs: []
-    TransportationCondition:
-      rid: 7980267684381065216
-    SM_TransportationResistance: []
+    BaseTransportationResistance: 3
     BaseAttractivenessPerJob: 0
     ViewConfig:
-      DefaultAnimatorState: LV0
+      DefaultAnimatorState: 
       DefaultAnimatorTrigger: 
       UpgradeTrigger: 
       PersistentParticlePrefab: {fileID: 0}
@@ -47,117 +39,27 @@ MonoBehaviour:
       ChildPrefab: {fileID: 0}
     ConditionsForAllowingUpgrades: []
     Rules:
-    - rid: 1546075644629090321
+    - rid: 7980267796626407426
   - BaseMaxPopulation: 5
-    EnableStatModifier_MaxPopulation: 0
-    SM_Population: []
     BaseStorageCapacity: 0
-    EnableStatModifier_StorageCapacity: 0
-    SM_StorageCapacity: []
-    SM_ExpToNext: []
+    ExpToNext: 10
     BaseMaxJobs: 0
-    EnableStatModifier_MaxJobs: 0
-    SM_MaxJobs: []
-    TransportationCondition:
-      rid: -2
-    SM_TransportationResistance: []
+    BaseTransportationResistance: 3
     BaseAttractivenessPerJob: 0
     ViewConfig:
-      DefaultAnimatorState: LV1
+      DefaultAnimatorState: 
       DefaultAnimatorTrigger: 
-      UpgradeTrigger: toLV1
+      UpgradeTrigger: 
       PersistentParticlePrefab: {fileID: 0}
       UpgradeEffectPrefab: {fileID: 0}
       ChildPrefab: {fileID: 0}
-    ConditionsForAllowingUpgrades:
-    - rid: 1546075644629090322
-    Rules:
-    - rid: 1546075644629090323
-    - rid: 1546075644629090324
+    ConditionsForAllowingUpgrades: []
+    Rules: []
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 1546075644629090321
-      type: {class: Rule, ns: , asm: Assembly-CSharp}
+    - rid: 7980267796626407426
+      type: {class: "R_\u56DE\u5408\u7ED3\u675F\u65F6\u83B7\u53D6\u7ECF\u9A8C", ns: , asm: Assembly-CSharp}
       data:
-        Name: Lv0 EndTurn Exp
-        Description: "\u56DE\u5408\u7ED3\u675F\u65F6 +1 \u7ECF\u9A8C"
-        ExecutePhase: 1
-        Trigger: 3
-        Conditions: []
-        OnSuccess:
-        - rid: 1546075644629090325
-        OnFailure: []
-    - rid: 1546075644629090322
-      type: {class: TechUnlockedCondition, ns: , asm: Assembly-CSharp}
-      data:
-        TechId: "tech_\u5386\u6CD5"
-    - rid: 1546075644629090323
-      type: {class: Rule, ns: , asm: Assembly-CSharp}
-      data:
-        Name: Feeding
-        Description: "\u6D88\u8017\u98DF\u7269\u4F9B\u517B\u4EBA\u53E3\uFF0C\u4EBA\u53E3\u589E\u51CF"
-        ExecutePhase: 1
-        Trigger: 1
-        Conditions:
-        - rid: 1546075644629090326
-        - rid: 1546075644629090327
-        OnSuccess:
-        - rid: 1546075644629090328
-        - rid: 1546075644629090329
-        OnFailure:
-        - rid: 1546075644629090330
-    - rid: 1546075644629090324
-      type: {class: Rule, ns: , asm: Assembly-CSharp}
-      data:
-        Name: FullPop Exp Bonus
-        Description: "\u4EBA\u53E3\u5DF2\u6EE1\u65F6\uFF0C\u6BCF\u56DE\u5408\u989D\u5916
-          +1 \u7ECF\u9A8C"
-        ExecutePhase: 1
-        Trigger: 3
-        Conditions:
-        - rid: 1546075644629090331
-        OnSuccess:
-        - rid: 1546075644629090332
-        OnFailure: []
-    - rid: 1546075644629090325
-      type: {class: AddExp, ns: , asm: Assembly-CSharp}
-      data:
-        Amount: 1
-    - rid: 1546075644629090326
-      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
-      data:
-        Min: 1
-    - rid: 1546075644629090327
-      type: {class: HasResourceForPopulationByCategory, ns: , asm: Assembly-CSharp}
-      data:
-        Category: 1
-        AmountPerCapita: 1
-        IgnoreIfPopulationZero: 1
-    - rid: 1546075644629090328
-      type: {class: ConsumeResourcePerPopulationByCategory, ns: , asm: Assembly-CSharp}
-      data:
-        Category: 1
-        AmountPerCapita: 1
-        IgnoreIfPopulationZero: 1
-        LargestStackFirst: 1
-    - rid: 1546075644629090329
-      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
-      data:
-        Delta: 1
-    - rid: 1546075644629090330
-      type: {class: ChangePopulation, ns: , asm: Assembly-CSharp}
-      data:
-        Delta: -1
-    - rid: 1546075644629090331
-      type: {class: PopulationAtLeast, ns: , asm: Assembly-CSharp}
-      data:
-        Min: 5
-    - rid: 1546075644629090332
-      type: {class: AddExp, ns: , asm: Assembly-CSharp}
-      data:
-        Amount: 1
-    - rid: 7980267684381065216
-      type: {class: NeverNo, ns: , asm: Assembly-CSharp}
+        Description: 
+        AddExp: 1

@@ -131,7 +131,8 @@ public class BuildingLevelDef
         ShowFoldout = true,
         ShowIndexLabels = true,
         DraggableItems = true,
-        ListElementLabelName = nameof(Rule.RuleName))]
+        ListElementLabelName = nameof(Rule.RuleName)
+        )]
     [SerializeReference, HideReferenceObjectPicker]
     public List<Rule> Rules = new();
 

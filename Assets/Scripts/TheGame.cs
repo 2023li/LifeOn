@@ -36,11 +36,11 @@ public class TheGame : MonoSingleton<TheGame>
     {
        _ = UIManager.Instance.ShowPanel<UIPanel_GameMain>(UIManager.UILayer.Main);
 
-       // _ = UIManager.Instance.ShowPanel<UIPanel_DebugGridInspector>(UIManager.UILayer.DebugInfo);
+     
 
 
         LOAppEvent.Tigger(LOAppEventType.开始游戏);
-
+        Debug.Log("游戏开始");
 
     }
 
