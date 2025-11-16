@@ -9,7 +9,8 @@ using Sirenix.OdinInspector;
 [Serializable]
 public abstract class Rule:ICloneable
 {
-    public virtual string RuleName { get;} = "未命名";
+    public abstract string GetRuleName();
+   
 
 
 
@@ -31,14 +32,14 @@ public abstract class Rule:ICloneable
 
 
 [Serializable]
-public class R_就业 : Rule
+public class R_填充就业 : Rule
 {
 
-    public override string RuleName => $"填补就业人口";
+    public override string GetRuleName() => $"填补就业人口";
 
     public override object Clone()
     {
-        return new R_就业();
+        return new R_填充就业();
     }
 
     public override void OnAdd(BuildingInstance self)
@@ -49,8 +50,19 @@ public class R_就业 : Rule
         switch (phase)
         {
             case TurnPhase.回合结束阶段:
+                Debug.Log("执行");
+                if (self.CurrentWorkers<self.RO_MaxJobsPosition)
+                {
+                    Debug.Log("有空位");
+                    if(self.Ctx.HumanResourcesNetwork.Unemployed > 0)
+                    {
+                        self.CurrentWorkers++;
+
+                        Debug.LogWarning("以后需要优化");
+                    }
 
 
+                }
                 break;
         }
     }
@@ -61,11 +73,13 @@ public class R_就业 : Rule
   
 }
 
+
+
 [Serializable]
 public class R_回合结束时获取经验 : Rule
 {
 
-    public override string RuleName => $"回合结束时增加{AddExp}exp";
+    public override string GetRuleName() => $"回合结束时增加{AddExp}exp";
 
     public int AddExp = 1;
 
@@ -111,6 +125,9 @@ public class R_回合结束时获取经验 : Rule
 [Serializable]
 public class R_野生浆果丛规则:Rule
 {
+
+    public override string GetRuleName() { return $"生成{supplyAmount.Count}个浆果"; }
+
     public List<SupplyAmount> supplyAmount;
 
     public override object Clone()

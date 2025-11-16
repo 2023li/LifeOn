@@ -35,6 +35,15 @@ public class BuildingStatModifiers
     public float Bonus_MaxPopulationMul = 1f;
     public float Final_MaxPopulationMul = 1f;
 
+
+    // 最大工作岗位数（对应 MaxJobsPosition）
+    public int Base_MaxJobsPositionAdd = 0;
+    public float Base_MaxJobsPositionMul = 1f;
+    public int Bonus_MaxJobsPositionAdd = 0;
+    public float Bonus_MaxJobsPositionMul = 1f;
+    public float Final_MaxJobsPositionMul = 1f;
+
+
     // 最大库存数
     public int Base_StorageCapacityAdd = 0;
     public float Base_StorageCapacityMul = 1f;
@@ -179,10 +188,15 @@ public class BuildingInstance : MonoBehaviour
         get => _currentPopulation;
         set
         {
-            if (_currentPopulation != value)
+            // 1. 计算有效最大值（避免 RO_MaxPopulation 为负数的异常情况）
+            int maxValid = Math.Max(RO_MaxPopulation, 0);
+            // 2. 钳位 newValue：确保在 [0, maxValid] 范围内（不超上限、不小于0）
+            int newValue = Math.Clamp(value, 0, maxValid);
+            // 3. 只有值真的变化时，才赋值并触发事件（避免无效调用）
+            if (_currentPopulation != newValue)
             {
-                _currentPopulation = value;
-
+                _currentPopulation = newValue;
+                OnStateChanged?.Invoke(this, BuildingStateValueType.CurrentPopulation);
             }
 
         }
@@ -204,6 +218,23 @@ public class BuildingInstance : MonoBehaviour
         get => _currentWorkers;
     }
 
+    [ShowInInspector, ReadOnly, LabelText("运行时最大工作岗位数")]
+    public int RO_MaxJobsPosition
+    {
+        get
+        {
+            if (GetLevelData() == null)
+            {
+                return 0;
+            }
+
+            // 计算基础值的修正（与最大人口数逻辑完全对齐）
+            float fBase = (GetLevelData().BaseMaxJobsPosition + statModifiers.Base_MaxJobsPositionAdd) * statModifiers.Base_MaxJobsPositionMul;
+            float fBonus = statModifiers.Bonus_MaxJobsPositionAdd * statModifiers.Bonus_MaxJobsPositionMul;
+            float f = (fBase + fBonus) * statModifiers.Final_MaxJobsPositionMul;
+            return (int)f;
+        }
+    }
 
 
     [ShowInInspector, ReadOnly, LabelText("岗位吸引力")]
@@ -544,7 +575,7 @@ public class BuildingInstance : MonoBehaviour
                 Debug.LogWarning($"[BuildingInstance] 等级规则为空或克隆失败（index={i}）", this);
                 continue;
             }
-            string key = MakeDataRuleKey(i, levelIndex, src.RuleName);
+            string key = MakeDataRuleKey(i, levelIndex, src.GetRuleName());
             AddRule(key, cloned);
         }
 

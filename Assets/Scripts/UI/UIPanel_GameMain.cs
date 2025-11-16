@@ -89,7 +89,8 @@ public class UIPanel_GameMain : PanelBase
     [FoldoutGroup("HUD"), SerializeField, LabelText("img_库存")] Image img_库存;
     [FoldoutGroup("HUD"), SerializeField, LabelText("txt_库存")] TMP_Text txt_库存;
 
-
+    [FoldoutGroup("HUD"), SerializeField, LabelText("img_人口")] Image img_人口;
+    [FoldoutGroup("HUD"), SerializeField, LabelText("txt_人口")] TMP_Text txt_人口;
 
     public void Start_顶部HUD()
     {
@@ -108,6 +109,13 @@ public class UIPanel_GameMain : PanelBase
         };
 
         txt_库存.text = $"库存：{ctx.ResourceNetwork.UsedCapacity}/{ctx.ResourceNetwork.TotalCapacity}";
+
+
+        ctx.HumanResourcesNetwork.OnHumanResourcesChange += () =>
+        {
+            txt_人口.text = $"人口：{ctx.HumanResourcesNetwork.TotalWorkers}/{ctx.HumanResourcesNetwork.Unemployed}";
+        };
+        txt_人口.text = $"人口：{ctx.HumanResourcesNetwork.TotalWorkers}/{ctx.HumanResourcesNetwork.Unemployed}";
     }
 
     #endregion
@@ -132,6 +140,10 @@ public class UIPanel_GameMain : PanelBase
 
     private void OnEnable_建筑信息()
     {
+
+        Debug.Log(TheGame.Instance==null);
+        Debug.Log(TheGame.Instance.BuildingSelector ==null);
+
         TheGame.Instance.BuildingSelector.Event_SelectedBuilding += ShowBuildingBrief;
     }
     private void OnDisable_建筑信息()

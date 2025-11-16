@@ -7,6 +7,10 @@ using Sirenix.OdinInspector;
 using UnityEditor;
 #endif
 
+
+
+
+
 /// <summary>
 /// 运行时：通过 Init() 加载并构建字典；
 /// 编辑器未运行：GetSupplyDef() 可自动扫描 SupplyDef 并缓存；
@@ -74,21 +78,7 @@ public class SupplyLib : ScriptableObject
         }
     }
 
-    /// <summary>
-    /// 老实例方法（兼容保留）。依赖 Init() 后的字典。
-    /// </summary>
-    public SupplyDef GetSupplyDefInstance(string id)
-    {
-        if (dic_ID_SupplyDef == null)
-        {
-            Debug.LogWarning("SupplyLib 未执行 Init()。");
-            return null;
-        }
-        if (dic_ID_SupplyDef.TryGetValue(id, out var def)) return def;
-
-        Debug.LogWarning($"不存在 id 为 {id} 的 SupplyDef。");
-        return null;
-    }
+   
 
     /// <summary>
     /// 通用入口：编辑器/运行时均可使用。
@@ -122,6 +112,15 @@ public class SupplyLib : ScriptableObject
         Debug.LogWarning($"[SupplyLib] 不存在 id 为 {id} 的 SupplyDef。");
         return null;
     }
+    
+    public static SupplyDef GetSupplyDef(SupplyEnum e)
+    {
+        return GetSupplyDef(e.ToString());
+    }
+
+
+
+
 
 #if UNITY_EDITOR
     /// <summary>

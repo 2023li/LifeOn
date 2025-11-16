@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dfd2eb7a55367d745a9a6df889614dd7, type: 3}
-  m_Name: "SD_\u6D46\u679C"
+  m_Name: "SD_\u6D4B\u8BD5"
   m_EditorClassIdentifier: 
-  Id: "SD_\u6D46\u679C"
-  DisplayName: "\u6D46\u679C"
-  Category: 1
+  Id: "SD_\u6D4B\u8BD5"
+  DisplayName: "\u6D4B\u8BD5\u7269\u8D44"
+  Category: 0
   Icon: {fileID: 0}
   DisplaySetting: 0
   OccupationUnit: 1
   BaseDurability: 5
   BaseTransportationRadius: 5
-  BaseLossRate: 0.04
+  BaseLossRate: 0

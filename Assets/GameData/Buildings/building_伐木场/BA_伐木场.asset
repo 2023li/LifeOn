@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee61fcc490adb154f95c02cb2ab70f9a, type: 3}
+  m_Name: "BA_\u4F10\u6728\u573A"
+  m_EditorClassIdentifier: 
+  Id: 
+  DisplayName: 
+  Size: 0
+  classification: 0
+  BuildingPrefab: {fileID: 0}
+  BuildingIcon: {fileID: 0}
+  UIPanelPrefab_Brief: {fileID: 0}
+  UIPanelPrefab_Detailed: {fileID: 0}
+  Introduction: 
+  ShowInBuildPanel: []
+  AllowConstruction: []
+  Levels: []
+  references:
+    version: 2
+    RefIds: []

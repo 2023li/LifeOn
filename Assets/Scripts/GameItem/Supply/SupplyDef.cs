@@ -16,9 +16,10 @@ public enum SupplyCategory
 
 
 
-[CreateAssetMenu(fileName = "SupplyDef_", menuName = "Game/SupplyDef")]
+[CreateAssetMenu(fileName = "SD_", menuName = "Game/SupplyDef")]
 public class SupplyDef : ScriptableObject
 {
+    [ReadOnly]
     [LabelText("物资ID")]
     public string Id;
 
@@ -31,7 +32,7 @@ public class SupplyDef : ScriptableObject
     [LabelText("图标")]
     public Sprite Icon;
 
-    
+    [LabelText("仓库显示设置")]
     public DisplayOption DisplaySetting = DisplayOption.常规;
 
     [LabelText("占用单位")]
@@ -56,6 +57,21 @@ public class SupplyDef : ScriptableObject
     {
         BaseLossRate = Mathf.Round(BaseLossRate / 0.005f) * 0.005f;
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        // ScriptableObject 的名字就是文件名（不带 .asset）
+        string fileName = name;
+
+        // 不再去掉 SD_ 前缀，直接使用完整名字
+        if (Id != fileName)
+        {
+            Id = fileName;
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+    }
+#endif
 
 
 

@@ -13,8 +13,8 @@ public class UIItem_BuildingSelection : MonoBehaviour
     [AutoBind] public GameObject panel_选择建筑;
 
     [Header("UI 引用")]
-    [AutoBind] public RectTransform Content;                 // 分类按钮容器
-    [AutoBind] public RectTransform BuildBuildingBtnContent; // 建筑按钮容器
+    [AutoBind,LabelText("建筑分类容器")] public RectTransform Content;                 // 分类按钮容器
+    [AutoBind,LabelText("建筑选择容器")] public RectTransform BuildBuildingBtnContent; // 建筑按钮容器
 
     [AutoBind] public Button btn_Hide;
 
@@ -22,7 +22,11 @@ public class UIItem_BuildingSelection : MonoBehaviour
     [AutoBind] public Button btn_BackToClass;
 
     [Header("预制体")]
-    public IconTextButton btnPrefabs;
+    [LabelText("分类按钮预制体")]
+    public IconTextButton classBtnPrefab;      // 用于“选择建筑分类”的按钮
+
+    [LabelText("建筑按钮预制体")]
+    public IconTextButton buildingBtnPrefab;   // 用于“选择建
 
     [Header("上下文引用")]
     [LabelText("游戏上下文")]
@@ -79,7 +83,13 @@ public class UIItem_BuildingSelection : MonoBehaviour
 
     private void CreateBuildingClassButton(BuildingClassify classify)
     {
-        IconTextButton item = LeanPool.Spawn(btnPrefabs, Content);
+        if (classBtnPrefab == null)
+        {
+            Debug.LogError("[UIItem_BuildingSelection] classBtnPrefab 未赋值，无法创建分类按钮。");
+            return;
+        }
+
+        IconTextButton item = LeanPool.Spawn(classBtnPrefab, Content);
 
         var rt = (RectTransform)item.transform;
         rt.localScale = Vector3.one;
@@ -94,7 +104,13 @@ public class UIItem_BuildingSelection : MonoBehaviour
 
     private void CreateBuildingButton(BuildingArchetype buildingDef, bool canBuild)
     {
-        IconTextButton item = LeanPool.Spawn(btnPrefabs, BuildBuildingBtnContent);
+        if (buildingBtnPrefab == null)
+        {
+            Debug.LogError("[UIItem_BuildingSelection] buildingBtnPrefab 未赋值，无法创建建筑按钮。");
+            return;
+        }
+
+        IconTextButton item = LeanPool.Spawn(buildingBtnPrefab, BuildBuildingBtnContent);
 
         var rt = (RectTransform)item.transform;
         rt.localScale = Vector3.one;
@@ -234,8 +250,10 @@ public class UIItem_BuildingSelection : MonoBehaviour
         if (panel_选择建筑 == null) { Debug.LogWarning("[UIItem_BuildingSelection] panel_选择建筑 未绑定。"); ok = false; }
         if (Content == null) { Debug.LogWarning("[UIItem_BuildingSelection] Content（分类容器）未绑定。"); ok = false; }
         if (BuildBuildingBtnContent == null) { Debug.LogWarning("[UIItem_BuildingSelection] BuildBuildingBtnContent（建筑容器）未绑定。"); ok = false; }
-        if (btnPrefabs == null) { Debug.LogWarning("[UIItem_BuildingSelection] btnPrefabs 未赋值。"); ok = false; }
-        // btn_BackToClass 可选，但更推荐绑定
+
+        if (classBtnPrefab == null) { Debug.LogWarning("[UIItem_BuildingSelection] classBtnPrefab（分类按钮预制体）未赋值。"); ok = false; }
+        if (buildingBtnPrefab == null) { Debug.LogWarning("[UIItem_BuildingSelection] buildingBtnPrefab（建筑按钮预制体）未赋值。"); ok = false; }
+
         if (btn_BackToClass == null) { Debug.LogWarning("[UIItem_BuildingSelection] 提示：未绑定 btn_BackToClass（返回按钮）。"); }
         return ok;
     }

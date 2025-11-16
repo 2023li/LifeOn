@@ -100,7 +100,7 @@ public class BuildingLevelDef
 
 
     [SerializeField, LabelText("基础最大岗位"), HorizontalGroup("岗位")]
-    public int BaseMaxJobs;
+    public int BaseMaxJobsPosition;
 
    
 
@@ -131,7 +131,7 @@ public class BuildingLevelDef
         ShowFoldout = true,
         ShowIndexLabels = true,
         DraggableItems = true,
-        ListElementLabelName = nameof(Rule.RuleName)
+        ListElementLabelName = nameof(Rule.GetRuleName)
         )]
     [SerializeReference, HideReferenceObjectPicker]
     public List<Rule> Rules = new();

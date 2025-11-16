@@ -35,34 +35,19 @@ public class Effect_生产资源 : Effect
                 $"[Effect_生产资源] 建筑 {self.DisplayName} 生产 {Resource.DisplayName} 失败：{why}", self);
         }
 
-
+        Debug.LogWarning("这里还需要检查是否在附近的仓库范围内");
         Debug.Log("目前库存："+net.GetAmount(Resource));
     }
-}
 
 
-[Serializable]
-public class Effect_改变人口 : Effect
-{
-    public int Delta;
-    public override void Apply(BuildingInstance self, IGameContext ctx)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-
-[Serializable]
-public class Effect_增加经验 : Effect
-{
-    public int Amount = 1;
-    public override void Apply(BuildingInstance self, IGameContext ctx)
-    {
-       // self.CurrentExp += Amount;
-    }
 
 
 }
+
+
+
+
+
 
 
 

@@ -25,6 +25,7 @@ public class HumanResourcesNetwork
             _work.Add(building,building.CurrentWorkers);
         }
         building.OnStateChanged += Handle_BuildingStateChange;
+        OnHumanResourcesChange?.Invoke();
     }
     public void UnRegister(BuildingInstance building)
     {
@@ -37,6 +38,7 @@ public class HumanResourcesNetwork
             _work.Remove(building);
         }
         building.OnStateChanged -= Handle_BuildingStateChange;
+        OnHumanResourcesChange?.Invoke();
     }
 
 

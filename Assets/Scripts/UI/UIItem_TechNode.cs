@@ -22,8 +22,12 @@ public class UIItem_TechNode : MonoBehaviour
     [SerializeField,LabelText("连线出口")]
     private RectTransform linePoint_Export;
 
+
+
     [SerializeField, LabelText("匹配的节点ID")]
     private string _nodeId;
+
+    
 
 
     private TechNodeData _data;

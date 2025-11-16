@@ -9,7 +9,7 @@ using UnityEngine;
 public class TheGame : MonoSingleton<TheGame>
 {
 
-    private BuildingSelector buildingSelector;
+    [SerializeField] private BuildingSelector buildingSelector;
     public BuildingSelector BuildingSelector { get { return buildingSelector; } }
 
 
@@ -27,8 +27,10 @@ public class TheGame : MonoSingleton<TheGame>
         base.Awake ();
         GameContext.Instance.Init();
 
-
-        buildingSelector = GetComponent<BuildingSelector>();
+        if (buildingSelector == null)
+        {
+            buildingSelector = GetComponent<BuildingSelector>();
+        }
 
 
     }

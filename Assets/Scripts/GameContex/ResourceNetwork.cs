@@ -144,6 +144,59 @@ public class ResourceNetwork
         return true;
     }
 
+
+    public bool TryConsumeResource(SupplyCategory category, int amount)
+    {
+        // 基本校验
+        if (amount <= 0)
+            return false;
+
+        // 收集所有这个类别的资源以及数量
+        var candidates = new List<(SupplyDef def, int count)>();
+        int total = 0;
+
+        foreach (var kvp in _resourceAmounts)
+        {
+            var def = kvp.Key;
+            if (def == null) continue;
+
+            if (def.Category == category && kvp.Value > 0)
+            {
+                candidates.Add((def, kvp.Value));
+                total += kvp.Value;
+            }
+        }
+
+        // 总量不够，直接失败，不修改库存
+        if (total < amount)
+            return false;
+
+        // 够的话，开始逐个资源扣减
+        int remaining = amount;
+        foreach (var item in candidates)
+        {
+            if (remaining <= 0)
+                break;
+
+            int take = Math.Min(item.count, remaining);
+
+            // 利用已有的按 SupplyDef 消耗逻辑
+            string reason;
+            if (!TryConsumeResource(item.def, take, out reason))
+            {
+                // 理论上这里不会失败（前面已经检查过库存），
+                // 为了安全打印一下日志。
+                Debug.LogError($"[ResourceNetwork] 按类别消耗资源失败：{item.def.name}，原因：{reason}");
+                return false;
+            }
+
+            remaining -= take;
+        }
+
+        return remaining == 0;
+    }
+
+
     // ========= 生产者注册 =========
 
     public void RegisterProducer(BuildingInstance producer, SupplyDef resource)
