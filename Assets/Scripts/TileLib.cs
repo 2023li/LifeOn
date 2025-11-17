@@ -14,7 +14,6 @@ public enum GameTileEnum
     Tile_黄色 = 6,
 }
 
-[CreateAssetMenu(fileName = "TileLib", menuName = "Game/TileLib")]
 public class TileLib : ScriptableObject
 {
     [SerializeField] private List<StructKV<GameTileEnum, TileBase>> AllTiles;

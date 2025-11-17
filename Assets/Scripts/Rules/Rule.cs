@@ -7,15 +7,18 @@ using Sirenix.OdinInspector;
 
 
 [Serializable]
+
 public abstract class Rule:ICloneable
 {
+    [ShowInInspector, MultiLineProperty(3),PropertyOrder(-1), HideLabel]
+    [FoldoutGroup("描述")]
+    public string DescriptionDisplay => GetDescription();
     public abstract string GetRuleName();
-   
 
 
+    
 
-    [LabelText("描述"), MultiLineProperty(3)]
-    public string Description;                      // 规则说明
+    public abstract string GetDescription();                  // 规则说明
 
 
     public abstract void OnAdd(BuildingInstance self);
@@ -70,7 +73,10 @@ public class R_填充就业 : Rule
     {
     }
 
-  
+    public override string GetDescription()
+    {
+        return "x";
+    }
 }
 
 
@@ -119,7 +125,10 @@ public class R_回合结束时获取经验 : Rule
     {
     }
 
-   
+    public override string GetDescription()
+    {
+        return "X";
+    }
 }
 
 [Serializable]
@@ -183,5 +192,10 @@ public class R_野生浆果丛规则:Rule
 
                 break;
         }
+    }
+
+    public override string GetDescription()
+    {
+        return "";
     }
 }

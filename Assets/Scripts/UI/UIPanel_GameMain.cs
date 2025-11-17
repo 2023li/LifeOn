@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Moyo.Unity;
@@ -40,6 +41,9 @@ public class UIPanel_GameMain : PanelBase
     private UIItem_WarehousePanel warehousePanel;
 
 
+    [SerializeField,LabelText("go_回合结束图标")]
+    private GameObject go_回合结束图标;
+
     protected override void Awake()
     {
         this.AutoBindFields();
@@ -74,8 +78,12 @@ public class UIPanel_GameMain : PanelBase
     private void OnEnable()
     {
         OnEnable_建筑信息();
+
+        TurnSystem.OnTurnPhaseChange += Handle_PhaseChange;
+        TurnSystem.OnTurnBlockCountChanged += Handle_TurnBlock;
     }
 
+   
     private void Start()
     {
         ctx = GameContext.Instance;
@@ -88,10 +96,46 @@ public class UIPanel_GameMain : PanelBase
     private void OnDisable()
     {
         OnDisable_建筑信息();
+        TurnSystem.OnTurnPhaseChange -= Handle_PhaseChange;
+        TurnSystem.OnTurnBlockCountChanged -= Handle_TurnBlock;
     }
 
+
+    private void Handle_PhaseChange(TurnPhase phase)
+    {
+        switch (phase)
+        {
+            case TurnPhase.结束准备阶段:
+               
+
+                break;
+            case TurnPhase.资源消耗阶段:
+                break;
+            case TurnPhase.资源生产阶段:
+                break;
+            case TurnPhase.回合结束阶段:
+                break;
+            case TurnPhase.开始准备阶段:
+
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    private void Handle_TurnBlock(int block)
+    {
+        // 如果你的语义是：有阻塞（block > 0）就【显示图标 + 启用按钮】
+        bool hasBlock = block > 0;
+
+        go_回合结束图标.SetActive(hasBlock);
+        btn_下回合.interactable = !hasBlock;
+    }
+
+
     #region 顶部HUD
-    
+
     [FoldoutGroup("HUD"),SerializeField,LabelText("文本_回合数")] TMP_Text text_TurnText;
 
     [FoldoutGroup("HUD"), SerializeField, LabelText("img_金币")] Image img_金币;

@@ -16,7 +16,6 @@ using UnityEditor;
 /// 编辑器未运行：GetSupplyDef() 可自动扫描 SupplyDef 并缓存；
 /// 现在新增 CollectAllSupplyDefs()：一键把 SupplyDef 收集到 allSupply（默认扫描 Assets/GameData/Supplies，或全局扫描）。
 /// </summary>
-[CreateAssetMenu(fileName = "SupplyLib", menuName = "Game/SupplyLib")]
 public class SupplyLib : ScriptableObject
 {
     [SerializeField] public List<SupplyDef> allSupply = new List<SupplyDef>();

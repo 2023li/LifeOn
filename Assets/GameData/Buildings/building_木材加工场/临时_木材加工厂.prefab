@@ -268,7 +268,7 @@ GameObject:
   - component: {fileID: 7508950141453676216}
   - component: {fileID: 3831073936164517814}
   m_Layer: 0
-  m_Name: "\u5C45\u6C11\u623F\u9884\u5236\u4F53"
+  m_Name: "\u4E34\u65F6_\u6728\u6750\u52A0\u5DE5\u5382"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -302,7 +302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7b7222e45056cf47af0d5fa8e56c931, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Def: {fileID: 11400000, guid: 9c0a75a814c42c94bbd5f54d7e0443ec, type: 2}
+  Def: {fileID: 11400000, guid: fabee5bf5162f5c41b6b194ef9af88e8, type: 2}
 --- !u!1 &8738672315109914515
 GameObject:
   m_ObjectHideFlags: 0
@@ -368,7 +368,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u623F0"
+  m_text: "\u6728\u6750\u52A0\u5DE5"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1141c873ba37433488b94c28728e1759, type: 2}
   m_sharedMaterial: {fileID: 3674330834059000649, guid: 1141c873ba37433488b94c28728e1759, type: 2}

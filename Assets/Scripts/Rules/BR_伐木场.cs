@@ -18,6 +18,11 @@ public class BR_伐木场 : Rule
         return new BR_伐木场();
     }
 
+    public override string GetDescription()
+    {
+        return "xx";
+    }
+
     public override string GetRuleName() => "伐木场规则";
   
 

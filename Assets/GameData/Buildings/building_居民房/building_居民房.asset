@@ -62,9 +62,7 @@ MonoBehaviour:
     - rid: 7980267796626407426
       type: {class: "R_\u56DE\u5408\u7ED3\u675F\u65F6\u83B7\u53D6\u7ECF\u9A8C", ns: , asm: Assembly-CSharp}
       data:
-        Description: 
         AddExp: 1
     - rid: 7980267866392887296
       type: {class: "BR_\u5C45\u6C11\u623F_LV1", ns: , asm: Assembly-CSharp}
-      data:
-        Description: 
+      data: 

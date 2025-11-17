@@ -1,36 +1,42 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class BR_居民房_LV1 : Rule
+
+[Serializable]
+public class BR_木材加工厂_LV0 : Rule
 {
+    public override object Clone()
+    {
+        return new BR_木材加工厂_LV0();
+    }
 
+    public override string GetDescription()
+    {
+        return "x";
+    }
 
-
-    public override string GetRuleName() => $"BR_居民房LV1";
+    public override string GetRuleName()
+    {
+        return "木材加工厂LV1";
+    }
 
     
 
-    public override object Clone()
-    {
-        return new BR_居民房_LV1 ();
-    }
-
     public override void OnAdd(BuildingInstance self)
     {
-
-
+        
     }
 
     public override void OnRemove(BuildingInstance self)
     {
-      
-
+        
     }
 
     public override void OnUpdate(BuildingInstance self, TurnPhase phase)
     {
-
         switch (phase)
         {
             case TurnPhase.结束准备阶段:
@@ -38,18 +44,7 @@ public class BR_居民房_LV1 : Rule
             case TurnPhase.资源消耗阶段:
 
 
-                if (self.Ctx.ResourceNetwork.TryConsumeResource(SupplyCategory.一级食物, 2))
-                {
 
-                    if (self.CurrentPopulation < self.RO_MaxPopulation)
-                    {
-                        self.CurrentPopulation += 2;
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("消耗食物失败,待处理");
-                }
 
 
                 break;
@@ -62,10 +57,5 @@ public class BR_居民房_LV1 : Rule
             default:
                 break;
         }
-    }
-
-    public override string GetDescription()
-    {
-        return "x";
     }
 }

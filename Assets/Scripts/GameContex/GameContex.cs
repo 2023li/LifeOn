@@ -8,9 +8,10 @@ public interface IGameContext
 {
     ResourceNetwork ResourceNetwork { get; }
     TechTreeManager TechTree { get; }
-
     HumanResourcesNetwork HumanResourcesNetwork { get; }
     CityEnvironment Environment { get; }
+
+    TurnSystem TurnSystem { get; }
 
 }
 
@@ -23,6 +24,7 @@ public class GameContext : Singleton<GameContext>, IGameContext
     private TechTreeManager techTree = new TechTreeManager();
     private CityEnvironment environment = new CityEnvironment();
     private HumanResourcesNetwork humanResourcesNetwork = new HumanResourcesNetwork();
+    private TurnSystem turnSystem;
     /// <summary>资源网络：负责仓库注册、库存查询。</summary>
     public ResourceNetwork ResourceNetwork => resourceNetwork;
 
@@ -33,6 +35,8 @@ public class GameContext : Singleton<GameContext>, IGameContext
     public CityEnvironment Environment => environment;
 
     public HumanResourcesNetwork HumanResourcesNetwork => humanResourcesNetwork;
+
+    public TurnSystem TurnSystem => turnSystem;
 
     public void Init()
     {
@@ -59,6 +63,10 @@ public class GameContext : Singleton<GameContext>, IGameContext
             humanResourcesNetwork = new HumanResourcesNetwork();
         }
 
+        if (turnSystem==null)
+        {
+            turnSystem = TurnSystem.Instance;
+        }
 
         Debug.Log("GameContext初始化完成");
     }

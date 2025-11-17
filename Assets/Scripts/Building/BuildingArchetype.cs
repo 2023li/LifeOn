@@ -23,7 +23,7 @@ public enum BuildingClassify
 }
 
 
-[CreateAssetMenu(fileName = "BuildingArchetype", menuName = "Game/BuildingInstance/Archetype")]
+[CreateAssetMenu(fileName = "BA_", menuName = "Game/BuildingArchetype")]
 public class BuildingArchetype : ScriptableObject
 {
     [LabelText("建筑唯一ID")]
