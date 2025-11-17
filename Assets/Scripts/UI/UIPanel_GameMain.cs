@@ -34,6 +34,12 @@ public class UIPanel_GameMain : PanelBase
         
     }
 
+    [SerializeField,LabelText("btn_打开仓库")]
+    private Button btn_打开仓库;
+    [SerializeField,LabelText("仓库面板")]
+    private UIItem_WarehousePanel warehousePanel;
+
+
     protected override void Awake()
     {
         this.AutoBindFields();
@@ -54,6 +60,11 @@ public class UIPanel_GameMain : PanelBase
             panel_科技面板.gameObject.SetActive(false);
         });
 
+
+        btn_打开仓库.onClick.AddListener(() =>
+        {
+            warehousePanel.Show();
+        });
 
         OnAwake_建筑信息();
     }
@@ -201,6 +212,9 @@ public class UIPanel_GameMain : PanelBase
 
 
     #endregion
+
+
+    
 
 
 

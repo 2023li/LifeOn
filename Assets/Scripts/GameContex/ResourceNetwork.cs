@@ -65,6 +65,25 @@ public class ResourceNetwork
     }
 
     /// <summary>
+    /// 获取当前所有资源及其数量的快照
+    /// </summary>
+    public IEnumerable<SupplyAmount> GetAllResourcesSnapshot()
+    {
+        foreach (var kv in _resourceAmounts)
+        {
+            if (kv.Key == null)
+                continue;
+
+            yield return new SupplyAmount
+            {
+                Resource = kv.Key,
+                Amount = kv.Value
+            };
+        }
+    }
+
+
+    /// <summary>
     /// 获取可用库存
     /// </summary>
     /// <returns>可用库存</returns>

@@ -90,7 +90,7 @@ GameObject:
   - component: {fileID: 4101965252520915614}
   - component: {fileID: 8724096374906059076}
   m_Layer: 5
-  m_Name: "\u5EFA\u9020\u9009\u62E9Item"
+  m_Name: "btn_\u5EFA\u9020"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

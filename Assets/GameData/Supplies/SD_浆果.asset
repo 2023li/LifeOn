@@ -15,7 +15,7 @@ MonoBehaviour:
   Id: "SD_\u6D46\u679C"
   DisplayName: "\u6D46\u679C"
   Category: 1
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 3b563dc1744c21846993db1c848d7677, type: 3}
   DisplaySetting: 0
   OccupationUnit: 1
   BaseDurability: 5

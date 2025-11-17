@@ -23,7 +23,22 @@ MonoBehaviour:
   Introduction: 
   ShowInBuildPanel: []
   AllowConstruction: []
-  Levels: []
+  Levels:
+  - BaseMaxPopulation: 0
+    BaseStorageCapacity: 0
+    ExpToNext: -1
+    BaseMaxJobsPosition: 0
+    BaseTransportationResistance: 3
+    BaseAttractivenessPerJob: 0
+    ViewConfig:
+      DefaultAnimatorState: 
+      DefaultAnimatorTrigger: 
+      UpgradeTrigger: 
+      PersistentParticlePrefab: {fileID: 0}
+      UpgradeEffectPrefab: {fileID: 0}
+      ChildPrefab: {fileID: 0}
+    ConditionsForAllowingUpgrades: []
+    Rules: []
   references:
     version: 2
     RefIds: []

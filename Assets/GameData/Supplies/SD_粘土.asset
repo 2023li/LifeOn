@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "SD_\u7C98\u571F"
   m_EditorClassIdentifier: 
   Id: "SD_\u7C98\u571F"
-  DisplayName: 
+  DisplayName: "\u7C98\u571F"
   Category: 0
   Icon: {fileID: 0}
   DisplaySetting: 0

@@ -29,7 +29,7 @@ MonoBehaviour:
   - BaseMaxPopulation: 0
     BaseStorageCapacity: 20
     ExpToNext: -1
-    BaseMaxJobs: 0
+    BaseMaxJobsPosition: 1
     BaseTransportationResistance: 3
     BaseAttractivenessPerJob: 0
     ViewConfig:
@@ -42,6 +42,7 @@ MonoBehaviour:
     ConditionsForAllowingUpgrades: []
     Rules:
     - rid: 7980267817382707202
+    - rid: 7980267866392887297
   references:
     version: 2
     RefIds:
@@ -58,3 +59,7 @@ MonoBehaviour:
         supplyAmount:
         - Resource: {fileID: 11400000, guid: 0df36ba6cd60a6f4eb2f2704de7a0149, type: 2}
           Amount: 1
+    - rid: 7980267866392887297
+      type: {class: "R_\u586B\u5145\u5C31\u4E1A", ns: , asm: Assembly-CSharp}
+      data:
+        Description: 
