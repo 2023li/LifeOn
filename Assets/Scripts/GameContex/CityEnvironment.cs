@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System;
 
 using UnityEngine;
+using UnityEditor.Build.Utilities;
 
 /// <summary>
 /// 环境光环的单圈配置。
@@ -15,6 +16,13 @@ public struct AuraRing
 {
     [Min(0)] public int Radius;
     public int Value;
+
+
+    public AuraRing(int r,int v )
+    {
+        Radius = r;
+        Value = v;
+    }
 }
 
 /// <summary>
@@ -72,7 +80,7 @@ public class CityEnvironment
     /// <summary>
     /// 应用光环，旧数据会被覆盖。
     /// </summary>
-    public void ApplyAura(string sourceId, Vector3 center, bool centerIsCorner, AuraCategory category, IReadOnlyList<AuraRing> rings)
+    public void AddAura(string sourceId, Vector3 center, bool centerIsCorner, AuraCategory category, IReadOnlyList<AuraRing> rings)
     {
         if (string.IsNullOrEmpty(sourceId))
         {
@@ -136,6 +144,12 @@ public class CityEnvironment
                 gridValues.Add(key, pair.Value);
             }
         }
+    }
+
+    public void AddAura(string sourceId, BuildingInstance building,AuraCategory category,params AuraRing[] args )
+    {
+        IReadOnlyList<AuraRing> rings = args;
+        AddAura(sourceId,building.CurrentCenterInGrid,building.CenterIsCorner,category,rings);
     }
 
     /// <summary>

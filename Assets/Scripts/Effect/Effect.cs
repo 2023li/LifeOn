@@ -76,7 +76,7 @@ public class ApplyEnvironmentAura : Effect
 
         Vector3 center = self.CurrentCenterInGrid;
         bool centerIsCorner = self.CenterIsCorner;
-        ctx.Environment.ApplyAura(self.InstanceId, center, centerIsCorner, Category, Rings);
+        ctx.Environment.AddAura(self.InstanceId, center, centerIsCorner, Category, Rings);
     }
 }
 

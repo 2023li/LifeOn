@@ -52,6 +52,8 @@ public class TileLib : ScriptableObject
          ins = await AssetsManager.Instance.LoadAssetAsync<TileLib>("TileLib");
            
          BuildTileDictionary();
+
+        Debug.Log("TileLib初始化完毕");
     }
 
     private static void BuildTileDictionary()

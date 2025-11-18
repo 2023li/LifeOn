@@ -269,6 +269,7 @@ public class GridSystem : MonoSingleton<GridSystem>
         HighlightSpec spec2 = new HighlightSpec(level2, tile2);
         HighlightSpec spec3 = new HighlightSpec(level3, tile3);
 
+        Debug.Log("有bug");
         SetHighlight(spec1, spec2, spec3);
     }
 

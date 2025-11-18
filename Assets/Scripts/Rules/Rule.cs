@@ -153,7 +153,13 @@ public class R_野生浆果丛规则:Rule
             self.Ctx.ResourceNetwork.RegisterProducer(self, item.Resource);
         }
 
-       
+
+        //添加一个光环
+        self.Ctx.Environment.AddAura("aaa", self, AuraCategory.Beauty, new AuraRing(5, 1));
+        self.Ctx.Environment.AddAura("bbb", self, AuraCategory.Beauty, new AuraRing(4, 2));
+        self.Ctx.Environment.AddAura("ccc", self, AuraCategory.Beauty, new AuraRing(3, 3));
+        Debug.Log("添加光环");
+
     }
 
     public override void OnRemove(BuildingInstance self)
@@ -163,6 +169,10 @@ public class R_野生浆果丛规则:Rule
             self.Ctx.ResourceNetwork.UnregisterProducer(self, item.Resource);
         }
 
+
+        self.Ctx.Environment.RemoveAura("ccc");
+        self.Ctx.Environment.RemoveAura("aaa");
+        self.Ctx.Environment.RemoveAura("bbb");
     }
 
     public override void OnUpdate(BuildingInstance self, TurnPhase phase)
