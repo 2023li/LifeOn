@@ -232,9 +232,71 @@ public static class CoordinateCalculator
     return CellsInRadius(center, radius, centerIsCorner, metric, includeEdge, useEuclideanPlusHalf, safetyPadding);
 }
 
+public static List<Vector3Int> GetReachableCellsByMovePower(
+    IEnumerable<Vector3Int> originCells,
+    float movePower)
+{
+    var result = new List<Vector3Int>();
 
+    if (originCells == null)
+        return result;
+    if (movePower <= 0f)
+        return result;
 
+    var costSoFar = new Dictionary<Vector3Int, float>();
+    var frontier = new Queue<Vector3Int>();
 
+    // 1. 把“占地的所有格子”都当作起点，初始消耗为 0
+    foreach (var cell in originCells)
+    {
+        if (costSoFar.ContainsKey(cell))
+            continue;
 
+        costSoFar[cell] = 0f;
+        frontier.Enqueue(cell);
+    }
+
+    // 4 向移动；需要 8 向就把对角也加上
+    var dirs = new[]
+    {
+        new Vector3Int( 1,  0, 0),
+        new Vector3Int(-1,  0, 0),
+        new Vector3Int( 0,  1, 0),
+        new Vector3Int( 0, -1, 0),
+    };
+
+    while (frontier.Count > 0)
+    {
+        var current = frontier.Dequeue();
+        float currentCost = costSoFar[current];
+
+        foreach (var d in dirs)
+        {
+            var next = new Vector3Int(current.x + d.x, current.y + d.y, 0);
+
+            // 根据你的 GridSystem 约定调整这里坐标含义
+            float resistance = GridSystem.Ins.GetMobileResistance(
+                new Vector3(next.x, next.y, 0f));
+
+            // 阻力 < 0 或 Infinity 视为不可通行（按你项目约定调）
+            if (resistance < 0f || float.IsInfinity(resistance))
+                continue;
+
+            float newCost = currentCost + resistance;
+            if (newCost > movePower)
+                continue;
+
+            if (!costSoFar.TryGetValue(next, out float oldCost) || newCost < oldCost)
+            {
+                costSoFar[next] = newCost;
+                frontier.Enqueue(next);
+            }
+        }
+    }
+
+    // 结果就是所有“成本 ≤ movePower”的格子
+    result.AddRange(costSoFar.Keys);
+    return result;
+}
 
 }
