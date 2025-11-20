@@ -20,6 +20,7 @@ public enum BuildingStateValueType
     TransportationAbility,
     TransportationResistance,
     就业吸引力,
+    产品列表
 }
 
 
@@ -355,7 +356,7 @@ public class BuildingInstance : MonoBehaviour
         }
     }
 
-    [ShowInInspector, ReadOnly, LabelText("运行时转运阻力")]
+    [ShowInInspector, ReadOnly, LabelText("转运阻力")]
     public int RO_TransportationResistance
     {
         get
@@ -371,7 +372,23 @@ public class BuildingInstance : MonoBehaviour
             return Mathf.Max(0, Mathf.RoundToInt(f));
         }
     }
-  
+
+
+    [ShowInInspector, ReadOnly, LabelText("产品列表")]
+    public HashSet<SupplyDef> CurrentProductList { get; private set; }
+    public bool AddProduct(SupplyDef product)
+    {
+
+        if (product == null) return false;
+        if (CurrentProductList == null) { CurrentProductList = new HashSet<SupplyDef>(); }
+        bool a =  CurrentProductList.Add(product);
+        if (a)
+        {
+            OnStateChanged?.Invoke(this, BuildingStateValueType.产品列表);
+        }
+        return a;
+    }
+
 
     //----------------------------地图占用（这些一般不触发状态事件，如需要也可改同样写法）-----------------------------------
 
