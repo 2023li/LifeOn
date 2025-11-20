@@ -82,32 +82,29 @@ public class BuildingLevelDef
     [SerializeField,HorizontalGroup("人口"),LabelText("基础最大人口")]
     public int BaseMaxPopulation;   // 人口上限基础值（居民类）
   
-  
-
-
-
-    [SerializeField,HorizontalGroup("库存容量"),LabelText("仓库容量"),Tooltip("提供的全局容量增量")]
+    [SerializeField,LabelText("仓库容量"),Tooltip("提供的全局容量增量")]
     public int BaseStorageCapacity;     // 仓库容量（仓库类）
    
-  
-
-
-    [LabelText("升级所需经验"),HorizontalGroup("EXP")]
-    public int ExpToNext = -1;      // 升级需要经验；-1 表示最高级
  
-   
+    [LabelText("升级所需经验")]
+    public int ExpToNext = -1;      // 升级需要经验；-1 表示最高级
 
-
-
-    [SerializeField, LabelText("基础最大岗位"), HorizontalGroup("岗位")]
+    [SerializeField, LabelText("基础最大岗位")]
     public int BaseMaxJobsPosition;
 
    
 
 
-    [LabelText("转运代价"), HorizontalGroup("转运能力")]
+    [LabelText("转运物资耐久度消耗")]
     public int BaseTransportationResistance = 3;
-   
+
+
+    [LabelText("链接运输范围")]
+    public float BaseTransportRadius = 10f;
+
+    [LabelText("资源分发范围")]
+    public float BaseDistributeRadius = 5f;
+
 
     [LabelText("基础岗位吸引力")]
     public float BaseAttractivenessPerJob = 0f;

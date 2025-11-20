@@ -32,26 +32,36 @@ public class SupplyDef : ScriptableObject
     [LabelText("图标")]
     public Sprite Icon;
 
-    [LabelText("仓库显示设置")]
+
+
+    [LabelText("仓库显示设置"),BoxGroup("库存属性")]
     public DisplayOption DisplaySetting = DisplayOption.常规;
 
-    [LabelText("占用单位")]
+    [LabelText("占用库存"), BoxGroup("库存属性")]
     public int OccupationUnit = 1;
 
+    [LabelText("损耗率"),BoxGroup("库存属性")]
+    [Tooltip("一般来说控制在5%以内，实际物资损耗还会受到仓库影响,最小单位为0.005f")]
+    [Range(0, 0.05f)]
+    [OnValueChanged(nameof(OnBaseLossRateChanged))]
+    public float BaseLossRate;
 
-    [LabelText("耐久度")]
+
+
+
+    [LabelText("耐久度"),BoxGroup("运输属性")]
     [Tooltip("能够传播的跳板数量")]
     public int BaseDurability = 5;
 
-    [LabelText("基础运输半径")]
-    public int BaseTransportationRadius = 5;
+    [LabelText("库存流量占用"),BoxGroup("运输属性")]
+    public int BaseTrafficOccupancy = 1;
+
+    
 
 
-    [LabelText("损耗率")]
-    [Tooltip("一般来说控制在5%以内，实际物资损耗还会受到仓库影响,最小单位为0.005f")]
-    [Range(0,0.05f)]
-    [OnValueChanged(nameof(OnBaseLossRateChanged))]
-    public float BaseLossRate;
+
+
+   
 
     private void OnBaseLossRateChanged()
     {

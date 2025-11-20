@@ -443,6 +443,7 @@ public class ResourceNetwork
 
     private HashSet<Vector3Int> ComputeCoverage(SupplyDef resource, HashSet<BuildingInstance> producers)
     {
+        /*
         var result = new HashSet<Vector3Int>();
         var cellChainMap = new Dictionary<Vector3Int, List<BuildingInstance>>();
 
@@ -512,6 +513,9 @@ public class ResourceNetwork
 
         _chainCache[resource] = cellChainMap;
         return result;
+
+        */
+        return null;
     }
 
     private void MarkCoverageWithChain(

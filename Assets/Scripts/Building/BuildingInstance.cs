@@ -1,3 +1,8 @@
+/*
+ * 建筑实例类中的RO_系列属性可以看作某种意义上的 静态属性 
+ */
+
+
 using UnityEngine;
 using System;
 using System.Collections.Generic;
@@ -51,12 +56,28 @@ public class BuildingStatModifiers
     public float Bonus_StorageCapacityMul = 1f;
     public float Final_StorageCapacityMul = 1f;
 
-    // 转运阻力
+    // 转运疲劳值
     public int Base_TransportationResistanceAdd = 0;
     public float Base_TransportationResistanceMul = 1f;
     public int Bonus_TransportationResistanceAdd = 0;
     public float Bonus_TransportationResistanceMul = 1f;
     public float Final_TransportationResistanceMul = 1f;
+
+    // 转运范围（原 TransportStrength 改为 Radius，补全结构）
+    public int Base_TransportRadiusAdd = 0;
+    public float Base_TransportRadiusMul = 1f;
+    public int Bonus_TransportRadiusAdd = 0;
+    public float Bonus_TransportRadiusMul = 1f;
+    public float Final_TransportRadiusMul = 1f;
+
+    // 分发范围（原 DistributeStrength 改为 Radius，补全结构）
+    public int Base_DistributeRadiusAdd = 0;
+    public float Base_DistributeRadiusMul = 1f;
+    public int Bonus_DistributeRadiusAdd = 0;
+    public float Bonus_DistributeRadiusMul = 1f;
+    public float Final_DistributeRadiusMul = 1f;
+
+
 
     // 工作吸引力
     public int Base_JobAttractivenessAdd = 0;
@@ -65,6 +86,10 @@ public class BuildingStatModifiers
     public float Bonus_JobAttractivenessMul = 1f;
     public float Final_JobAttractivenessMul = 1f;
 }
+
+
+
+
 
 
 public class BuildingInstance : MonoBehaviour
@@ -238,7 +263,7 @@ public class BuildingInstance : MonoBehaviour
 
 
     [ShowInInspector, ReadOnly, LabelText("岗位吸引力")]
-    public float CurrentJobAttractiveness
+    public float RO_JobAttractiveness
     {
         get
         {
@@ -275,7 +300,44 @@ public class BuildingInstance : MonoBehaviour
         }
     }
 
-  
+    [ShowInInspector, ReadOnly, LabelText("运行时转运范围")]
+    public float RO_TransportRadius
+    {
+        get
+        {
+            if (GetLevelData() == null)
+            {
+                return 0f; // 浮点型返回 0f，更规范
+            }
+
+            // 完全对齐库存容量的计算逻辑，仅替换字段名
+            float fBase = (GetLevelData().BaseTransportRadius + statModifiers.Base_TransportRadiusAdd) * statModifiers.Base_TransportRadiusMul;
+            float fBonus = statModifiers.Bonus_TransportRadiusAdd * statModifiers.Bonus_TransportRadiusMul;
+            float f = (fBase + fBonus) * statModifiers.Final_TransportRadiusMul;
+            return f;
+        }
+    }
+
+    [ShowInInspector, ReadOnly, LabelText("运行时分发范围")]
+    public float RO_DistributeRadius
+    {
+        get
+        {
+            if (GetLevelData() == null)
+            {
+                return 0f; // 浮点型返回 0f，更规范
+            }
+
+            // 完全对齐库存容量的计算逻辑，仅替换字段名
+            float fBase = (GetLevelData().BaseDistributeRadius + statModifiers.Base_DistributeRadiusAdd) * statModifiers.Base_DistributeRadiusMul;
+            float fBonus = statModifiers.Bonus_DistributeRadiusAdd * statModifiers.Bonus_DistributeRadiusMul;
+            float f = (fBase + fBonus) * statModifiers.Final_DistributeRadiusMul;
+            return f;
+        }
+    }
+
+
+
 
     [ShowInInspector, ReadOnly, LabelText("允许转运")]
     private bool _currentTransportationAbility;

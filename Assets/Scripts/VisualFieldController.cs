@@ -77,10 +77,9 @@ public class VisualFieldController : MonoBehaviour, ISlideHandler
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            InputManager.Instance.EnableGamePlayMap();
-        }
+       
+
+
     }
 
 

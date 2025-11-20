@@ -14,19 +14,32 @@ public class Test : MonoBehaviour
     {
     }
 
+    private bool EnableGamePlayMap = false;
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            if (!EnableGamePlayMap)
+            {
+                InputManager.Instance.EnableGamePlayMap();
+                EnableGamePlayMap = true;
+            }
+            else
+            {
+                InputManager.Instance.DisableGamePlayMap();
+                EnableGamePlayMap = false;
+            }
 
-    public SupplyDef def;
+        }
+       
+    }
+
+    public List<Vector3Int> t;
     [Button]
     public void TestXX()
     {
-
-        //if (phase==TurnPhase.回合结束阶段)
-        //{
-        //    GameContext.Instance.TechTree.AddProgressToActiveResearch(1);
-        //}
-
-
-        GameContext.Instance.ResourceNetwork.HighlightCoverage(def);
+      GridSystem.Instance.SetHighlight ( CoordinateCalculator.GetReachableCellsByMovePower(t, 5));
+       
 
       
     }

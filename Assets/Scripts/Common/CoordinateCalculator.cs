@@ -232,9 +232,7 @@ public static class CoordinateCalculator
     return CellsInRadius(center, radius, centerIsCorner, metric, includeEdge, useEuclideanPlusHalf, safetyPadding);
 }
 
-public static List<Vector3Int> GetReachableCellsByMovePower(
-    IEnumerable<Vector3Int> originCells,
-    float movePower)
+public static List<Vector3Int> GetReachableCellsByMovePower(IEnumerable<Vector3Int> originCells,float movePower)
 {
     var result = new List<Vector3Int>();
 
@@ -272,11 +270,10 @@ public static List<Vector3Int> GetReachableCellsByMovePower(
 
         foreach (var d in dirs)
         {
-            var next = new Vector3Int(current.x + d.x, current.y + d.y, 0);
+                Vector3Int next = new Vector3Int(current.x + d.x, current.y + d.y, 0);
 
             // 根据你的 GridSystem 约定调整这里坐标含义
-            float resistance = GridSystem.Ins.GetMobileResistance(
-                new Vector3(next.x, next.y, 0f));
+            float resistance = GridSystem.Instance.GetMobileResistance(new Vector3Int(next.x, next.y, 0));
 
             // 阻力 < 0 或 Infinity 视为不可通行（按你项目约定调）
             if (resistance < 0f || float.IsInfinity(resistance))

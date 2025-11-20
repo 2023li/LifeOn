@@ -58,7 +58,8 @@ public class GridSystem : MonoSingleton<GridSystem>
 
 
     private Dictionary<Layer, Tilemap> dic_LayerMap;
-    private HashSet<Vector3Int> allCells;
+    private Dictionary<Vector3Int,CellData> allCells;
+
     protected override void Awake()
     {
         base.Awake();
@@ -76,16 +77,27 @@ public class GridSystem : MonoSingleton<GridSystem>
         };
 
 
-        allCells = new HashSet<Vector3Int>();
+        allCells = new Dictionary<Vector3Int, CellData>();
         // 遍历 tilemap 的所有已绘制区域
         BoundsInt bounds = tilemap_地图边界.cellBounds;
         foreach (var pos in bounds.allPositionsWithin)
         {
             if (tilemap_地图边界.HasTile(pos))
             {
-                allCells.Add(pos);
+                allCells.Add(pos,new CellData());
             }
         }
+
+        BoundsInt roadBounds = tilemap_道路.cellBounds;
+        Debug.Log("目前初始化道路的逻辑还不完善");
+        foreach (var pos in roadBounds.allPositionsWithin)
+        {
+            if (tilemap_道路.HasTile(pos))
+            {
+                allCells[pos].roadType = RoadType.道路;
+            }
+        }
+
     }
 
 
@@ -200,14 +212,14 @@ public class GridSystem : MonoSingleton<GridSystem>
         // 如果同一格被多次指定，后面的覆盖前面的
         var final = new Dictionary<Vector3Int, TileBase>();
 
-        foreach (var spec in needSetHighlights)
+        foreach (HighlightSpec spec in needSetHighlights)
         {
             if (spec.Coords == null) continue;
 
-            var tile = spec.Tile ?? visualizationTile; // 允许不传则使用默认高亮Tile
-            foreach (var c in spec.Coords)
+            TileBase tile = spec.Tile ?? visualizationTile; // 允许不传则使用默认高亮Tile
+            foreach (Vector3Int c in spec.Coords)
             {
-                if (!allCells.Contains(c)) continue;
+                if (!allCells.ContainsKey(c)) continue;
                 final[c] = tile;
             }
         }
@@ -228,7 +240,7 @@ public class GridSystem : MonoSingleton<GridSystem>
 
         foreach (var c in coords)
         {
-            if (allCells.Contains(c))
+            if (allCells.ContainsKey(c))
             {
                 map.SetTile(c, visualizationTile);
                 _lastCells.Add(c);
@@ -281,5 +293,43 @@ public class GridSystem : MonoSingleton<GridSystem>
         ShowAuraHighlight(context, category);
     }
 
+
+
+
+    public float GetMobileResistance(Vector3Int vector3)
+    {
+        if (allCells.ContainsKey(vector3))
+        {
+            return allCells[vector3].GetMobileResistance();
+        }
+        return -1f; 
+    }
+}
+
+
+public enum RoadType
+{
+    无道路,
+    道路,
+}
+
+public class CellData
+{
+    public Vector3Int Coor;
+    public RoadType roadType = RoadType.无道路;
+    private float baseMobileResistance = 1f;
+
+    public float GetMobileResistance()
+    {
+        switch (roadType)
+        {
+            case RoadType.无道路:
+                return 1f;
+            case RoadType.道路:
+                return 0.5f;
+            default:
+                return 1f;
+        }
+    }
 
 }
