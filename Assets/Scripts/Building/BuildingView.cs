@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class BuildingView : MonoBehaviour
 {
+    /*
     [SerializeField, LabelText("动画控制器")]
     private Animator _animator;
 
@@ -160,4 +161,9 @@ public class BuildingView : MonoBehaviour
             _persistentParticleInstance = null;
         }
     }
+    */
+
+
+   
+
 }

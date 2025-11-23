@@ -682,6 +682,10 @@ public class BuildingInstance : MonoBehaviour
 
 
 
+
+
+
+
     #endregion
 
 
