@@ -6,10 +6,10 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(RectTransform))]
 public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHandler,IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("Topology")]
+    [Header("拓扑")]
     public bool isStart = false;
 
-    [Header("Line Style (used only if isStart == true)")]
+    [Header("线材质 (只有在isStart为turn时才会被使用)")]
     public Material lineMaterial;
 
     [Header("左右端口偏移")]
@@ -22,8 +22,6 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     // 暴露 laneLines 给 manager/handle 用
     public IReadOnlyList<ConnectionLine> LaneLines => _laneLines;
 
-    private readonly List<GameObject> _handles = new
-     List<GameObject>();
     public float handleSizeWorld = 0.08f;   // 2D世界单位大小
     public float handleOffsetWorld = 0.12f; // 右侧偏移
 
@@ -41,7 +39,6 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     #region Drag Forward
     public void OnBeginDrag(PointerEventData eventData)
     {
-        Debug.Log("开始");
         ConnectionManager.I.StartDrag(this, eventData);
     }
 
@@ -58,24 +55,31 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-      //  SpawnHandles();
+     
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        //ClearHandles();
+      
     }
 
     #endregion
 
     #region Lane / Pass-through points
-
+    /// <summary>
+    /// 注册到线
+    /// </summary>
+    /// <param name="line"></param>
     public void RegisterLaneLine(ConnectionLine line)
     {
         if (_laneLines.Contains(line)) return;
         _laneLines.Add(line);
     }
 
+    /// <summary>
+    /// 从线中注销
+    /// </summary>
+    /// <param name="line"></param>
     public void UnregisterLaneLine(ConnectionLine line)
     {
         _laneLines.Remove(line);
@@ -131,40 +135,4 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     }
 
     #endregion
-
-
-
-    private void SpawnHandles()
-    {
-        ClearHandles();
-
-        // 只给“以我为尾端”的线生成 handle
-        for (int i = 0; i < _laneLines.Count; i++)
-        {
-            var line = _laneLines[i];
-            if (line.LastNode != this) continue;
-
-            var go = new GameObject($"Handle_{line.CreationOrder}");
-            go.transform.SetParent(transform.parent, worldPositionStays: true);
-
-            // 位置：节点右侧 + 对应lane的Y偏移（规则7）
-            Vector3 pos = RightPoint(line) + RectT.right * handleOffsetWorld;
-            go.transform.position = pos;
-
-            var rt = go.AddComponent<RectTransform>();
-            rt.sizeDelta = Vector2.one * handleSizeWorld; // world-space canvas下直接按世界尺寸
-
-            var handle = go.AddComponent<LineHandle>();
-            handle.Init(line, this);
-
-            _handles.Add(go);
-        }
-    }
-
-    private void ClearHandles()
-    {
-        for (int i = 0; i < _handles.Count; i++)
-            if (_handles[i] != null) Destroy(_handles[i]);
-        _handles.Clear();
-    }
 }

@@ -66,8 +66,7 @@ public class ConnectionLine : MonoBehaviour
         return false;
     }
     public IReadOnlyList<Vector3> CachedPoints => _cachedPoints;
-    private readonly List<Vector3> _cachedPoints = new
-    ();
+    private readonly List<Vector3> _cachedPoints = new();
     public void RebuildPositions()
     {
         var pts = new List<Vector3>();
