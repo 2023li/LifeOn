@@ -1,44 +1,32 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public class BR_伐木场 : Rule
+public class BR_测试 : Rule
 {
-
-
-    SupplyDef SD_木材;
-    
-
-  
-
     public override object Clone()
     {
-        return new BR_伐木场();
+        return new BR_测试();
     }
 
     public override string GetDescription()
     {
-        return "xx";
+        return "测试建筑描述";
     }
 
-    public override string GetRuleName() => "伐木场规则";
-  
+    public override string GetRuleName()
+    {
+        return "测试建筑规则";
+    }
 
     public override void OnAdd(BuildingInstance self)
     {
-        if (SD_木材 == null)
-        {
-            SD_木材 = SupplyLib.GetSupplyDef(SupplyEnum.SD_原木);
-        }
-        self.AddProduct(SD_木材);
+        self.AddProduct(SupplyLib.GetSupplyDef(SupplyEnum.SD_测试));
     }
 
     public override void OnRemove(BuildingInstance self)
     {
-      
-        self.RemoveProduct(SD_木材) ;
+        self.RemoveProduct(SupplyLib.GetSupplyDef(SupplyEnum.SD_测试));
     }
 
     public override void OnUpdate(BuildingInstance self, TurnPhase phase)
@@ -51,7 +39,7 @@ public class BR_伐木场 : Rule
                 break;
             case TurnPhase.资源生产阶段:
 
-               
+                self.BE_TryAddResource(SupplyDef.GetSupplyDef(SupplyEnum.SD_测试),10);
 
                 break;
             case TurnPhase.回合结束阶段:
@@ -63,5 +51,5 @@ public class BR_伐木场 : Rule
         }
     }
 
-   
+  
 }

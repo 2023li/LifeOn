@@ -37,7 +37,7 @@ public class BuildingArchetype : ScriptableObject
 
 
 
-    [AssetsOnly,LabelText("建筑预制体")]
+    [AssetsOnly,LabelText("建筑预制体"),Required("必须赋值",InfoMessageType.Error)]
     public BuildingInstance BuildingPrefab;
 
     [LabelText("建筑图标")]
@@ -105,6 +105,9 @@ public class BuildingLevelDef
     [LabelText("资源分发范围")]
     public float BaseDistributeRadius = 5f;
 
+
+    [LabelText("基础最大转运流量")]
+    public float BaseMaxTraffic = 0f;
 
     [LabelText("基础岗位吸引力")]
     public float BaseAttractivenessPerJob = 0f;

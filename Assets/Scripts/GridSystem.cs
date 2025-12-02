@@ -170,9 +170,9 @@ public class GridSystem : MonoSingleton<GridSystem>
     //------------------------------------坐标属性-------------------------------------
 
 
-    public bool IsOccupy(Vector3Int coor)
+    public bool IsAllowPlacementBuilding(Vector3Int coor)
     {
-        return dic_LayerMap[Layer.障碍].HasTile(coor);
+        return dic_LayerMap[Layer.障碍].HasTile(coor)||dic_LayerMap[Layer.道路].HasTile(coor) ;
     }
     public void SetOccupy(Vector3Int coor)
     {

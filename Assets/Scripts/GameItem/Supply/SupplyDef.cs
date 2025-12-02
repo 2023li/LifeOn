@@ -93,6 +93,14 @@ public class SupplyDef : ScriptableObject
         宝藏,
         
     }
+
+
+
+    public static SupplyDef GetSupplyDef(SupplyEnum supply)
+    {
+        return SupplyLib.GetSupplyDef(supply);
+    }
+
 }
 
 [Serializable]

@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
 public class ConnectionLine : MonoBehaviour
 {
+
+    #region 画线
     public UINode startNode;
     public readonly List<UINode> nodes = new List<UINode>();
 
@@ -18,6 +21,25 @@ public class ConnectionLine : MonoBehaviour
         _lr = GetComponent<LineRenderer>();
         _lr.useWorldSpace = true;
     }
+    private void Start()
+    {
+        ConnectionManager.Instance.OnShowTransfer += Show;
+        ConnectionManager.Instance.OnHideTransfer += Hide;
+        ConnectionManager.Instance.OnSelectSupply += Handle_OnSelectSupply;
+
+    }
+
+  
+    private void OnDisable()
+    {
+        if (ConnectionManager.HasInstance)
+        {
+            ConnectionManager.Instance.OnShowTransfer -= Show;
+            ConnectionManager.Instance.OnHideTransfer -= Hide;
+            ConnectionManager.Instance.OnSelectSupply -= Handle_OnSelectSupply;
+        }
+    }
+
 
     public void Init(UINode start, Material mat, float width, int creationOrder)
     {
@@ -135,4 +157,35 @@ public class ConnectionLine : MonoBehaviour
         _cachedPoints.Clear();
         _cachedPoints.AddRange(pts);
     }
+    #endregion
+
+    #region 与建筑系统集成
+
+    public SupplyEnum Supply {  get; private set; }
+
+    public List<BuildingInstance> GetBuildingsForLine()
+    {
+        List<BuildingInstance> buildings = new List<BuildingInstance>();
+        foreach (var item in nodes)
+        {
+            buildings.Add(item.SelfBuilding);
+        }
+        return buildings; 
+    }
+
+
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
+    public void Hide()
+    {
+        gameObject?.SetActive(false);
+    }
+    private void Handle_OnSelectSupply(SupplyDef supply)
+    {
+        Debug.Log(supply);
+    }
+
+    #endregion
 }

@@ -27,7 +27,7 @@ public class Effect_生产资源 : Effect
         ResourceNetwork net = ctx.ResourceNetwork;
 
         // 记录该建筑是这个资源的生产者（供覆盖范围计算使用，幂等）
-        net.RegisterProducer(self, Resource);
+      //  net.RegisterProducer(self, Resource);
 
         if (!net.TryAddResource(Resource, Amount, out string why))
         {
@@ -36,7 +36,7 @@ public class Effect_生产资源 : Effect
         }
 
         Debug.LogWarning("这里还需要检查是否在附近的仓库范围内");
-        Debug.Log("目前库存："+net.GetAmount(Resource));
+        Debug.Log("目前库存："+net.GetSupplyAmount(Resource));
     }
 
 

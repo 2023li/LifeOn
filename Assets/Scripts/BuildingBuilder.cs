@@ -149,7 +149,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
 
         foreach (var cell in tempBuildingCells)
         {
-            if (GridSystem.Instance.IsOccupy(cell)) occupied.Add(cell);
+            if (GridSystem.Instance.IsAllowPlacementBuilding(cell)) occupied.Add(cell);
             else free.Add(cell);
         }
 
@@ -176,7 +176,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
 
         if (!lastPlacementValid) return;
         foreach (var cell in tempBuildingCells)
-            if (GridSystem.Instance.IsOccupy(cell)) return;
+            if (GridSystem.Instance.IsAllowPlacementBuilding(cell)) return;
 
         process = ConstructionProcess.AwaitingConfirmation;
 
@@ -224,7 +224,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
         // 二次占用校验（避免竞态）
         foreach (var cell in tempBuildingCells)
         {
-            if (GridSystem.Instance.IsOccupy(cell))
+            if (GridSystem.Instance.IsAllowPlacementBuilding(cell))
             {
                 Debug.LogWarning("目标区域已被占用，建造失败，返回放置状态。");
                 process = ConstructionProcess.Placing;
@@ -343,7 +343,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
         {
             foreach (var c in occupyCells)
             {
-                if(GridSystem.Instance.IsOccupy(c))
+                if(GridSystem.Instance.IsAllowPlacementBuilding(c))
                 {
                     Debug.LogWarning("TryCreateBuildingAtWorld: 目标区域存在占用，放置失败。");
                     return false;

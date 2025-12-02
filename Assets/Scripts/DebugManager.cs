@@ -1,32 +1,52 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class DebugManager : MonoBehaviour
 {
     [Header("是否显示鼠标所在单元格坐标")]
     public bool b_显示鼠标位置的坐标;
 
+    [Header("是否显示鼠标射线点击信息")]
+    public bool b_显示鼠标射线点击信息;
+
     [Header("字体设置")]
-    public int fontSize = 20; // 可以调整这个值来改变字体大小
+    public int fontSize = 20; // 字体大小
+
+    [Header("射线检测设置")]
+    [Tooltip("用于射线检测的相机，不设置则使用 Camera.main")]
+    public Camera raycastCamera;
 
     private GUIStyle _guiStyle;
 
+    // 射线点击信息
+    private string _lastClickHitText;
+    private Vector2 _lastClickGuiPos; // 记录点击时的 GUI 坐标位置
+
     private void Awake()
     {
-        // 创建自定义的 GUIStyle
-        _guiStyle = new GUIStyle();
-        _guiStyle.fontSize = fontSize;
-        _guiStyle.normal.textColor = Color.white;
-        _guiStyle.normal.background = MakeTex(2, 2, new Color(0f, 0f, 0f, 0.7f)); // 半透明黑色背景
-        _guiStyle.alignment = TextAnchor.MiddleCenter;
-        _guiStyle.padding = new RectOffset(5, 5, 5, 5);
+        InitGuiStyle();
+    }
+
+    private void Update()
+    {
+        if (b_显示鼠标射线点击信息 && Input.GetMouseButtonDown(0))
+        {
+            UpdateRaycastInfo();
+        }
     }
 
     private void OnGUI()
     {
+        if (_guiStyle == null)
+            InitGuiStyle();
+
         Show_鼠标坐标();
+        Show_射线点击信息();
     }
+
+    #region GUI 绘制
 
     private void Show_鼠标坐标()
     {
@@ -39,19 +59,131 @@ public class DebugManager : MonoBehaviour
         // 获取鼠标所在单元格坐标（网格坐标）
         Vector3Int cellCoor = GridSystem.Instance.GetMousePosCoordinates();
 
-        // 把鼠标屏幕坐标转换到 GUI 坐标系（Y 轴反向）
+        // 屏幕坐标转换为 GUI 坐标（Y 轴反向）
         Vector3 mousePos = Input.mousePosition;
         mousePos.y = Screen.height - mousePos.y;
 
-        // 要显示的文本内容，可以根据需要调整格式
         string text = $"Cell: ({cellCoor.x}, {cellCoor.y}, {cellCoor.z})";
 
-        // 根据字体大小调整框的大小
-        float width = 150f * (fontSize / 20f); // 根据字体大小缩放宽度
-        float height = 25f * (fontSize / 20f); // 根据字体大小缩放高度
-        Rect rect = new Rect(mousePos.x + 15f, mousePos.y + 15f, width, height);
+        GUIContent content = new GUIContent(text);
+        Vector2 size = _guiStyle.CalcSize(content);
 
-        GUI.Box(rect, text, _guiStyle);
+        Rect rect = new Rect(
+            mousePos.x + 15f,
+            mousePos.y + 15f,
+            size.x + 10f,
+            size.y + 10f
+        );
+
+        GUI.Box(rect, content, _guiStyle);
+    }
+
+    private void Show_射线点击信息()
+    {
+        if (!b_显示鼠标射线点击信息)
+            return;
+
+        if (string.IsNullOrEmpty(_lastClickHitText))
+            return;
+
+        GUIContent content = new GUIContent(_lastClickHitText);
+        Vector2 size = _guiStyle.CalcSize(content);
+
+        Rect rect = new Rect(
+            _lastClickGuiPos.x + 15f,
+            _lastClickGuiPos.y + 15f,
+            size.x + 10f,
+            size.y + 10f
+        );
+
+        GUI.Box(rect, content, _guiStyle);
+    }
+
+    #endregion
+
+    #region 射线检测逻辑
+
+    private void UpdateRaycastInfo()
+    {
+        Camera cam = raycastCamera != null ? raycastCamera : Camera.main;
+        if (cam == null)
+        {
+            _lastClickHitText = "射线检测失败：无有效相机";
+            return;
+        }
+
+        Vector3 mousePos = Input.mousePosition;
+
+        // 记录点击时的 GUI 坐标（用于 OnGUI 绘制）
+        _lastClickGuiPos = new Vector2(mousePos.x, Screen.height - mousePos.y);
+
+        List<string> hitNames = new List<string>();
+
+        // 1. 3D 射线检测
+        Ray ray = cam.ScreenPointToRay(mousePos);
+        if (Physics.Raycast(ray, out RaycastHit hit3D))
+        {
+            hitNames.Add($"{hit3D.collider.gameObject.name} (3D)");
+        }
+
+        // 2. 2D 射线检测
+        Vector2 worldPoint2D = cam.ScreenToWorldPoint(mousePos);
+        RaycastHit2D hit2D = Physics2D.Raycast(worldPoint2D, Vector2.zero);
+        if (hit2D.collider != null)
+        {
+            hitNames.Add($"{hit2D.collider.gameObject.name} (2D)");
+        }
+
+        // 3. UI 射线检测（uGUI）
+        if (EventSystem.current != null)
+        {
+            var graphicRaycasters = FindObjectsOfType<GraphicRaycaster>();
+            if (graphicRaycasters.Length > 0)
+            {
+                PointerEventData ped = new PointerEventData(EventSystem.current)
+                {
+                    position = mousePos
+                };
+
+                List<RaycastResult> uiResults = new List<RaycastResult>();
+
+                foreach (var gr in graphicRaycasters)
+                {
+                    gr.Raycast(ped, uiResults);
+                }
+
+                foreach (var r in uiResults)
+                {
+                    hitNames.Add($"{r.gameObject.name} (UI)");
+                }
+            }
+        }
+
+        if (hitNames.Count == 0)
+        {
+            _lastClickHitText = "Click Hit: None";
+        }
+        else
+        {
+            _lastClickHitText = "Click Hit: " + string.Join(", ", hitNames);
+        }
+    }
+
+    #endregion
+
+    #region GUIStyle / 工具
+
+    private void InitGuiStyle()
+    {
+        _guiStyle = new GUIStyle
+        {
+            fontSize = fontSize,
+            alignment = TextAnchor.MiddleCenter,
+            padding = new RectOffset(5, 5, 5, 5)
+        };
+
+        _guiStyle.normal.textColor = Color.white;
+        _guiStyle.normal.background = MakeTex(2, 2, new Color(0f, 0f, 0f, 0.7f));
     }
 
     // 创建一个纯色纹理用于背景
@@ -62,13 +194,14 @@ public class DebugManager : MonoBehaviour
         {
             pix[i] = col;
         }
+
         Texture2D result = new Texture2D(width, height);
         result.SetPixels(pix);
         result.Apply();
         return result;
     }
 
-    // 可选：在Inspector中修改fontSize时实时更新样式
+    // 在 Inspector 中修改 fontSize 时实时更新样式
     private void OnValidate()
     {
         if (_guiStyle != null)
@@ -76,4 +209,6 @@ public class DebugManager : MonoBehaviour
             _guiStyle.fontSize = fontSize;
         }
     }
+
+    #endregion
 }

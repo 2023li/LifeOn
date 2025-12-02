@@ -71,6 +71,7 @@ public class UIPanel_GameMain : PanelBase
         });
 
         OnAwake_建筑信息();
+
     }
 
 
@@ -258,7 +259,12 @@ public class UIPanel_GameMain : PanelBase
     #endregion
 
 
-    
+    #region 物流网络相关
+   
+    #endregion
+
+
+
 
 
 

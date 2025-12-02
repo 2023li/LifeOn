@@ -1,11 +1,51 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
 public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHandler,IPointerEnterHandler, IPointerExitHandler
 {
+
+    #region 生命周期
+    private void Awake()
+    {
+        _rt = GetComponent<RectTransform>();
+    }
+    private void OnEnable()
+    {
+
+    }
+    private void Start()
+    {
+
+        ConnectionManager.Instance.OnHideTransfer += Hide;
+        ConnectionManager.Instance.OnSelectSupply += Handle_ConnectionManager_OnSelect;
+        ConnectionManager.Instance.OnShowTransfer += Show;
+        gameObject.SetActive(false);
+        Debug.Log("ss");
+    }
+
+    private void OnDestroy()
+    {
+        if (ConnectionManager.HasInstance)
+        {
+            ConnectionManager.Instance.OnHideTransfer -= Hide;
+            ConnectionManager.Instance.OnSelectSupply -= Handle_ConnectionManager_OnSelect;
+            ConnectionManager.Instance.OnShowTransfer -= Show;
+        }
+
+        if (SelfBuilding != null)
+        {
+            SelfBuilding.OnStateChanged -= Handle_BuildStateChange;
+        }
+
+    }
+    #endregion
+
+    #region 画线
     [Header("拓扑")]
     public bool isStart = false;
 
@@ -31,25 +71,25 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
 
     public RectTransform RectT => _rt;
 
-    private void Awake()
-    {
-        _rt = GetComponent<RectTransform>();
-    }
+  
+
+  
 
     #region Drag Forward
     public void OnBeginDrag(PointerEventData eventData)
     {
-        ConnectionManager.I.StartDrag(this, eventData);
+        Debug.Log("开始拖拽");
+        ConnectionManager.Instance.StartDrag(this, eventData);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        ConnectionManager.I.Drag(eventData);
+        ConnectionManager.Instance.Drag(eventData);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        ConnectionManager.I.EndDrag(this, eventData);
+        ConnectionManager.Instance.EndDrag(this, eventData);
     }
 
 
@@ -135,4 +175,113 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     }
 
     #endregion
+    #endregion
+
+    #region 与建筑集成
+
+
+    [SerializeField,LabelText("进度条填充")]
+    public Image barFull;
+
+    [SerializeField, LabelText("物资图标")]
+    public Image supplyDefIcon;
+
+
+    public BuildingInstance SelfBuilding { get; set; }
+
+    public void BuidBuildingInstance(BuildingInstance self)
+    {
+        SelfBuilding = self;
+
+        SelfBuilding.OnStateChanged += Handle_BuildStateChange;
+    }
+
+    public void Show()
+    {
+        Debug.Log("show");
+        if (SelfBuilding.CurrentTransportationAbility)
+        {
+            gameObject.SetActive(true);
+        }
+        UpdateBar();
+    }
+
+
+    public void Handle_ConnectionManager_OnSelect(SupplyDef def)
+    {
+        //不是生产者 又 无转运能力
+        if (!SelfBuilding.CurrentProductList.Contains(def)&&!SelfBuilding.CurrentTransportationAbility)
+        {
+            gameObject.SetActive(false);
+        }
+
+        //所选 类型的生产者
+        if (SelfBuilding.CurrentProductList.Contains(def))
+        {
+            supplyDefIcon.sprite = def.Icon;
+            isStart = true;
+        }
+
+    }
+
+    public void Hide()
+    {
+        gameObject?.SetActive(false);
+    }
+
+    [Button]
+    public void UpdateBar()
+    {
+        float percentage;
+        if (SelfBuilding == null||SelfBuilding.RO_MaxTraffic<=0)
+        {
+            percentage = 0;
+        }
+
+        percentage = SelfBuilding.CurrentTraffic/SelfBuilding.RO_MaxTraffic;
+        barFull.fillAmount = percentage;
+    }
+
+    private void Handle_BuildStateChange(BuildingInstance instance, BuildingStateValueType type)
+    {
+        if (SelfBuilding != instance)
+        {
+            return;
+        }
+
+        switch (type)
+        {
+            case BuildingStateValueType.LevelIndex:
+                break;
+            case BuildingStateValueType.CurrentExp:
+                break;
+            case BuildingStateValueType.ExpToNext:
+                break;
+            case BuildingStateValueType.MaxPopulation:
+                break;
+            case BuildingStateValueType.CurrentPopulation:
+                break;
+            case BuildingStateValueType.CurrentWorkers:
+                break;
+            case BuildingStateValueType.MaxStorageCapacity:
+                break;
+            case BuildingStateValueType.TransportationAbility:
+                break;
+            case BuildingStateValueType.TransportationResistance:
+                break;
+            case BuildingStateValueType.就业吸引力:
+                break;
+            case BuildingStateValueType.产品列表:
+                break;
+            case BuildingStateValueType.转运流量:
+                UpdateBar();
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    #endregion
+
 }

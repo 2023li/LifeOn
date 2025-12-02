@@ -20,7 +20,8 @@ public enum BuildingStateValueType
     TransportationAbility,
     TransportationResistance,
     就业吸引力,
-    产品列表
+    产品列表,
+    转运流量,
 }
 
 
@@ -78,7 +79,12 @@ public class BuildingStatModifiers
     public float Bonus_DistributeRadiusMul = 1f;
     public float Final_DistributeRadiusMul = 1f;
 
-
+    // 转运流量 MaxTraffic（遵循统一属性结构：基础增减+基础倍率+额外增减+额外倍率+最终倍率）
+    public int Base_MaxTrafficAdd = 0;          // 基础转运流量增减（固定值）
+    public float Base_MaxTrafficMul = 1f;      // 基础转运流量倍率（乘法系数）
+    public int Bonus_MaxTrafficAdd = 0;        // 额外转运流量增减（奖励/buff 叠加值）
+    public float Bonus_MaxTrafficMul = 1f;     // 额外转运流量倍率（奖励/buff 叠加系数）
+    public float Final_MaxTrafficMul = 1f;     // 最终转运流量总倍率（汇总所有倍率后的值）
 
     // 工作吸引力
     public int Base_JobAttractivenessAdd = 0;
@@ -124,14 +130,13 @@ public class BuildingInstance : MonoBehaviour
 
     #endregion
 
-    #region 事件
+   
 
 
     public event Action<BuildingInstance, BuildingStateValueType> OnStateChanged;
 
 
 
-    #endregion
 
     #region 基础 & 状态字段 + 属性
 
@@ -142,8 +147,8 @@ public class BuildingInstance : MonoBehaviour
     [LabelText("实例ID"), ShowInInspector, ReadOnly]
     public string InstanceId { get; private set; } = Guid.NewGuid().ToString("N");
 
-    [LabelText("建筑定义数据")]
-    public BuildingArchetype Def;
+    [ReadOnly, ShowInInspector,LabelText("建筑定义数据")]
+    public BuildingArchetype Def { get; set; }
     public string DisplayName =>Def==null? "未知数据" : Def.DisplayName;
 
 
@@ -336,24 +341,52 @@ public class BuildingInstance : MonoBehaviour
             return f;
         }
     }
-
-
-
-
-    [ShowInInspector, ReadOnly, LabelText("允许转运")]
-    private bool _currentTransportationAbility;
-    public bool CurrentTransportationAbility
+    [ShowInInspector, ReadOnly, LabelText("最大转运容量")]
+    public float RO_MaxTraffic
     {
-        get => _currentTransportationAbility;
+        get
+        {
+            if (GetLevelData() == null)
+            {
+                return 0f; // 浮点型返回 0f，更规范
+            }
+
+            // 完全对齐 RO_DistributeRadius 计算逻辑，仅替换 MaxTraffic 对应字段名
+            float fBase = (GetLevelData().BaseMaxTraffic + statModifiers.Base_MaxTrafficAdd) * statModifiers.Base_MaxTrafficMul;
+            float fBonus = statModifiers.Bonus_MaxTrafficAdd * statModifiers.Bonus_MaxTrafficMul;
+            float f = (fBase + fBonus) * statModifiers.Final_MaxTrafficMul;
+            return f;
+        }
+    }
+
+    private float _currentTraffic;
+    [ShowInInspector, ReadOnly, LabelText("当前转运流量")]
+    public float CurrentTraffic
+    {
+        get => _currentTraffic;
         set
         {
-            if (_currentTransportationAbility != value)
+            if (_currentTraffic != value)
             {
-                _currentTransportationAbility = value;
-                OnStateChanged?.Invoke(this, BuildingStateValueType.TransportationAbility);
+                _currentTraffic = value;
+                OnStateChanged?.Invoke(this, BuildingStateValueType.转运流量);
             }
 
         }
+    }
+
+    [ShowInInspector, ReadOnly, LabelText("剩余转运容量")]
+    public float SurplusTraffic
+    {
+        get => RO_MaxTraffic - CurrentTraffic;
+    }
+
+
+
+    [ShowInInspector, ReadOnly, LabelText("参与转运系统")]
+    public bool CurrentTransportationAbility
+    {
+        get => RO_MaxTraffic > 0;      
     }
 
     [ShowInInspector, ReadOnly, LabelText("转运阻力")]
@@ -374,11 +407,12 @@ public class BuildingInstance : MonoBehaviour
     }
 
 
+
     [ShowInInspector, ReadOnly, LabelText("产品列表")]
-    public HashSet<SupplyDef> CurrentProductList { get; private set; }
+    public HashSet<SupplyDef> CurrentProductList { get; private set; } = new HashSet<SupplyDef>(0); //目前只是作为产品源头 没有什么其他作用
+
     public bool AddProduct(SupplyDef product)
     {
-
         if (product == null) return false;
         if (CurrentProductList == null) { CurrentProductList = new HashSet<SupplyDef>(); }
         bool a =  CurrentProductList.Add(product);
@@ -387,6 +421,19 @@ public class BuildingInstance : MonoBehaviour
             OnStateChanged?.Invoke(this, BuildingStateValueType.产品列表);
         }
         return a;
+    }
+    public bool RemoveProduct(SupplyDef product)
+    {
+        if (product == null) return false;
+        if (CurrentProductList == null) return false;
+
+        bool removed = CurrentProductList.Remove(product);
+        if (removed)
+        {
+            OnStateChanged?.Invoke(this, BuildingStateValueType.产品列表);
+        }
+
+        return removed;
     }
 
 
@@ -454,7 +501,7 @@ public class BuildingInstance : MonoBehaviour
         }
     }
 
-
+  
 
 
     private void OnEnable()
@@ -463,6 +510,11 @@ public class BuildingInstance : MonoBehaviour
 
 
         RegisterToGame();
+    }
+    private void Start()
+    {
+        View = transform.GetComponentInChildren<BuildingView>();
+        View.Init(this);
     }
 
     private void OnDisable()
@@ -678,7 +730,8 @@ public class BuildingInstance : MonoBehaviour
 
     #region 视觉效果
 
-    private Animator animator;
+
+    public BuildingView View {  get; private set; } 
 
 
 
@@ -687,6 +740,30 @@ public class BuildingInstance : MonoBehaviour
 
 
     #endregion
+
+
+}
+
+
+
+public static class BuildingInstanceExtensions
+{
+    public static bool BE_TryAddResource(this BuildingInstance self,SupplyAmount item)
+    {
+
+        return BE_TryAddResource(self,item.Resource,item.Amount);
+       
+    }
+
+    public static bool BE_TryAddResource(this BuildingInstance self, SupplyDef def,int num)
+    {
+        if (!self.Ctx.ResourceNetwork.TryAddResource(def, num, out string r))
+        {
+            Debug.Log(r);
+            return false;
+        }
+        return true;
+    }
 
 
 }

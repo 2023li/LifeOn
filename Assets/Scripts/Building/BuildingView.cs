@@ -1,9 +1,14 @@
+using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class BuildingView : MonoBehaviour
 {
+
+
+
     /*
     [SerializeField, LabelText("动画控制器")]
     private Animator _animator;
@@ -163,7 +168,84 @@ public class BuildingView : MonoBehaviour
     }
     */
 
+    private Animator buildingAnimator;
 
-   
+    private Canvas buildingCanvas;
+
+    private UINode nodeUI;
+
+    private BuildingInstance self;
+    internal void Init(BuildingInstance buildingInstance)
+    {
+        self = buildingInstance;
+        self.OnStateChanged += Handle_BuildingStateChange;
+
+
+        buildingAnimator = GetComponent<Animator>();
+
+
+
+        //建筑UI系统
+        buildingCanvas = transform.parent.Find("建筑实体uiCanvas").GetComponent<Canvas>();
+
+        if (buildingCanvas == null)
+        {
+            Debug.LogError("buildingCanvas NULL");
+        }
+
+        buildingCanvas.worldCamera = InputManager.Instance.RealCamera;
+        nodeUI = buildingCanvas.GetComponentInChildren<UINode>();
+
+
+        Debug.LogWarning(nodeUI == null);
+        nodeUI.BuidBuildingInstance(self);
+    }
+
+
+    private void OnDisable()
+    {
+        self.OnStateChanged -= Handle_BuildingStateChange;
+    }
+
+    private void Handle_BuildingStateChange(BuildingInstance instance, BuildingStateValueType type)
+    {
+        switch (type)
+        {
+            case BuildingStateValueType.LevelIndex:
+                break;
+            case BuildingStateValueType.CurrentExp:
+                break;
+            case BuildingStateValueType.ExpToNext:
+                break;
+            case BuildingStateValueType.MaxPopulation:
+                break;
+            case BuildingStateValueType.CurrentPopulation:
+                break;
+            case BuildingStateValueType.CurrentWorkers:
+                break;
+            case BuildingStateValueType.MaxStorageCapacity:
+                break;
+            case BuildingStateValueType.TransportationAbility:
+                break;
+            case BuildingStateValueType.TransportationResistance:
+                break;
+            case BuildingStateValueType.就业吸引力:
+                break;
+            case BuildingStateValueType.产品列表:
+
+
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void Handle_OnEditSupplyNetwork(SupplyEnum supply)
+    {
+        //这里要处理一下 区分一下逻辑看是否要显示该建筑的节点 以及如何显示
+
+        //现在由节点自行处理了
+    }
 
 }

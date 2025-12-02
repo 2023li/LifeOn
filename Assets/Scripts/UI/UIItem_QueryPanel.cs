@@ -4,6 +4,9 @@ using UnityEngine;
 using Moyo.Unity;
 using UnityEngine.UI;
 
+/// <summary>
+/// 查询面板
+/// </summary>
 public class UIItem_QueryPanel : MonoBehaviour
 {
     [SerializeField] private Toggle toggle_治安;

@@ -3,6 +3,8 @@ using System.Linq;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Moyo.Unity;
+using System;
 
 /// <summary>
 /// UI 节点连线的全局管理器。
@@ -20,18 +22,11 @@ using UnityEngine.EventSystems;
 /// - 新建时若 AB 段已存在则不重复创建。  
 /// - start 节点拖空（没连到任何目标）视为撤销：删除该 start 最近创建的那条线。  
 /// </summary>
-public class ConnectionManager : MonoBehaviour
+public class ConnectionManager : MonoSingleton<ConnectionManager>
 {
-    /// <summary>
-    /// 单例入口（场景内唯一）。
-    /// </summary>
-    public static ConnectionManager I { get; private set; }
-
-    /// <summary>
-    /// 连线预制模板（运行时用代码生成，不需要手工配置）。  
-    /// 这里不序列化，仅作为 Instantiate 的源对象。
-    /// </summary>
-    private ConnectionLine linePrefab;
+    #region 画线
+    protected override bool IsDontDestroyOnLoad => false;
+   
 
     [Header("Line Settings")]
     [LabelText("线宽")]
@@ -51,6 +46,7 @@ public class ConnectionManager : MonoBehaviour
     /// 当前所有“已固化”的连线集合。
     /// </summary>
     private readonly List<ConnectionLine> _lines = new List<ConnectionLine>();
+    public IReadOnlyList<ConnectionLine> Lines => _lines;
 
     /// <summary>
     /// 正在拖拽中的那条线（可能是新建，也可能是延长）。
@@ -91,38 +87,36 @@ public class ConnectionManager : MonoBehaviour
         ExtendExisting
     }
 
-    private void Awake()
+    protected override void Awake()
     {
-        I = this;
+        base.Awake();
 
-        // 运行时生成一份连线模板，避免必须拖 prefab。
-        linePrefab = CreateLineTemplate();
     }
 
     /// <summary>
     /// 在运行时创建一份 ConnectionLine 模板对象。  
     /// 通过代码补齐 LineRenderer 的默认设置，保证表现一致。
     /// </summary>
-    private ConnectionLine CreateLineTemplate()
+    private ConnectionLine CreateLineInstance()
     {
         var go = new GameObject("ConnectionLine");
         go.transform.SetParent(transform, false);
 
-        // 先加 ConnectionLine（其 RequireComponent 会自动补 LineRenderer）
         var line = go.AddComponent<ConnectionLine>();
-
-        // 补齐 LineRenderer 其它默认配置
         var lr = go.GetComponent<LineRenderer>();
-        lr.useWorldSpace = true;               // 使用世界坐标绘制
-        lr.numCornerVertices = 4;              // 圆角段数（越大越圆滑）
-        lr.numCapVertices = 4;                 // 端点圆滑段数
-        lr.textureMode = LineTextureMode.Tile; // 纹理平铺
-        lr.alignment = LineAlignment.View;     // 始终朝向相机
+
+        // 这里把你原来在 CreateLineTemplate 里填的配置都搬过来
+        lr.useWorldSpace = true;
+        lr.numCornerVertices = 4;
+        lr.numCapVertices = 4;
+        lr.textureMode = LineTextureMode.Tile;
+        lr.alignment = LineAlignment.View;
         lr.sortingLayerName = "UI";
         lr.sortingOrder = 10;
 
         return line;
     }
+
 
     #region 拖拽 API（由 UINode 调用）
 
@@ -150,14 +144,14 @@ public class ConnectionManager : MonoBehaviour
         if (origin.isStart)
         {
             // start 节点：允许无上限新建一条线
-            _activeLine = Instantiate(linePrefab, transform);
+            _activeLine = CreateLineInstance();
             _activeLine.Init(origin, origin.lineMaterial, lineWidth, ++_creationCounter);
             _dragMode = DragMode.NewFromStart;
         }
         else
         {
             // 非 start：只能延长自己作为尾节点的已有线
-            var tailLines = _lines.Where(l => l.LastNode == origin).ToList();
+            List<ConnectionLine> tailLines = _lines.Where(l => l.LastNode == origin).ToList();
 
             if (tailLines.Count == 1)
             {
@@ -455,4 +449,33 @@ public class ConnectionManager : MonoBehaviour
         Vector3 proj = a + t * ab;
         return (p - proj).sqrMagnitude;
     }
+    #endregion
+
+    #region 与建筑系统集成
+
+   
+    //显示 //这个事件需要显示所有的线 显示所有的节点（起始节点添加额外的光环）
+    public event Action OnShowTransfer;
+    //选择一个资源
+    public event Action<SupplyDef> OnSelectSupply;
+    public event Action OnHideTransfer;
+
+
+    public void EnterEditorMode()
+    {
+        OnShowTransfer?.Invoke();
+    }
+
+    public void OnSelect(SupplyDef def)
+    {
+        OnSelectSupply?.Invoke(def);
+    }
+
+    public void ExitEditorMode()
+    {
+        OnHideTransfer?.Invoke();
+    }
+
+    #endregion
+
 }

@@ -150,7 +150,7 @@ public class R_野生浆果丛规则:Rule
     {
         foreach (SupplyAmount item in supplyAmount)
         {
-            self.Ctx.ResourceNetwork.RegisterProducer(self, item.Resource);
+            self.AddProduct(item.Resource);
         }
 
 
@@ -166,7 +166,7 @@ public class R_野生浆果丛规则:Rule
     {
         foreach (SupplyAmount item in supplyAmount)
         {
-            self.Ctx.ResourceNetwork.UnregisterProducer(self, item.Resource);
+            self.AddProduct(item.Resource);
         }
 
 
