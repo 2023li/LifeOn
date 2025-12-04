@@ -49,8 +49,7 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     [Header("拓扑")]
     public bool isStart = false;
 
-    [Header("线材质 (只有在isStart为turn时才会被使用)")]
-    public Material lineMaterial;
+   
 
     [Header("左右端口偏移")]
     public float horizontalMargin = 0.5f;   // 经过节点时左右点距节点边缘的额外偏移（世界单位）
@@ -66,6 +65,7 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     public float handleOffsetWorld = 0.12f; // 右侧偏移
 
     // 所有“占用该节点水平通道”的线（中间或末端拖拽时）
+    [ShowInInspector,ReadOnly]
     private readonly List<ConnectionLine> _laneLines = new List<ConnectionLine>();
     private readonly Dictionary<ConnectionLine, int> _laneIndex = new Dictionary<ConnectionLine, int>();
 
@@ -104,8 +104,16 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     /// <param name="line"></param>
     public void RegisterLaneLine(ConnectionLine line)
     {
-        if (_laneLines.Contains(line)) return;
+        if (_laneLines.Contains(line)) return;       
         _laneLines.Add(line);
+
+
+
+        if (SelfBuilding)
+        {
+            SelfBuilding.CurrentTraffic += line.SelfSupply.BaseTrafficOccupancy;
+            UpdateBar();
+        }
     }
 
     /// <summary>
@@ -114,6 +122,14 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     /// <param name="line"></param>
     public void UnregisterLaneLine(ConnectionLine line)
     {
+
+
+        if (SelfBuilding)
+        {
+            SelfBuilding.CurrentTraffic -= line.SelfSupply.BaseTrafficOccupancy;
+            UpdateBar();
+        }
+
         _laneLines.Remove(line);
         _laneIndex.Remove(line);
     }
@@ -171,6 +187,19 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
 
     #region 与建筑集成
 
+    public SupplyDef CurrentActiveSupplyDef { get; set; }
+
+    public float UnusedTrafficOccupancy
+    {
+        get
+        {
+            if (SelfBuilding == null)
+            {
+                return 0f;
+            }
+            return SelfBuilding.RO_MaxTraffic - SelfBuilding.CurrentTraffic;
+        }
+    }
 
     [SerializeField,LabelText("进度条填充")]
     public Image barFull;
@@ -210,7 +239,9 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
         //所选 类型的生产者
         if (SelfBuilding.CurrentProductList.Contains(def))
         {
+            CurrentActiveSupplyDef = def;
             supplyDefIcon.sprite = def.Icon;
+
             isStart = true;
         }
 
@@ -224,15 +255,16 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     [Button]
     public void UpdateBar()
     {
-        float percentage;
-        if (SelfBuilding == null||SelfBuilding.RO_MaxTraffic<=0)
+        if (SelfBuilding == null || SelfBuilding.RO_MaxTraffic <= 0)
         {
-            percentage = 0;
+            barFull.fillAmount = 0f;
+            return;
         }
 
-        percentage = SelfBuilding.CurrentTraffic/SelfBuilding.RO_MaxTraffic;
+        float percentage = SelfBuilding.CurrentTraffic / SelfBuilding.RO_MaxTraffic;
         barFull.fillAmount = percentage;
     }
+
 
     private void Handle_BuildStateChange(BuildingInstance instance, BuildingStateValueType type)
     {

@@ -56,6 +56,9 @@ public class SupplyDef : ScriptableObject
     [LabelText("库存流量占用"),BoxGroup("运输属性")]
     public int BaseTrafficOccupancy = 1;
 
+    [LabelText("运输路线材质"), BoxGroup("运输属性")]
+    public Material lineMat;
+
     
 
 

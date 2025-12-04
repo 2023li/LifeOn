@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(LineRenderer))]
 public class ConnectionLine : MonoBehaviour
@@ -41,15 +42,16 @@ public class ConnectionLine : MonoBehaviour
     }
 
 
-    public void Init(UINode start, Material mat, float width, int creationOrder)
+    public void Init(UINode start, SupplyDef supply, float width, int creationOrder)
     {
         startNode = start;
         CreationOrder = creationOrder;
 
         nodes.Clear();
         nodes.Add(start);
+        SelfSupply = supply;
 
-        _lr.material = mat;
+        _lr.material = SelfSupply.lineMat;
         _lr.widthMultiplier = width;
 
         start.RegisterLaneLine(this);
@@ -161,7 +163,7 @@ public class ConnectionLine : MonoBehaviour
 
     #region 与建筑系统集成
 
-    public SupplyDef Supply {  get; private set; }
+    public SupplyDef SelfSupply {  get; private set; }
 
     public List<BuildingInstance> GetBuildingsForLine()
     {
@@ -184,8 +186,11 @@ public class ConnectionLine : MonoBehaviour
     }
     private void Handle_OnSelectSupply(SupplyDef supply)
     {
+        if (supply.Id == SelfSupply.Id)
+        {
+            Show();
+        }
         
-
         Debug.Log(supply);
     }
 

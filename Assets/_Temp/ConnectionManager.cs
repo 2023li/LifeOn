@@ -145,7 +145,7 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
         {
             // start 节点：允许无上限新建一条线
             _activeLine = CreateLineInstance();
-            _activeLine.Init(origin, origin.lineMaterial, lineWidth, ++_creationCounter);
+            _activeLine.Init(origin, origin.CurrentActiveSupplyDef, lineWidth, ++_creationCounter);
             _dragMode = DragMode.NewFromStart;
         }
         else
@@ -211,16 +211,17 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
     {
         if (_activeLine == null) return;
 
-        // 找到鼠标下的目标节点（排除 origin 自己）
         UINode target = GetNodeUnderPointer(eventData, origin);
 
         if (_dragMode == DragMode.NewFromStart)
         {
             if (target != null)
             {
-                // 若 AB 段已存在则不重复创建
+                // 命中了节点
                 if (FindLineWithSegment(origin, target) != null)
                 {
+                    // 这次拖出来的线无效：要先从节点注销，再销毁
+                    _activeLine.DetachAll();           // ★ 新增
                     Destroy(_activeLine.gameObject);
                 }
                 else
@@ -232,8 +233,12 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
             }
             else
             {
-                // start 拖空：删除该 start 最新创建的线（撤销逻辑）
+                // 没命中任何节点：这次新建的临时线需要先撤销注册
+                _activeLine.DetachAll();               // ★ 先把刚才新建的那条线从节点上去掉
+
+                // 再按你的原逻辑：拖空视为“撤销上一条真正存在的线”
                 DeleteLastLineFromStart(origin);
+
                 Destroy(_activeLine.gameObject);
             }
         }
@@ -268,6 +273,7 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
         RecalculateAllLanes();
         RebuildAllLines();
     }
+
 
     #endregion
 
