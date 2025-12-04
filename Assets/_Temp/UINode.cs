@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
-public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHandler,IPointerEnterHandler, IPointerExitHandler
+public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHandler
 {
 
     #region 生命周期
@@ -93,19 +93,11 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     }
 
 
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-     
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-      
-    }
+  
 
     #endregion
 
-    #region Lane / Pass-through points
+    #region 路线
     /// <summary>
     /// 注册到线
     /// </summary>

@@ -161,7 +161,7 @@ public class ConnectionLine : MonoBehaviour
 
     #region 与建筑系统集成
 
-    public SupplyEnum Supply {  get; private set; }
+    public SupplyDef Supply {  get; private set; }
 
     public List<BuildingInstance> GetBuildingsForLine()
     {
@@ -184,6 +184,8 @@ public class ConnectionLine : MonoBehaviour
     }
     private void Handle_OnSelectSupply(SupplyDef supply)
     {
+        
+
         Debug.Log(supply);
     }
 
