@@ -30,7 +30,7 @@ public class InputManager : MonoSingleton<InputManager>
     /// <summary>仅在 GamePlay.MoveCamera 激活时为 true。</summary>
     public event Action<bool> GamePlay_OnMoveCamera;
 
-    public LOControlsMaps inputActionMap;
+    private LOControlsMaps inputActionMap;
 
     public bool IsGamePlayActive => inputActionMap != null && inputActionMap.GamePlay.enabled;
     

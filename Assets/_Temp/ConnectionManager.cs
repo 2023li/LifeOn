@@ -217,11 +217,13 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
         {
             if (target != null)
             {
-                // 命中了节点
-                if (FindLineWithSegment(origin, target) != null)
+                // 当前正在画线的物资类型
+                var supply = _activeLine.SelfSupply;
+
+                // 只在 A-B 之间已经存在【同一 supply】的连线时，视为重复，不允许再连
+                if (FindLineWithSegment(origin, target, supply) != null)
                 {
-                    // 这次拖出来的线无效：要先从节点注销，再销毁
-                    _activeLine.DetachAll();           // ★ 新增
+                    _activeLine.DetachAll();
                     Destroy(_activeLine.gameObject);
                 }
                 else
@@ -233,12 +235,8 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
             }
             else
             {
-                // 没命中任何节点：这次新建的临时线需要先撤销注册
-                _activeLine.DetachAll();               // ★ 先把刚才新建的那条线从节点上去掉
-
-                // 再按你的原逻辑：拖空视为“撤销上一条真正存在的线”
+                _activeLine.DetachAll();
                 DeleteLastLineFromStart(origin);
-
                 Destroy(_activeLine.gameObject);
             }
         }
@@ -327,6 +325,19 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
     {
         return _lines.FirstOrDefault(l => l.ContainsSegment(a, b));
     }
+
+
+    /// <summary>
+    /// 查找包含线段 AB 且物资为指定 supply 的连线。
+    /// </summary>
+    private ConnectionLine FindLineWithSegment(UINode a, UINode b, SupplyDef supply)
+    {
+        return _lines.FirstOrDefault(l =>
+            l.ContainsSegment(a, b) &&
+            l.SelfSupply == supply    // 同一物资才算重复
+        );
+    }
+
 
     /// <summary>
     /// 收集所有参与连线的节点，重算它们的槽位/车道信息。

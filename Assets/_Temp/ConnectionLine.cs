@@ -30,9 +30,10 @@ public class ConnectionLine : MonoBehaviour
 
     }
 
-  
-    private void OnDisable()
+
+    private void OnDestroy()
     {
+
         if (ConnectionManager.HasInstance)
         {
             ConnectionManager.Instance.OnShowTransfer -= Show;
@@ -188,10 +189,16 @@ public class ConnectionLine : MonoBehaviour
     {
         if (supply.Id == SelfSupply.Id)
         {
+
+          
             Show();
         }
-        
-        Debug.Log(supply);
+        else
+        {
+            Hide();
+        }
+
+        Debug.Log($"{supply.Id} {SelfSupply.Id}");
     }
 
     #endregion

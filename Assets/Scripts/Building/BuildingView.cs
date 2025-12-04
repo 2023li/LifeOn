@@ -197,7 +197,6 @@ public class BuildingView : MonoBehaviour
         nodeUI = buildingCanvas.GetComponentInChildren<UINode>();
 
 
-        Debug.LogWarning(nodeUI == null);
         nodeUI.BuidBuildingInstance(self);
     }
 
