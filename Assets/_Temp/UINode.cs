@@ -9,23 +9,27 @@ using UnityEngine.UI;
 public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHandler
 {
 
+    public static readonly List<UINode> ActiveNodes = new List<UINode>();
     #region 生命周期
     private void Awake()
     {
         _rt = GetComponent<RectTransform>();
+        _nodeCanvasGroup = GetComponent<CanvasGroup>();
     }
     private void OnEnable()
     {
+        ActiveNodes.Add(this);
 
     }
     private void Start()
     {
+        UpdateInteractiveState();
 
         ConnectionManager.Instance.OnHideTransfer += Hide;
         ConnectionManager.Instance.OnSelectSupply += Handle_ConnectionManager_OnSelect;
         ConnectionManager.Instance.OnShowTransfer += Show;
         gameObject.SetActive(false);
-        Debug.Log("ss");
+        
     }
 
     private void OnDestroy()
@@ -49,7 +53,33 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     [Header("拓扑")]
     public bool isStart = false;
 
-   
+    private bool _interactive = true;
+    [ShowInInspector]
+    public bool Interactive
+    {
+        get { return _interactive; }
+        set
+        {
+            _interactive = value;
+            UpdateInteractiveState();
+        }
+    }
+
+    private CanvasGroup _nodeCanvasGroup;
+
+    private void UpdateInteractiveState()
+    {
+        // Safety check: In case this is called before Awake (unlikely but possible via scripts)
+        if (_nodeCanvasGroup == null)
+            _nodeCanvasGroup = GetComponent<CanvasGroup>();
+
+        if (_nodeCanvasGroup != null)
+        {
+            _nodeCanvasGroup.interactable = _interactive;
+            _nodeCanvasGroup.blocksRaycasts = _interactive; // IMPORTANT: usually you want to block raycasts too if not interactive
+            _nodeCanvasGroup.alpha = _interactive ? 1f : 0.7f;
+        }
+    }
 
     [Header("左右端口偏移")]
     public float horizontalMargin = 0.5f;   // 经过节点时左右点距节点边缘的额外偏移（世界单位）
@@ -219,11 +249,12 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
 
     public void Show()
     {
-        Debug.Log("show");
+       
         if (SelfBuilding.CurrentTransportationAbility)
         {
             gameObject.SetActive(true);
         }
+        Interactive = true;
         UpdateBar();
     }
 

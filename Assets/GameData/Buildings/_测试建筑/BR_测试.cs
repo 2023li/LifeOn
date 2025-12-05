@@ -22,11 +22,13 @@ public class BR_测试 : Rule
     public override void OnAdd(BuildingInstance self)
     {
         self.AddProduct(SupplyLib.GetSupplyDef(SupplyEnum.SD_测试));
+        self.AddProduct(SupplyLib.GetSupplyDef(SupplyEnum.SD_原木));
     }
 
     public override void OnRemove(BuildingInstance self)
     {
         self.RemoveProduct(SupplyLib.GetSupplyDef(SupplyEnum.SD_测试));
+        self.RemoveProduct(SupplyLib.GetSupplyDef(SupplyEnum.SD_原木));
     }
 
     public override void OnUpdate(BuildingInstance self, TurnPhase phase)

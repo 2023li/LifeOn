@@ -28,7 +28,7 @@ RectTransform:
   m_GameObject: {fileID: 1501376453200529356}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1806569838975375058}
@@ -101,7 +101,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 16439
 --- !u!1 &2552424118002610107
 GameObject:
   m_ObjectHideFlags: 0
@@ -114,6 +114,7 @@ GameObject:
   - component: {fileID: 5688790447896976858}
   - component: {fileID: 1093118985233495173}
   - component: {fileID: 1639897826296274087}
+  - component: {fileID: 1555742413293737136}
   m_Layer: 0
   m_Name: "\u8FD0\u8F93\u7CFB\u7EDFUI"
   m_TagString: Untagged
@@ -192,13 +193,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isStart: 0
-  lineMaterial: {fileID: 0}
   horizontalMargin: 0.5
   laneSpacing: 0.2
   handleSizeWorld: 0.08
   handleOffsetWorld: 0.12
   barFull: {fileID: 7817979373468411833}
   supplyDefIcon: {fileID: 5100524856416889764}
+--- !u!225 &1555742413293737136
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2552424118002610107}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &3181687415159370509
 GameObject:
   m_ObjectHideFlags: 0
@@ -311,7 +323,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -0.5, y: -0.49999997}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &445169056255482217
 CanvasGroup:

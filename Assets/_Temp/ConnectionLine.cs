@@ -7,7 +7,14 @@ using UnityEngine.UIElements;
 public class ConnectionLine : MonoBehaviour
 {
 
+
+  
+
     #region 画线
+
+
+
+
     public UINode startNode;
     public readonly List<UINode> nodes = new List<UINode>();
 
@@ -163,6 +170,9 @@ public class ConnectionLine : MonoBehaviour
     #endregion
 
     #region 与建筑系统集成
+
+
+
 
     public SupplyDef SelfSupply {  get; private set; }
 

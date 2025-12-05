@@ -131,9 +131,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4ec2611dfc22564886a9c1574b4afad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildingAnimator: {fileID: 4354065575623979518}
-  buildingCanvas: {fileID: 7019490669639338324}
-  nodeUI: {fileID: 4986872669385349514}
 --- !u!95 &4354065575623979518
 Animator:
   serializedVersion: 5
@@ -482,14 +479,6 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6193330236126031847, guid: 7fd76a4641eb9ff4da30240d634d327e, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6193330236126031847, guid: 7fd76a4641eb9ff4da30240d634d327e, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6193330236126031847, guid: 7fd76a4641eb9ff4da30240d634d327e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -545,21 +534,5 @@ PrefabInstance:
 --- !u!224 &433991731750906570 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6193330236126031847, guid: 7fd76a4641eb9ff4da30240d634d327e, type: 3}
-  m_PrefabInstance: {fileID: 6050295995848344877}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &4986872669385349514 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1639897826296274087, guid: 7fd76a4641eb9ff4da30240d634d327e, type: 3}
-  m_PrefabInstance: {fileID: 6050295995848344877}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3eba0906611d822479f13ccb49dba6f4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!223 &7019490669639338324 stripped
-Canvas:
-  m_CorrespondingSourceObject: {fileID: 3647007182639582329, guid: 7fd76a4641eb9ff4da30240d634d327e, type: 3}
   m_PrefabInstance: {fileID: 6050295995848344877}
   m_PrefabAsset: {fileID: 0}

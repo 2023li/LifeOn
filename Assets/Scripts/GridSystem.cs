@@ -286,16 +286,15 @@ public class GridSystem : MonoSingleton<GridSystem>
     }
 
 
-    [Button]
-    private void Test(AuraCategory category)
-    {
-        GameContext context = GameContext.Instance;
-        ShowAuraHighlight(context, category);
-    }
+  
 
 
 
-
+    /// <summary>
+    /// 获取移动阻力
+    /// </summary>
+    /// <param name="vector3"></param>
+    /// <returns></returns>
     public float GetMobileResistance(Vector3Int vector3)
     {
         if (allCells.ContainsKey(vector3))

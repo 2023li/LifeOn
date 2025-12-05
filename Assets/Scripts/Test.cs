@@ -31,7 +31,7 @@ public class Test : MonoBehaviour
             }
 
         }
-       
+
     }
 
     public List<Vector3Int> t;

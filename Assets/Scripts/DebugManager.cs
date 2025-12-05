@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -210,5 +211,26 @@ public class DebugManager : MonoBehaviour
         }
     }
 
+    #endregion
+
+
+
+    #region 输入模式
+    [ShowInInspector,FoldoutGroup("输入模式")]
+    public bool EableGamePlayMap {
+        get
+        {
+            if (!InputManager.HasInstance)
+            {
+                return false;
+            }
+            else
+            {
+                return InputManager.Instance.IsGamePlayMap();
+            }
+
+        }
+       
+    }
     #endregion
 }

@@ -29,7 +29,7 @@ MonoBehaviour:
     ExpToNext: 2
     BaseMaxJobsPosition: 0
     BaseTransportationResistance: 3
-    BaseTransportRadius: 10
+    BaseTransportRadius: 3
     BaseDistributeRadius: 5
     BaseMaxTraffic: 5
     BaseAttractivenessPerJob: 0
@@ -49,7 +49,7 @@ MonoBehaviour:
     ExpToNext: 10
     BaseMaxJobsPosition: 0
     BaseTransportationResistance: 3
-    BaseTransportRadius: 10
+    BaseTransportRadius: 3
     BaseDistributeRadius: 5
     BaseMaxTraffic: 5
     BaseAttractivenessPerJob: 0

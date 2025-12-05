@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Moyo.Unity;
 using System;
+using UnityEngine.Rendering;
 
 /// <summary>
 /// UI 节点连线的全局管理器。
@@ -25,6 +26,15 @@ using System;
 public class ConnectionManager : MonoSingleton<ConnectionManager>
 {
     #region 画线
+
+    // 1. Define the event (Passing the start node allows listeners to know WHERE it started)
+    public event Action<UINode> OnLineDragStart;
+
+    // Optional: Useful to know when it ends to stop effects
+    public event Action<UINode> OnLineDragEnd;
+
+    // ... existing events ...
+
     protected override bool IsDontDestroyOnLoad => false;
    
 
@@ -92,7 +102,105 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
         base.Awake();
 
     }
+    private void Start()
+    {
+       OnLineDragStart += HandleDragStart;
+         OnLineDragEnd += HandleDragEnd;
+        
+    }
+    protected override void OnDestroy()
+    {
+        base .OnDestroy();
+        OnLineDragStart -= HandleDragStart;
+        OnLineDragEnd -= HandleDragEnd;
+    }
 
+    [SerializeField]
+    private ScopeCheckMode checkMode = ScopeCheckMode.AnyCellOverlap;
+
+    private void HandleDragStart(UINode startNode)
+    {
+        // 1. 安全检查
+        if (startNode == null || startNode.SelfBuilding == null) return;
+
+        // 2. 获取起始节点的转运半径
+        float radius = startNode.SelfBuilding.RO_TransportRadius;
+
+        // 获取所有可达的格子列表
+        var reachableCells = CoordinateCalculator.GetReachableCellsByMovePower(startNode.SelfBuilding, radius);
+
+        // 【关键优化Step 1】：设置高亮
+        GridSystem.Instance.SetHighlight(reachableCells);
+
+        // 【关键优化Step 2】：将列表转为 HashSet，实现 O(1) 快速查询
+        HashSet<Vector3Int> reachableSet = new HashSet<Vector3Int>(reachableCells);
+
+        // 3. 遍历所有活跃的 UINode
+        foreach (var targetNode in UINode.ActiveNodes)
+        {
+            if (targetNode == null) continue;
+
+            // 总是保持自己是可交互的
+            if (targetNode == startNode)
+            {
+                targetNode.Interactive = true;
+                continue;
+            }
+
+            if (targetNode.SelfBuilding == null)
+            {
+                targetNode.Interactive = false;
+                continue;
+            }
+
+            // 4. 【修改处】不再进行寻路，而是直接检查 targetNode 是否在 reachableSet 中
+            bool isReachable = false;
+
+            // 根据你的 CheckMode 选择判定方式
+            // 假设你要的是 AnyCellOverlap (只要沾边就算) -> 推荐这个，体验最好
+            if (checkMode == ScopeCheckMode.AnyCellOverlap)
+            {
+                // 只要建筑占用的任何一个格子在可达集合里，就是 true
+                foreach (var cell in targetNode.SelfBuilding.CurrentOccupy)
+                {
+                    if (reachableSet.Contains(cell))
+                    {
+                        isReachable = true;
+                        break;
+                    }
+                }
+            }
+            else // CenterOnly
+            {
+                // 只有中心点在可达集合里才算
+                Vector3Int center = Vector3Int.RoundToInt(targetNode.SelfBuilding.CurrentCenterInGrid);
+                if (reachableSet.Contains(center))
+                {
+                    isReachable = true;
+                }
+            }
+
+            // 5. 设置状态
+            targetNode.Interactive = isReachable;
+        }
+    }
+    /// <summary>
+    /// 结束拖拽：还原所有节点为可交互状态
+    /// </summary>
+    private void HandleDragEnd(UINode startNode)
+    {
+
+
+        GridSystem.Instance.ClearHighlight();
+        // 遍历所有节点，统一恢复 Interactive = true
+        foreach (var node in UINode.ActiveNodes)
+        {
+            if (node != null)
+            {
+                node.Interactive = true;
+            }
+        }
+    }
     /// <summary>
     /// 在运行时创建一份 ConnectionLine 模板对象。  
     /// 通过代码补齐 LineRenderer 的默认设置，保证表现一致。
@@ -118,6 +226,8 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
     }
 
 
+
+    
     #region 拖拽 API（由 UINode 调用）
 
     /// <summary>
@@ -189,7 +299,12 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
 
         // 初始化临时尾端，用于拖拽时显示“跟随鼠标的尾巴”
         if (_activeLine != null)
+        {
             _activeLine.SetTempTail(GetDragWorld(eventData));
+            OnLineDragStart?.Invoke(origin);
+        }
+
+      
     }
 
     /// <summary>
@@ -242,7 +357,7 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
         }
         else if (_dragMode == DragMode.ExtendExisting)
         {
-            if (target != null && target != origin)
+            if (target != null && target != origin && target.Interactive)
             {
                 // 防止形成环或重复节点
                 if (!_activeLine.nodes.Contains(target))
@@ -261,6 +376,12 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
                 // 未命中任何节点：保持原线不变
                 _activeLine.ClearTempTail();
             }
+        }
+
+        // 3. Trigger the end event before clearing _activeLine
+        if (_activeLine != null)
+        {
+            OnLineDragEnd?.Invoke(origin);
         }
 
         // 重置拖拽状态
@@ -438,7 +559,10 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
         _dragMode = DragMode.ExtendExisting;
 
         if (_activeLine != null)
+        {
             _activeLine.SetTempTail(GetDragWorld(eventData));
+            OnLineDragStart?.Invoke(ownerNode);
+        }
     }
 
     /// <summary>

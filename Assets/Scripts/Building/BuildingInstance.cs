@@ -107,30 +107,16 @@ public class BuildingInstance : MonoBehaviour
 
     public static IReadOnlyCollection<BuildingInstance> ActiveInstances => _activeInstances;
 
+    private static Dictionary<Vector3Int, BuildingInstance> _occupyMap = new Dictionary<Vector3Int, BuildingInstance>();
+    // 优化后的 TryGetAtCell，复杂度从 O(N) 降为 O(1)
     public static bool TryGetAtCell(Vector3Int cell, out BuildingInstance inst)
     {
-        foreach (var candidate in _activeInstances)
-        {
-            if (candidate == null || candidate.CurrentOccupy == null)
-                continue;
-
-            foreach (var occupyCell in candidate.CurrentOccupy)
-            {
-                if (occupyCell == cell)
-                {
-                    inst = candidate;
-                    return true;
-                }
-            }
-        }
-
-        inst = null;
-        return false;
+        return _occupyMap.TryGetValue(cell, out inst);
     }
 
     #endregion
 
-   
+
 
 
     public event Action<BuildingInstance, BuildingStateValueType> OnStateChanged;
@@ -555,6 +541,8 @@ public class BuildingInstance : MonoBehaviour
         Ctx.ResourceNetwork.Register(this);
         TurnSystem.OnTurnPhaseChange += HandleTurnPhase;
 
+        foreach (var pos in CurrentOccupy) _occupyMap[pos] = this;
+
     }
 
 
@@ -563,6 +551,8 @@ public class BuildingInstance : MonoBehaviour
         Ctx.HumanResourcesNetwork.UnRegister(this);
         Ctx.ResourceNetwork.UnRegister(this);
         TurnSystem.OnTurnPhaseChange -= HandleTurnPhase;
+
+        foreach (var pos in CurrentOccupy) _occupyMap.Remove(pos);
     }
 
 
