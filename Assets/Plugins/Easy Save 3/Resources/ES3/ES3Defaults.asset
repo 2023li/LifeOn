@@ -39,6 +39,8 @@ MonoBehaviour:
     - Assembly-CSharp-firstpass
     - Cinemachine
     - CW.Common
+    - FMODUnity
+    - FMODUnityResonance
     - LeanCommon
     - LeanPool
     - SingularityGroup.HotReload.Runtime
