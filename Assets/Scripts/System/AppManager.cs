@@ -8,6 +8,8 @@ using Sirenix.OdinInspector;
 
 public enum AppLanguage
 {
+    简体中文,
+    English,
 
 }
 
