@@ -18,8 +18,6 @@ public class UIItem_BuildingSelection : MonoBehaviour
 
     [AutoBind] public Button btn_Hide;
 
-    // ✅ 新增：返回到分类列表的按钮（请把它放在 “panel_选择建筑” 面板里）
-    [AutoBind] public Button btn_BackToClass;
 
     [Header("预制体")]
     [LabelText("分类按钮预制体")]
@@ -48,12 +46,7 @@ public class UIItem_BuildingSelection : MonoBehaviour
             btn_Hide.onClick.AddListener(Hide);
         }
 
-        // ✅ 绑定返回按钮
-        if (btn_BackToClass != null)
-        {
-            btn_BackToClass.onClick.RemoveAllListeners();
-            btn_BackToClass.onClick.AddListener(BackToClassList);
-        }
+      
     }
 
     /// <summary>
@@ -63,18 +56,26 @@ public class UIItem_BuildingSelection : MonoBehaviour
     {
         if (!ValidateRefs()) return;
 
-        // 显示“选择建筑类型”，隐藏“选择建筑”
+        // 【修改点 1】：同时显示两个面板（因为现在是上下布局，不是切换显示）
         if (panel_选择建筑类型) panel_选择建筑类型.SetActive(true);
-        if (panel_选择建筑) panel_选择建筑.SetActive(false);
+        if (panel_选择建筑) panel_选择建筑.SetActive(true); // 改为 true
 
-        // 清空旧分类 & 旧建筑按钮
+        // 清空旧数据
         ClearBuildingClassButtons();
-        ClearBuildingButtons();
+        ClearBuildingButtons(); // 初始化时先清空下方
 
         // 生成分类按钮
+        bool isFirst = true;
         foreach (BuildingClassify classify in Enum.GetValues(typeof(BuildingClassify)))
         {
             CreateBuildingClassButton(classify);
+
+            // 【修改点 2】：打开界面时，默认加载第一个分类的数据
+            if (isFirst)
+            {
+                ShowBuilingClasss(classify);
+                isFirst = false;
+            }
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
@@ -202,8 +203,7 @@ public class UIItem_BuildingSelection : MonoBehaviour
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(BuildBuildingBtnContent);
 
-        if (panel_选择建筑类型) panel_选择建筑类型.SetActive(false);
-        if (panel_选择建筑) panel_选择建筑.SetActive(true);
+     
 
         Debug.Log($"[UIItem_BuildingSelection] 分类 {classify} 的建筑列表已生成。");
     }
@@ -216,21 +216,6 @@ public class UIItem_BuildingSelection : MonoBehaviour
     
     }
 
-    /// <summary>
-    /// ✅ 返回到分类列表
-    /// </summary>
-    public void BackToClassList()
-    {
-        // 仅清空“建筑”按钮，保留已生成的分类按钮
-        ClearBuildingButtons();
-
-        if (panel_选择建筑类型) panel_选择建筑类型.SetActive(true);
-        if (panel_选择建筑) panel_选择建筑.SetActive(false);
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
-
-        Debug.Log("[UIItem_BuildingSelection] 已返回到分类列表。");
-    }
 
     public void Hide()
     {
@@ -254,7 +239,6 @@ public class UIItem_BuildingSelection : MonoBehaviour
         if (classBtnPrefab == null) { Debug.LogWarning("[UIItem_BuildingSelection] classBtnPrefab（分类按钮预制体）未赋值。"); ok = false; }
         if (buildingBtnPrefab == null) { Debug.LogWarning("[UIItem_BuildingSelection] buildingBtnPrefab（建筑按钮预制体）未赋值。"); ok = false; }
 
-        if (btn_BackToClass == null) { Debug.LogWarning("[UIItem_BuildingSelection] 提示：未绑定 btn_BackToClass（返回按钮）。"); }
         return ok;
     }
 

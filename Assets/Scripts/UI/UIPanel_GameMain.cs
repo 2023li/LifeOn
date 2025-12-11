@@ -139,13 +139,13 @@ public class UIPanel_GameMain : PanelBase
 
     [FoldoutGroup("HUD"),SerializeField,LabelText("文本_回合数")] TMP_Text text_TurnText;
 
-    [FoldoutGroup("HUD"), SerializeField, LabelText("img_金币")] Image img_金币;
+    //[FoldoutGroup("HUD"), SerializeField, LabelText("img_金币")] Image img_金币;
     [FoldoutGroup("HUD"), SerializeField, LabelText("txt_金币")] TMP_Text txt_金币;
 
-    [FoldoutGroup("HUD"), SerializeField, LabelText("img_库存")] Image img_库存;
+    //[FoldoutGroup("HUD"), SerializeField, LabelText("img_库存")] Image img_库存;
     [FoldoutGroup("HUD"), SerializeField, LabelText("txt_库存")] TMP_Text txt_库存;
 
-    [FoldoutGroup("HUD"), SerializeField, LabelText("img_人口")] Image img_人口;
+    //[FoldoutGroup("HUD"), SerializeField, LabelText("img_人口")] Image img_人口;
     [FoldoutGroup("HUD"), SerializeField, LabelText("txt_人口")] TMP_Text txt_人口;
 
     public void Start_顶部HUD()

@@ -164,7 +164,7 @@ GameObject:
   - component: {fileID: 4817286716391474198}
   - component: {fileID: 3758035789925929007}
   m_Layer: 0
-  m_Name: Component_FantasyMenus_Section_Break_02_Bottom
+  m_Name: "\u6807\u9898\u7EBF"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

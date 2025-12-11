@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moyo.Unity;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Test : MonoBehaviour
 {
@@ -12,6 +13,16 @@ public class Test : MonoBehaviour
 
     private void Start()
     {
+
+        var btn = GetComponent<Button>();
+        if (btn != null)
+        {
+            Debug.Log(1);
+            btn.onClick.AddListener(() =>
+            {
+                Debug.Log(1);
+            });
+        }
     }
 
     private bool EnableGamePlayMap = false;
