@@ -194,9 +194,9 @@ GameObject:
   m_Component:
   - component: {fileID: 519420032}
   - component: {fileID: 519420031}
-  - component: {fileID: 519420029}
   - component: {fileID: 519420030}
   - component: {fileID: 519420033}
+  - component: {fileID: 519420034}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -204,14 +204,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &519420029
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 519420028}
-  m_Enabled: 1
 --- !u!114 &519420030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -356,6 +348,20 @@ MonoBehaviour:
   m_CameraActivatedEvent:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &519420034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86c6556701af9e04380698b89f691b6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nonRigidbodyVelocity: 0
+  attenuationObject: {fileID: 0}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -788,34 +794,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
-      propertyPath: treeAssets
-      value: 
-      objectReference: {fileID: 11400000, guid: c6cf630beeb7f3743afdf42a2f12aea7, type: 2}
-    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
-      propertyPath: buildingCommonBriefPanel
-      value: 
-      objectReference: {fileID: 303513712239329178, guid: 1433dbd474baadf4e9c2ce491751bddf, type: 3}
-    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
-      propertyPath: buildingDefinitions.Array.size
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
-      propertyPath: buildingDefinitions.Array.data[0]
-      value: 
-      objectReference: {fileID: 11400000, guid: 9c0a75a814c42c94bbd5f54d7e0443ec, type: 2}
-    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
-      propertyPath: buildingDefinitions.Array.data[1]
-      value: 
-      objectReference: {fileID: 11400000, guid: bf60fb487aecdce4695fc8765ab41393, type: 2}
-    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
-      propertyPath: buildingDefinitions.Array.data[2]
-      value: 
-      objectReference: {fileID: 11400000, guid: 30439583503a75541bd538383c8c43be, type: 2}
-    - target: {fileID: 6790068438061607902, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
-      propertyPath: buildingDefinitions.Array.data[3]
-      value: 
-      objectReference: {fileID: 11400000, guid: 2f80924b70bbbd142ac600379dffb67b, type: 2}
     - target: {fileID: 8832982178575566358, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
       propertyPath: m_Name
       value: App

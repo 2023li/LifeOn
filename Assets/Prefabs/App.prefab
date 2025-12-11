@@ -290,6 +290,60 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89e47685ceaa48f4992b8d23774561b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &8642055841643760645
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8932639236432783588}
+  - component: {fileID: 8297275852391700008}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8932639236432783588
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8642055841643760645}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8986474453935398527}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8297275852391700008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8642055841643760645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85b282f505ad8084ab992d118b789f10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  "sfx_\u7FFB\u9875":
+    Guid:
+      Data1: -93999069
+      Data2: 1277918818
+      Data3: -1403961436
+      Data4: -1719032271
+    Path: event:/test
+  masterVolume: 1
+  musicVolume: 1
+  sfxVolume: 1
 --- !u!1 &8832982178575566358
 GameObject:
   m_ObjectHideFlags: 0
@@ -324,6 +378,7 @@ Transform:
   - {fileID: 2365859377334264949}
   - {fileID: 5449372189276699619}
   - {fileID: 6832143133423277998}
+  - {fileID: 8932639236432783588}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &873446327084042900
@@ -351,12 +406,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91b109464cc1aea4499d71607178595e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  foodSupply: {fileID: 11400000, guid: c942605ecf5498d4eb55f036e6b648aa, type: 2}
-  woodSupply: {fileID: 11400000, guid: 15d6c357e5874a44391c6672152e9134, type: 2}
-  testSupply: {fileID: 11400000, guid: ef9811f98affe7748a0f950d224e4cef, type: 2}
+  buildingCommonBriefPanel: {fileID: 303513712239329178, guid: 1433dbd474baadf4e9c2ce491751bddf, type: 3}
   buildingDefinitions:
-  - {fileID: 11400000, guid: 8df312abae5d5a248a51a67562791d72, type: 2}
-  - {fileID: 11400000, guid: 7cd54c6131ba3b84ebb8a9276da26974, type: 2}
-  - {fileID: 11400000, guid: 8f6c704dcb20e5e41a567ff84ee09138, type: 2}
-  - {fileID: 11400000, guid: 21a6ea641bd504f43afbea515d009803, type: 2}
-  - {fileID: 11400000, guid: 2f80924b70bbbd142ac600379dffb67b, type: 2}
+  - {fileID: 11400000, guid: 9c0a75a814c42c94bbd5f54d7e0443ec, type: 2}
+  - {fileID: 11400000, guid: bf60fb487aecdce4695fc8765ab41393, type: 2}
+  - {fileID: 11400000, guid: 30439583503a75541bd538383c8c43be, type: 2}
+  treeAssets: {fileID: 11400000, guid: c6cf630beeb7f3743afdf42a2f12aea7, type: 2}
