@@ -15,7 +15,7 @@ public class UIPanel_GameMain : PanelBase
 
     [SerializeField, LabelText("Btn_打开建造")] private Button btn_打开建造;
 
-    [SerializeField, LabelText("Btn_结束回合")] private Button btn_下回合;
+  
 
     [SerializeField, LabelText("Item_建造选择")] private UIItem_BuildingSelection item_建造选择;
 
@@ -41,8 +41,18 @@ public class UIPanel_GameMain : PanelBase
     private UIItem_WarehousePanel warehousePanel;
 
 
-    [SerializeField,LabelText("go_回合结束图标")]
+
+    #region 结束回合按钮
+    [SerializeField, LabelText("Btn_结束回合")]
+    [FoldoutGroup("下回合")]
+    private Button btn_下回合;
+
+    [SerializeField, LabelText("go_回合结束图标")]
+    [FoldoutGroup("下回合")]
     private GameObject go_回合结束图标;
+
+    #endregion
+
 
     protected override void Awake()
     {
@@ -131,7 +141,10 @@ public class UIPanel_GameMain : PanelBase
         bool hasBlock = block > 0;
 
         go_回合结束图标.SetActive(hasBlock);
-        btn_下回合.interactable = !hasBlock;
+
+
+
+        btn_下回合.gameObject.SetActive(!hasBlock);
     }
 
 

@@ -270,7 +270,7 @@ GameObject:
   - component: {fileID: 969139132}
   - component: {fileID: 969139131}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: "\u6D4B\u8BD5 \u53EF\u968F\u65F6\u5220\u9664"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -288,6 +288,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9dce13d65ad8104d976f4258330b052, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  t: []
 --- !u!4 &969139132
 Transform:
   m_ObjectHideFlags: 0
