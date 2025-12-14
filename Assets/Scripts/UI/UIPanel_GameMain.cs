@@ -10,6 +10,10 @@ using UnityEngine.UI;
 public class UIPanel_GameMain : PanelBase
 {
 
+    public Button btn_打开设置面板;
+
+
+
     private IGameContext ctx;
 
 
@@ -18,6 +22,7 @@ public class UIPanel_GameMain : PanelBase
   
 
     [SerializeField, LabelText("Item_建造选择")] private UIItem_BuildingSelection item_建造选择;
+
 
     [SerializeField, LabelText("按钮_打开科技面板")]
     private Button btn_打开科技面板;
@@ -57,6 +62,12 @@ public class UIPanel_GameMain : PanelBase
     protected override void Awake()
     {
         this.AutoBindFields();
+
+        btn_打开设置面板.onClick.AddListener(() =>
+        {
+           _ = UIManager.Instance.ShowPanel<UIPanel_Setting>(UIManager.UILayer.Main);
+        });
+
 
         btn_打开建造.onClick.AddListener(() => { item_建造选择.Show(); });
 
