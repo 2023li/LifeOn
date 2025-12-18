@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: "Building_\u91CE\u751F\u6D46\u679C\u4E1B"
   DisplayName: "\u91CE\u751F\u6D46\u679C\u4E1B"
-  Size: 2
+  Size: 1
   classification: 3
   BuildingPrefab: {fileID: 3831073936164517814, guid: 26651a696588d9840ac7a654a78f9197, type: 3}
   BuildingIcon: {fileID: 0}
@@ -31,14 +31,10 @@ MonoBehaviour:
     ExpToNext: -1
     BaseMaxJobsPosition: 1
     BaseTransportationResistance: 3
+    BaseTransportRadius: 10
+    BaseDistributeRadius: 5
+    BaseMaxTraffic: 5
     BaseAttractivenessPerJob: 0
-    ViewConfig:
-      DefaultAnimatorState: 
-      DefaultAnimatorTrigger: 
-      UpgradeTrigger: 
-      PersistentParticlePrefab: {fileID: 0}
-      UpgradeEffectPrefab: {fileID: 0}
-      ChildPrefab: {fileID: 0}
     ConditionsForAllowingUpgrades: []
     Rules:
     - rid: 7980267817382707202
@@ -55,11 +51,9 @@ MonoBehaviour:
     - rid: 7980267817382707202
       type: {class: "R_\u91CE\u751F\u6D46\u679C\u4E1B\u89C4\u5219", ns: , asm: Assembly-CSharp}
       data:
-        Description: 
         supplyAmount:
         - Resource: {fileID: 11400000, guid: 0df36ba6cd60a6f4eb2f2704de7a0149, type: 2}
           Amount: 1
     - rid: 7980267866392887297
       type: {class: "R_\u586B\u5145\u5C31\u4E1A", ns: , asm: Assembly-CSharp}
-      data:
-        Description: 
+      data: 

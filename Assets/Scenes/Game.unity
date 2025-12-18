@@ -147,7 +147,7 @@ Transform:
   m_GameObject: {fileID: 115355270}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.02, y: -1.27, z: 0}
+  m_LocalPosition: {x: -5.56, y: -1.49, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -566,7 +566,7 @@ Transform:
   m_GameObject: {fileID: 1170220038}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.53, y: 0.77, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -741,6 +741,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: Game
       objectReference: {fileID: 0}
+    - target: {fileID: 317409391274589556, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
+      propertyPath: m_SortingOrder
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 326933691800777069, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
+      propertyPath: m_SortingOrder
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264914720185618592, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
+      propertyPath: m_SortingOrder
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4398661319901478503, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
+      propertyPath: m_SortingOrder
+      value: -4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4824740768625727793, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
+      propertyPath: m_SortingOrder
+      value: -2
+      objectReference: {fileID: 0}
     - target: {fileID: 8123488984481321654, guid: 6d70cb854931afd4ab68b62c9eb3c7a1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -794,6 +814,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1922932757958697070, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: PreloadSamples
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1922932757958697070, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: Banks.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1922932757958697070, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: Banks.Array.data[0]
+      value: Master.strings
+      objectReference: {fileID: 0}
+    - target: {fileID: 1922932757958697070, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: Banks.Array.data[1]
+      value: Master
+      objectReference: {fileID: 0}
     - target: {fileID: 8832982178575566358, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
       propertyPath: m_Name
       value: App

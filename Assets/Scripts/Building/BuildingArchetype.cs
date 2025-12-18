@@ -113,8 +113,8 @@ public class BuildingLevelDef
     public float BaseAttractivenessPerJob = 0f;
 
 
-    [LabelText("等级表现配置")]
-    public BuildingLevelViewConfig ViewConfig = new();
+   // [LabelText("等级表现配置")]
+   // public BuildingLevelViewConfig ViewConfig = new();
 
 
     [LabelText("允许升级的条件")]
@@ -140,6 +140,7 @@ public class BuildingLevelDef
 
 }
 
+/*
 [Serializable]
 public class BuildingLevelViewConfig
 {
@@ -167,3 +168,5 @@ public class BuildingLevelViewConfig
     [Tooltip("用于切换子模型或装饰的预制体，ApplyLevelState 会销毁旧实例并重新生成。留空则沿用上一等级的外观。")]
     public GameObject ChildPrefab;
 }
+
+*/

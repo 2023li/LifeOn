@@ -118,9 +118,9 @@ public class UIItem_BuildingSelection : MonoBehaviour
         rt.anchoredPosition3D = Vector3.zero;
         item.gameObject.name = $"Btn_Build_{buildingDef.Id}";
 
-        item.SetContent(buildingDef.DisplayName, null);
+        item.SetContent(buildingDef.DisplayName, buildingDef.BuildingIcon);
 
-        var captured = buildingDef;
+        BuildingArchetype captured = buildingDef;
 
         if (canBuild)
         {

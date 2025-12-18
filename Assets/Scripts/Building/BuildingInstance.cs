@@ -146,7 +146,11 @@ public class BuildingInstance : MonoBehaviour
     public int CurrentLevelIndex
     {
         get => _currentLevelIndex;
-        private set => _currentLevelIndex = value;
+        private set
+        {
+            _currentLevelIndex = value;
+            OnStateChanged?.Invoke(this, BuildingStateValueType.LevelIndex);
+        }
     }
 
     [ShowInInspector, ReadOnly, LabelText("当前经验")]

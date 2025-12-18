@@ -23998,11 +23998,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04012d668ac71924d91dad6e04e29b95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  btn_Continue: {fileID: 0}
-  btn_LoadGame: {fileID: 0}
-  btn_Setting: {fileID: 0}
-  btn_Save: {fileID: 0}
-  Quit: {fileID: 0}
+  btn_Continue: {fileID: 9149277783811439405}
+  btn_LoadGame: {fileID: 8947189507924074558}
+  btn_Setting: {fileID: 231374603799736891}
+  btn_Save: {fileID: 8884571941809760553}
+  Quit: {fileID: 1025209170113793656}
 --- !u!1 &4955660415502348489
 GameObject:
   m_ObjectHideFlags: 0
@@ -57522,7 +57522,7 @@ GameObject:
   - component: {fileID: 1395074389659721703}
   - component: {fileID: 7494337538799417032}
   m_Layer: 0
-  m_Name: btn_Credits
+  m_Name: btn_Save
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

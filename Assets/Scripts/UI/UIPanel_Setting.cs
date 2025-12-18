@@ -4,8 +4,13 @@ using UnityEngine;
 using Moyo.Unity;
 using UnityEngine.UI;
 using Sirenix.OdinInspector;
-public class UIPanel_Setting : PanelBase
+using FMODUnity;
+using Unity.VisualScripting;
+public class UIPanel_Setting : PanelBase,IBackHandler
 {
+
+   
+
     [SerializeField, FoldoutGroup("导航栏")] private Toggle toggle_声音;
     [SerializeField, FoldoutGroup("导航栏")] private Toggle toggle_控制;
     [SerializeField, FoldoutGroup("导航栏")] private Toggle toggle_游戏;
@@ -17,6 +22,15 @@ public class UIPanel_Setting : PanelBase
     [SerializeField, FoldoutGroup("导航栏")] private GameObject go_游戏;
     [SerializeField, FoldoutGroup("导航栏")] private GameObject go_图像;
     [SerializeField, FoldoutGroup("导航栏")] private GameObject go_辅助功能;
+
+    public short Priority { get; set; } =  LOConstant.InputPriority.Priority_设置面板; 
+
+    public bool TryHandleBack()
+    {
+       gameObject.SetActive(false);
+        return true;
+    }
+
     protected override void Awake()
     {
         base.Awake();
@@ -25,6 +39,24 @@ public class UIPanel_Setting : PanelBase
         RefreshPanelState();
 
     }
+
+    private void OnEnable()
+    {
+        if (InputManager.HasInstance)
+        {
+            InputManager.Instance.Register(this);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (!InputManager.HasInstance)
+        {
+            InputManager.Instance.UnRegister(this);
+        }
+    }
+
+
 
 
     private void BindToggleEvents()
@@ -45,5 +77,6 @@ public class UIPanel_Setting : PanelBase
         go_游戏.SetActive(toggle_游戏.isOn);
         go_图像.SetActive(toggle_图像.isOn);
         go_辅助功能.SetActive(toggle_辅助功能.isOn);
+
     }
 }

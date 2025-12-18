@@ -7,11 +7,11 @@ using UnityEngine.UI;
 public class UIPanel_Pause : PanelBase, IBackHandler
 {
 
-    [AutoBind] public Button btn_Continue;
-    [AutoBind] public Button btn_LoadGame;
-    [AutoBind] public Button btn_Setting;
-    [AutoBind] public Button btn_Save;
-    [AutoBind] public Button Quit;
+    [SerializeField] private Button btn_Continue;
+    [SerializeField] private Button btn_LoadGame;
+    [SerializeField] private Button btn_Setting;
+    [SerializeField] private Button btn_Save;
+    [SerializeField] private Button Quit;
 
 
     protected override void Awake()

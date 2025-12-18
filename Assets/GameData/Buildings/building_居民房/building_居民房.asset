@@ -17,7 +17,7 @@ MonoBehaviour:
   Size: 2
   classification: 0
   BuildingPrefab: {fileID: 3831073936164517814, guid: 1898ff6dcc05dc54080912133c8be488, type: 3}
-  BuildingIcon: {fileID: 0}
+  BuildingIcon: {fileID: 21300000, guid: 611a59348e01ce54b948fa0cdcb80a1b, type: 3}
   UIPanelPrefab_Brief: {fileID: 0}
   UIPanelPrefab_Detailed: {fileID: 0}
   Introduction: 
@@ -29,6 +29,9 @@ MonoBehaviour:
     ExpToNext: 2
     BaseMaxJobsPosition: 0
     BaseTransportationResistance: 3
+    BaseTransportRadius: 10
+    BaseDistributeRadius: 5
+    BaseMaxTraffic: 0
     BaseAttractivenessPerJob: 0
     ViewConfig:
       DefaultAnimatorState: 
@@ -45,6 +48,9 @@ MonoBehaviour:
     ExpToNext: 10
     BaseMaxJobsPosition: 0
     BaseTransportationResistance: 3
+    BaseTransportRadius: 10
+    BaseDistributeRadius: 5
+    BaseMaxTraffic: 0
     BaseAttractivenessPerJob: 0
     ViewConfig:
       DefaultAnimatorState: 
