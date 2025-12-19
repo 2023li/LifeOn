@@ -6,6 +6,9 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
+using System.Text.RegularExpressions;
+using System.Text;
+using System.IO;
 
 public class TechTreeEditorWindow : EditorWindow
 {
@@ -77,6 +80,9 @@ public class TechTreeEditorWindow : EditorWindow
             allowSceneObjects = false,
             value = _currentTree
         };
+
+        _treeField.style.width = 300;
+
         _treeField.RegisterValueChangedCallback(evt =>
         {
             var newTree = evt.newValue as TechTreeAssets;
@@ -100,8 +106,14 @@ public class TechTreeEditorWindow : EditorWindow
         });
         toolbar.Add(_treeField);
 
-        var saveBtn = new ToolbarButton(() => SaveWithValidation()) { text = "保存 (Ctrl/Cmd + S)" };
+        //生成保存按钮
+        ToolbarButton saveBtn = new ToolbarButton(() => SaveWithValidation()) { text = "保存 (Ctrl/Cmd + S)" };
         toolbar.Add(saveBtn);
+
+        //生成枚举按钮
+
+        ToolbarButton genEnumBtn = new ToolbarButton(GenerateTechIDEnum){ text = "生成 TechIDEnum" };
+        toolbar.Add(genEnumBtn);
 
         rootVisualElement.Add(toolbar);
 
@@ -169,7 +181,8 @@ public class TechTreeEditorWindow : EditorWindow
             MarkDirty,
             msg => ShowNotification(new GUIContent(msg))
         );
-        _graphView.StretchToParentSize();
+        //_graphView.StretchToParentSize();
+        _graphView.style.flexGrow = 1;
         rootVisualElement.Add(_graphView);
 
         ClearDirty();
@@ -733,4 +746,89 @@ public class TechTreeEditorWindow : EditorWindow
             }
         }
     }
+
+
+    private void GenerateTechIDEnum()
+    {
+        if (_currentTree == null)
+        {
+            ShowNotification(new GUIContent("未选择资产，无法生成"));
+            return;
+        }
+
+        string relativeDir = "Assets/Scripts/AutoGenerate";
+        string fullDir = Path.Combine(Application.dataPath, "Scripts/AutoGenerate");
+
+        if (!Directory.Exists(fullDir))
+        {
+            Directory.CreateDirectory(fullDir);
+        }
+
+        string filePath = Path.Combine(fullDir, "TechIDEnum_Auto.cs");
+
+        var validEntries = new Dictionary<string, string>();
+
+        foreach (var tech in _currentTree.techList)
+        {
+            if (tech == null || string.IsNullOrWhiteSpace(tech.id)) continue;
+
+            string rawId = tech.id.Trim();
+
+            // ================= 修改重点 =================
+            // 原代码: @"[^a-zA-Z0-9_]" (只允许英文和数字)
+            // 新代码: @"[^\w]" 
+            // 说明: \w 在 C# 中匹配所有单词字符(包括中文)，
+            // [^\w] 意味着只替换标点符号、空格等特殊字符，而保留中文。
+            string enumName = Regex.Replace(rawId, @"[^\w]", "_");
+            // ===========================================
+
+            // 如果是以数字开头，在前面加下划线 (C# 变量不能以数字开头)
+            if (string.IsNullOrEmpty(enumName) || char.IsDigit(enumName[0]))
+            {
+                enumName = "_" + enumName;
+            }
+
+            if (!validEntries.ContainsKey(enumName))
+            {
+                validEntries.Add(enumName, rawId);
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("// =========================================================");
+        sb.AppendLine("//  此文件由 TechTreeEditorWindow 自动生成，请勿手动修改。");
+        sb.AppendLine($"//  生成时间: {DateTime.Now}");
+        sb.AppendLine("// =========================================================");
+        sb.AppendLine();
+        sb.AppendLine("public enum TechIDEnum");
+        sb.AppendLine("{");
+
+        sb.AppendLine("    None = 0,");
+
+        foreach (var kvp in validEntries)
+        {
+            if (kvp.Key != kvp.Value)
+            {
+                sb.AppendLine($"    // Original ID: {kvp.Value}");
+            }
+            sb.AppendLine($"    {kvp.Key},");
+        }
+
+        sb.AppendLine("}");
+
+        try
+        {
+            File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
+            AssetDatabase.Refresh();
+            ShowNotification(new GUIContent("Enum 生成成功！"));
+            Debug.Log($"TechIDEnum generated at: {filePath}");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"生成 TechIDEnum 失败: {e.Message}");
+            ShowNotification(new GUIContent("生成失败，看控制台"));
+        }
+    }
+
+
 }
