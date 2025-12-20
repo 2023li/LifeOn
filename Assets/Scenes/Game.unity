@@ -818,18 +818,6 @@ PrefabInstance:
       propertyPath: PreloadSamples
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1922932757958697070, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
-      propertyPath: Banks.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1922932757958697070, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
-      propertyPath: Banks.Array.data[0]
-      value: Master.strings
-      objectReference: {fileID: 0}
-    - target: {fileID: 1922932757958697070, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
-      propertyPath: Banks.Array.data[1]
-      value: Master
-      objectReference: {fileID: 0}
     - target: {fileID: 8832982178575566358, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
       propertyPath: m_Name
       value: App

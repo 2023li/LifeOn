@@ -301,6 +301,7 @@ GameObject:
   - component: {fileID: 8932639236432783588}
   - component: {fileID: 8297275852391700008}
   - component: {fileID: 1922932757958697070}
+  - component: {fileID: 1331615574976476898}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -349,9 +350,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LoadEvent: 1
   UnloadEvent: 2
-  Banks: []
+  Banks:
+  - Master.strings
+  - Master
   CollisionTag: 
   PreloadSamples: 0
+--- !u!114 &1331615574976476898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8642055841643760645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a07e57d4cb47254aad99b29c1bf982c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  "UI_\u5207\u6362":
+    Guid:
+      Data1: -703296547
+      Data2: 1135930288
+      Data3: 1372615864
+      Data4: 286613756
+    Path: "event:/UI_\u5207\u6362"
 --- !u!1 &8832982178575566358
 GameObject:
   m_ObjectHideFlags: 0

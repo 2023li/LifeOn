@@ -64,7 +64,7 @@ public class UIItem_TechPanel : MonoBehaviour
             var nodeId = node.NodeId;
             if (string.IsNullOrWhiteSpace(nodeId))
             {
-                Debug.LogWarning($"[{nameof(UIItem_TechPanel)}] 节点 {node.name} 未配置节点ID。", node);
+                Debug.LogWarning($"[{nameof(UIItem_TechPanel)}] 节点 {node.name} 未配置节点ID。因为节点节点id为空", node);
                 continue;
             }
 

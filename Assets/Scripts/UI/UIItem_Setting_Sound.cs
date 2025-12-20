@@ -8,12 +8,9 @@ using UnityEngine.UI;
 public class UIItem_Setting_Sound : MonoBehaviour
 {
 
-    [SerializeField] private EventReference test;
+    
 
-    private void OnEnable()
-    {
-        FMODAudioManager.Instance.PlayOneShot(test);
-    }
+   
 
     [Header("UI 组件绑定")]
     [SerializeField] private Slider sld_主音量;
@@ -33,33 +30,33 @@ public class UIItem_Setting_Sound : MonoBehaviour
 
     private void InitSliderValues()
     {
-        if (FMODAudioManager.Instance == null) return;
+        if (AudioManager.Instance == null) return;
 
-        if (sld_主音量) sld_主音量.value = FMODAudioManager.Instance.GetMasterVolume();
-        if (sld_SFX音量) sld_SFX音量.value = FMODAudioManager.Instance.GetSFXVolume();
-        if (sld_BGM音量) sld_BGM音量.value = FMODAudioManager.Instance.GetMusicVolume();
-        if (sld_环境音量) sld_环境音量.value = FMODAudioManager.Instance.GetAmbienceVolume();
-        if (sld_语言音量) sld_语言音量.value = FMODAudioManager.Instance.GetVoiceVolume();
+        if (sld_主音量) sld_主音量.value = AudioManager.Instance.GetMasterVolume();
+        if (sld_SFX音量) sld_SFX音量.value = AudioManager.Instance.GetSFXVolume();
+        if (sld_BGM音量) sld_BGM音量.value = AudioManager.Instance.GetMusicVolume();
+        if (sld_环境音量) sld_环境音量.value = AudioManager.Instance.GetEnvironmentVolume();
+        if (sld_语言音量) sld_语言音量.value = AudioManager.Instance.GetVoiceVolume();
     }
 
     private void BindEvents()
     {
-        if (FMODAudioManager.Instance == null) return;
+        if (AudioManager.Instance == null) return;
 
         // 使用 lambda 表达式将 slider 的 float 值传给 Manager
         if (sld_主音量)
-            sld_主音量.onValueChanged.AddListener(val => FMODAudioManager.Instance.SetMasterVolume(val));
+            sld_主音量.onValueChanged.AddListener(val => AudioManager.Instance.SetMasterVolume(val));
 
         if (sld_SFX音量)
-            sld_SFX音量.onValueChanged.AddListener(val => FMODAudioManager.Instance.SetSFXVolume(val));
+            sld_SFX音量.onValueChanged.AddListener(val => AudioManager.Instance.SetSFXVolume(val));
 
         if (sld_BGM音量)
-            sld_BGM音量.onValueChanged.AddListener(val => FMODAudioManager.Instance.SetMusicVolume(val));
+            sld_BGM音量.onValueChanged.AddListener(val => AudioManager.Instance.SetMusicVolume(val));
 
         if (sld_环境音量)
-            sld_环境音量.onValueChanged.AddListener(val => FMODAudioManager.Instance.SetAmbienceVolume(val));
+            sld_环境音量.onValueChanged.AddListener(val => AudioManager.Instance.SetEnvironmentVolume(val));
 
         if (sld_语言音量)
-            sld_语言音量.onValueChanged.AddListener(val => FMODAudioManager.Instance.SetVoiceVolume(val));
+            sld_语言音量.onValueChanged.AddListener(val => AudioManager.Instance.SetVoiceVolume(val));
     }
 }
