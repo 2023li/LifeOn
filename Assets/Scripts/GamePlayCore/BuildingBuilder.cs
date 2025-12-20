@@ -3,16 +3,13 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using Sirenix.OdinInspector;
 using Moyo.Unity;
-using static BuildingBuilder;
+using System.Linq;
 
-public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyoEventListener<BuildingEvent>
+public class BuildingBuilder : MonoSingleton<BuildingBuilder>, IBackHandler, IMoyoEventListener<BuildingBuilder.BuildingEvent>
 {
-
-
     public struct BuildingEvent
     {
         static BuildingEvent e;
-
         public BuildingArchetype def;
 
         public static void Trigger(BuildingArchetype buildingDef)
@@ -20,18 +17,12 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
             e.def = buildingDef;
             MoyoEventManager.TriggerEvent(e);
         }
-
     }
 
     public void OnMoyoEvent(BuildingEvent eventType)
     {
-
         this.EnterBuildMode(eventType.def);
-
     }
-
-
-
 
     private enum ConstructionProcess
     {
@@ -46,17 +37,19 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
     [ShowInInspector, ReadOnly]
     private BuildingArchetype currentBuildDef;
 
-    //public BuildingInstance BuildingPrefab;
-   
     [SerializeField] private TileBase green;
     [SerializeField] private TileBase red;
     [SerializeField] private TileBase crimson; // 深红：占用
-    [LabelText("确认面板地址")] [SerializeField] private string confirmPanelAddress = "BuildingConfirmPanel";
+
+    [LabelText("确认面板地址")][SerializeField] private string confirmPanelAddress = "BuildingConfirmPanel";
     [SerializeField] private UIManager.UILayer confirmPanelLayer = UIManager.UILayer.Popup;
 
     private BuildingConfirmPanel confirmPanelInstance;
     private bool lastPlacementValid;
-    private readonly List<Vector3Int> tempBuildingCells = new List<Vector3Int>(256);
+
+    // 使用 CubeCoor 列表替代 Vector3Int
+    private readonly List<CubeCoor> tempBuildingCells = new List<CubeCoor>(64);
+    private CubeCoor _currentCenterCube; // 记录当前的中心点
     private Vector3 _confirmAnchorWorld;
 
     public short Priority { get; set; } = LOConstant.InputPriority.Priority_BuildingBuilder;
@@ -66,29 +59,22 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
     private void OnEnable()
     {
         this.MoyoEventStartListening();
-
         if (InputManager.Instance == null) return;
 
         InputManager.Instance.Register(this);
-
         InputManager.Instance.Building_OnChangeCoordinates += Handle_放置;
         InputManager.Instance.Building_OnConfirmPlacement += Handle_确认放置;
         InputManager.Instance.Building_OnConfirmConstruction += Handle_完成建造;
-
-        // 统一取消
     }
 
     private void OnDisable()
     {
         this.MoyoEventStopListening();
-
         if (!InputManager.HasInstance) return;
-
 
         InputManager.Instance.Building_OnChangeCoordinates -= Handle_放置;
         InputManager.Instance.Building_OnConfirmPlacement -= Handle_确认放置;
         InputManager.Instance.Building_OnConfirmConstruction -= Handle_完成建造;
-
     }
 
     #endregion
@@ -103,6 +89,8 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
         currentBuildDef = buildingDef;
         lastPlacementValid = false;
         tempBuildingCells.Clear();
+
+        // 清除所有高亮层
         GridSystem.Instance.ClearHighlight();
         HideConfirmBar();
 
@@ -112,7 +100,6 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
         InputManager.Instance?.EnableBuildingMap();
     }
 
-    /// <summary>彻底退出建造（可选暴露）</summary>
     [Button]
     public void ExitBuildMode()
     {
@@ -122,7 +109,6 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
         GridSystem.Instance.ClearHighlight();
         HideConfirmBar();
         InputManager.Instance?.DisableBuildingMap();
-        Debug.Log(1);
     }
 
     #endregion
@@ -134,39 +120,52 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
     {
         if (process != ConstructionProcess.Placing || currentBuildDef == null) return;
 
-        // 等距网格中的连续坐标（中心）
-        var center = GridSystem.Instance.GetScreenPointInGridPos(screenMousePos);
+        // 1. 获取鼠标指向的六边形坐标 (Cube)
+        _currentCenterCube = GridSystem.Instance.ScreenToCube(screenMousePos);
 
-        // 按 S×S 生成占地
-        var cells = CoordinateCalculator.GetBuildingCells(center, currentBuildDef.Size);
+        // 2. 计算占地 (基于半径)
+        // 假设 Size 1 = 半径 0 (1格), Size 2 = 半径 1 (7格)
+        int radius = Mathf.Max(0, currentBuildDef.Size - 1);
+        var cells = CoordinateCalculator.CellsInRadius(_currentCenterCube, radius);
 
         tempBuildingCells.Clear();
         tempBuildingCells.AddRange(cells);
 
-        // 分类：占用/空闲
-        var occupied = new List<Vector3Int>();
-        var free = new List<Vector3Int>();
+        // 3. 分类：占用/空闲
+        var occupied = new List<CubeCoor>();
+        var valid = new List<CubeCoor>();
 
         foreach (var cell in tempBuildingCells)
         {
-            if (GridSystem.Instance.IsAllowPlacementBuilding(cell)) occupied.Add(cell);
-            else free.Add(cell);
+            if (GridSystem.Instance.IsAllowPlacementBuilding(cell))
+                valid.Add(cell);
+            else
+                occupied.Add(cell);
         }
 
         lastPlacementValid = occupied.Count == 0;
 
-        if (lastPlacementValid)
+        // 4. 设置分层高亮
+        // Priority 0: 有效区域 (绿色)
+        // Priority 1: 冲突区域 (深红)，会覆盖在绿色之上
+
+        if (valid.Count > 0)
         {
-            GridSystem.Instance.SetHighlight(
-                new GridSystem.HighlightSpec(tempBuildingCells, green ?? GridSystem.Instance.visualizationTile)
-            );
+            GridSystem.Instance.SetHighlight(valid, green ?? GridSystem.Instance.visualizationTile, 0);
         }
         else
         {
-            GridSystem.Instance.SetHighlight(
-                new GridSystem.HighlightSpec(occupied, crimson ?? GridSystem.Instance.visualizationTile),
-                new GridSystem.HighlightSpec(free, red ?? GridSystem.Instance.visualizationTile)
-            );
+            // 如果全是无效的，清理一下0层避免残留
+            GridSystem.Instance.ClearHighlight(0);
+        }
+
+        if (occupied.Count > 0)
+        {
+            GridSystem.Instance.SetHighlight(occupied, crimson ?? GridSystem.Instance.visualizationTile, 1);
+        }
+        else
+        {
+            GridSystem.Instance.ClearHighlight(1);
         }
     }
 
@@ -175,44 +174,41 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
         if (process != ConstructionProcess.Placing || currentBuildDef == null) return;
 
         if (!lastPlacementValid) return;
+
+        // 二次校验
         foreach (var cell in tempBuildingCells)
-            if (GridSystem.Instance.IsAllowPlacementBuilding(cell)) return;
+            if (!GridSystem.Instance.IsAllowPlacementBuilding(cell)) return;
 
         process = ConstructionProcess.AwaitingConfirmation;
 
-        // 计算确认条锚点（优先用占地中心，兜底用鼠标格）
-        _confirmAnchorWorld = GetWorldAnchorFromCells(tempBuildingCells);
+        // 计算确认条锚点 (六边形中心的世界坐标)
+        _confirmAnchorWorld = GridSystem.Instance.CubeToWorld(_currentCenterCube);
         ShowConfirmBarAt(_confirmAnchorWorld);
     }
 
     public bool TryHandleBack()
     {
-        if (process == ConstructionProcess.None)
-        {
-            return false; 
-        }
-
+        if (process == ConstructionProcess.None) return false;
         Handle_取消();
         return true;
     }
+
     private void Handle_取消()
     {
         switch (process)
         {
             case ConstructionProcess.Placing:
-                // 放置态：彻底退出建造
                 ExitBuildMode();
                 break;
 
             case ConstructionProcess.AwaitingConfirmation:
-                // 等待确认：退回放置
                 process = ConstructionProcess.Placing;
                 HideConfirmBar();
+                // 恢复放置状态的高亮 (这里简单全清，下一帧 Handle_放置 会自动重绘，或者手动重置状态)
                 GridSystem.Instance.ClearHighlight();
                 break;
 
             default:
-                // 无：不做事（或按需清理）
                 break;
         }
     }
@@ -221,10 +217,10 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
     {
         if (process != ConstructionProcess.AwaitingConfirmation || currentBuildDef == null) return;
 
-        // 二次占用校验（避免竞态）
+        // 1. 二次占用校验
         foreach (var cell in tempBuildingCells)
         {
-            if (GridSystem.Instance.IsAllowPlacementBuilding(cell))
+            if (!GridSystem.Instance.IsAllowPlacementBuilding(cell))
             {
                 Debug.LogWarning("目标区域已被占用，建造失败，返回放置状态。");
                 process = ConstructionProcess.Placing;
@@ -233,52 +229,35 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
             }
         }
 
-        // 落锚点（用于建筑摆放）
-        Vector3 anchor = _confirmAnchorWorld;
-
-        // 标记占用
+        // 2. 标记占用
         foreach (var cell in tempBuildingCells)
         {
             GridSystem.Instance.SetOccupy(cell);
         }
 
-        // 实例化 & 定位（若你的 BuildingInstance.Construction 内部会定位，可省略下面两行）
-        BuildingInstance b;
-        if (currentBuildDef.BuildingPrefab!=null)
+        // 3. 实例化 & 初始化
+        if (currentBuildDef.BuildingPrefab != null)
         {
-          b = Instantiate(currentBuildDef.BuildingPrefab);
-          b.transform.SetPositionAndRotation(anchor, Quaternion.identity);
-            Vector2 center;
-            bool centerIsCorner;
-            int footprintSize;
-            if (!CoordinateCalculator.TryGetCenterFromCells(tempBuildingCells, out center, out centerIsCorner, out footprintSize))
-            {
-                center = Vector2.zero;
-                centerIsCorner = false;
-                footprintSize = currentBuildDef != null ? currentBuildDef.Size : 0;
-            }
+            BuildingInstance b = Instantiate(currentBuildDef.BuildingPrefab);
 
-            Vector3Int[] occupy = tempBuildingCells.ToArray();
-            Vector3 centerVector = new Vector3(center.x, center.y, 0f);
+            // 设置物理位置
+            b.transform.SetPositionAndRotation(_confirmAnchorWorld, Quaternion.identity);
 
-
-            b.Initialize(currentBuildDef, occupy, centerVector, centerIsCorner);
+            // 初始化建筑逻辑数据 (传入 CubeCoor)
+            // 在六边形网格中，CenterIsCorner 通常为 false，除非你做的是顶点放置游戏
+            // CellsInRadius 逻辑下，中心一定是某个格子
+            b.Initialize(currentBuildDef, tempBuildingCells.ToArray(), _currentCenterCube, false);
         }
         else
         {
             Debug.LogWarning("建筑预制体未设置");
         }
-        
-     
-        
-        
 
         Debug.Log("完成建造");
         process = ConstructionProcess.None;
         HideConfirmBar();
         GridSystem.Instance.ClearHighlight();
 
-        // 关闭建造输入
         InputManager.Instance?.DisableBuildingMap();
     }
 
@@ -289,13 +268,16 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
         process = ConstructionProcess.Placing;
         HideConfirmBar();
         GridSystem.Instance.ClearHighlight();
-        // 保持在建造模式中，仍允许继续放置
     }
 
     #endregion
 
+    #region 程序化建造 API
 
-    public bool TryCreateBuildingAtWorld(Vector3 worldPos,BuildingArchetype buildingDef,out BuildingInstance instance,bool ignoreOccupy = false)
+    /// <summary>
+    /// 尝试在指定世界位置建造 (六边形适配版)
+    /// </summary>
+    public bool TryCreateBuildingAtWorld(Vector3 worldPos, BuildingArchetype buildingDef, out BuildingInstance instance, bool ignoreOccupy = false)
     {
         instance = null;
 
@@ -311,39 +293,20 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
             return false;
         }
 
-        // 1) 计算“中心/拐角”在网格坐标系中的连续坐标
-        //    奇数尺寸：使用包含 worldPos 的 cell 作为中心；
-        //    偶数尺寸：吸附到该 cell 附近的最近格拐角。
-        var grid = GridSystem.Instance.mapGrid;
-        Vector3Int cell = grid.WorldToCell(worldPos);
-        Vector3 cellCenterWorld = grid.GetCellCenterWorld(cell);
+        // 1. 计算中心 CubeCoor
+        CubeCoor centerCube = GridSystem.Instance.WorldToCube(worldPos);
+        Vector3 anchorPos = GridSystem.Instance.CubeToWorld(centerCube);
 
-        Vector2 centerLike;
-        // 对于奇数=格心坐标(整数), 偶数=格拐角坐标(整数格线交点)
-        bool isOdd = (buildingDef.Size & 1) == 1;
+        // 2. 计算占地 (Radius)
+        int radius = Mathf.Max(0, buildingDef.Size - 1);
+        var cells = CoordinateCalculator.CellsInRadius(centerCube, radius);
 
-        if(isOdd)
+        // 3. 占用校验
+        if (!ignoreOccupy)
         {
-            centerLike = new Vector2(cell.x, cell.y);
-        }
-        else
-        {
-            int cx = worldPos.x >= cellCenterWorld.x ? cell.x + 1 : cell.x;
-            int cy = worldPos.y >= cellCenterWorld.y ? cell.y + 1 : cell.y;
-            centerLike = new Vector2(cx, cy);
-        }
-
-        // 2) 计算占地格
-        var cellsEnum = CoordinateCalculator.GetBuildingCells(centerLike, buildingDef.Size);
-        var occupyCells = new
-        List<Vector3Int>(cellsEnum);
-
-        // 3) 占用校验（可选忽略）
-        if(!ignoreOccupy)
-        {
-            foreach (var c in occupyCells)
+            foreach (var c in cells)
             {
-                if(GridSystem.Instance.IsAllowPlacementBuilding(c))
+                if (!GridSystem.Instance.IsAllowPlacementBuilding(c))
                 {
                     Debug.LogWarning("TryCreateBuildingAtWorld: 目标区域存在占用，放置失败。");
                     return false;
@@ -351,38 +314,24 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
             }
         }
 
-        // 4) 计算与高亮一致的世界落锚点
-        Vector3 anchor = GetWorldAnchorFromCells(occupyCells);
-
-        // 5) 标记占用
-        foreach (var c in occupyCells)
+        // 4. 标记占用
+        foreach (var c in cells)
         {
             GridSystem.Instance.SetOccupy(c);
         }
 
-        // 6) 实例化并定位
+        // 5. 实例化并定位
         var go = Instantiate(buildingDef.BuildingPrefab);
         instance = go;
-        go.transform.SetPositionAndRotation(anchor, Quaternion.identity);
+        go.transform.SetPositionAndRotation(anchorPos, Quaternion.identity);
 
-        // 7) 计算 ConfigurePlacement 所需的中心与形状信息（与现有流程一致）
-        Vector2 center;
-        bool centerIsCorner;
-        int footprintSize;
-        if (!CoordinateCalculator.TryGetCenterFromCells(occupyCells, out center, out centerIsCorner, out footprintSize))
-        {
-            center = centerLike;
-            centerIsCorner = !isOdd;
-            footprintSize = buildingDef.Size;
-        }
-
-        go.Initialize(buildingDef, occupyCells.ToArray(), new Vector3(center.x, center.y, 0f), centerIsCorner);
+        // 6. 初始化逻辑
+        go.Initialize(buildingDef, cells.ToArray(), centerCube, false);
 
         return true;
     }
 
-
-
+    #endregion
 
     #region UI：确认条
 
@@ -415,42 +364,6 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IBackHandler,IMoyo
 
         confirmPanelInstance = null;
     }
-
-    #endregion
-
-    #region 工具
-
-    /// <summary>
-    /// 用占地格反推“视觉中心”的世界坐标：奇数尺寸=格心；偶数尺寸=拐角。
-    /// 落点会与你高亮逻辑一致。
-    /// </summary>
-    private Vector3 GetWorldAnchorFromCells(IReadOnlyCollection<Vector3Int> cells)
-    {
-        // 优先严格用你的 TryGetCenterFromCells（格坐标空间中心）
-        if (CoordinateCalculator.TryGetCenterFromCells(cells, out var center, out var isCorner, out var size))
-        {
-            if (isCorner)
-            {
-                // 拐角位于整数格线交点：选其左下格的世界原点作为落锚（与 Tile 原点一致）
-                var baseCell = new Vector3Int(Mathf.FloorToInt(center.x), Mathf.FloorToInt(center.y), 0);
-                return GridSystem.Instance.CellToWorld(baseCell);
-            }
-            else
-            {
-                // 格心：取最近格再 + 半格（若 Tile 原点为左下）
-                var baseCell = new Vector3Int(Mathf.RoundToInt(center.x), Mathf.RoundToInt(center.y), 0);
-                return GridSystem.Instance.mapGrid.GetCellCenterWorld(baseCell);
-            }
-        }
-
-        // 兜底：用当前鼠标所在格
-        var cell = GridSystem.Instance.GetMousePosCoordinates();
-        return GridSystem.Instance.CellToWorld(cell);
-    }
-
-  
-
-
 
     #endregion
 }

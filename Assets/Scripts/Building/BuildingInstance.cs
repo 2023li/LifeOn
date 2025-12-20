@@ -107,9 +107,9 @@ public class BuildingInstance : MonoBehaviour
 
     public static IReadOnlyCollection<BuildingInstance> ActiveInstances => _activeInstances;
 
-    private static Dictionary<Vector3Int, BuildingInstance> _occupyMap = new Dictionary<Vector3Int, BuildingInstance>();
-    // 优化后的 TryGetAtCell，复杂度从 O(N) 降为 O(1)
-    public static bool TryGetAtCell(Vector3Int cell, out BuildingInstance inst)
+    private static Dictionary<CubeCoor, BuildingInstance> _occupyMap = new Dictionary<CubeCoor, BuildingInstance>();
+    // 优化后的 TryGetBuildingAtCell，复杂度从 O(N) 降为 O(1)
+    public static bool TryGetBuildingAtCell(CubeCoor cell, out BuildingInstance inst)
     {
         return _occupyMap.TryGetValue(cell, out inst);
     }
@@ -430,10 +430,10 @@ public class BuildingInstance : MonoBehaviour
     //----------------------------地图占用（这些一般不触发状态事件，如需要也可改同样写法）-----------------------------------
 
     [ShowInInspector, ReadOnly, LabelText("占用格子")]
-    public Vector3Int[] CurrentOccupy { get; private set; } = Array.Empty<Vector3Int>();
+    public CubeCoor[] CurrentOccupy { get; private set; } = Array.Empty<CubeCoor>();
 
     [ShowInInspector, ReadOnly, LabelText("中心坐标(网格)")]
-    public Vector3 CurrentCenterInGrid { get; private set; }
+    public CubeCoor CurrentCenterInGrid { get; private set; }
 
     [ShowInInspector, ReadOnly, LabelText("中心是坐标交点")]
     public bool CenterIsCorner { get; private set; }
@@ -517,7 +517,7 @@ public class BuildingInstance : MonoBehaviour
 
 
 
-    public void Initialize(BuildingArchetype def, Vector3Int[] occupyCells, Vector3 center, bool centerIsCorner, int startLevelIndex = 0)
+    public void Initialize(BuildingArchetype def, CubeCoor[] occupyCells, CubeCoor center, bool centerIsCorner, int startLevelIndex = 0)
     {
         Def = def;
         if (Def?.Levels == null || Def.Levels.Count == 0)
@@ -528,7 +528,7 @@ public class BuildingInstance : MonoBehaviour
 
         CurrentLevelIndex = Mathf.Clamp(startLevelIndex, 0, Def.Levels.Count - 1);
 
-        CurrentOccupy = occupyCells ?? Array.Empty<Vector3Int>();
+        CurrentOccupy = occupyCells ?? Array.Empty<CubeCoor>();
         CurrentCenterInGrid = center;
         CenterIsCorner = centerIsCorner;
 

@@ -37,12 +37,12 @@ public class BuildingSelector : MonoBehaviour
             return;
         }
 
-        Vector3Int cell = GridSystem.Instance.GetScreenPointCoordinates(screenPoint);
+        CubeCoor cell = GridSystem.Instance.ScreenToCube(screenPoint);
 
-        if (BuildingInstance.TryGetAtCell(cell, out var building) && building?.CurrentOccupy?.Length > 0)
+        if (BuildingInstance.TryGetBuildingAtCell(cell, out BuildingInstance building) && building?.CurrentOccupy?.Length > 0)
         {
             _current = building;
-            GridSystem.Instance.SetHighlight(new GridSystem.HighlightSpec(building.CurrentOccupy, highlightTile ?? TileLib.GetTile(GameTileEnum.Tile_黄色)));
+            GridSystem.Instance.SetHighlight(_current.CurrentOccupy,TileLib.GetTile(GameTileEnum.Tile_黄色));
         }
         else
         {

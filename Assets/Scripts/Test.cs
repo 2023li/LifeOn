@@ -46,14 +46,7 @@ public class Test : MonoBehaviour
     }
 
     public List<Vector3Int> t;
-    [Button]
-    public void TestXX()
-    {
-      GridSystem.Instance.SetHighlight ( CoordinateCalculator.GetReachableCellsByMovePower(t, 5));
-       
-
-      
-    }
+   
 
 
 

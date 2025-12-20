@@ -58,13 +58,13 @@ public class DebugManager : MonoBehaviour
             return;
 
         // 获取鼠标所在单元格坐标（网格坐标）
-        Vector3Int cellCoor = GridSystem.Instance.GetMousePosCoordinates();
+        var cellCoor = GridSystem.Instance.GetMouseCubeCoor();
 
         // 屏幕坐标转换为 GUI 坐标（Y 轴反向）
         Vector3 mousePos = Input.mousePosition;
         mousePos.y = Screen.height - mousePos.y;
 
-        string text = $"Cell: ({cellCoor.x}, {cellCoor.y}, {cellCoor.z})";
+        string text = $"Cell: ({cellCoor.r}, {cellCoor.q}, {cellCoor.s})";
 
         GUIContent content = new GUIContent(text);
         Vector2 size = _guiStyle.CalcSize(content);

@@ -127,13 +127,13 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
         float radius = startNode.SelfBuilding.RO_TransportRadius;
 
         // 获取所有可达的格子列表
-        var reachableCells = CoordinateCalculator.GetReachableCellsByMovePower(startNode.SelfBuilding, radius);
+        List<CubeCoor> reachableCells = CoordinateCalculator.GetReachableCellsByMovePower(startNode.SelfBuilding, radius);
 
         // 【关键优化Step 1】：设置高亮
         GridSystem.Instance.SetHighlight(reachableCells);
 
         // 【关键优化Step 2】：将列表转为 HashSet，实现 O(1) 快速查询
-        HashSet<Vector3Int> reachableSet = new HashSet<Vector3Int>(reachableCells);
+        HashSet<CubeCoor> reachableSet = new HashSet<CubeCoor>(reachableCells);
 
         // 3. 遍历所有活跃的 UINode
         foreach (var targetNode in UINode.ActiveNodes)
@@ -173,7 +173,7 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
             else // CenterOnly
             {
                 // 只有中心点在可达集合里才算
-                Vector3Int center = Vector3Int.RoundToInt(targetNode.SelfBuilding.CurrentCenterInGrid);
+                CubeCoor center = targetNode.SelfBuilding.CurrentCenterInGrid;
                 if (reachableSet.Contains(center))
                 {
                     isReachable = true;

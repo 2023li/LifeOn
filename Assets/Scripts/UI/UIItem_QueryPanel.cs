@@ -16,11 +16,14 @@ public class UIItem_QueryPanel : MonoBehaviour
     private Dictionary<Toggle, AuraCategory> toggleCategoryMap;
     private bool isInitialized = false;
 
+    
     private void Awake()
     {
-        Initialize();
-    }
 
+        Debug.LogWarning("需要完成");
+       // Initialize();
+    }
+    /*
     private void Initialize()
     {
         if (isInitialized) return;
@@ -62,7 +65,7 @@ public class UIItem_QueryPanel : MonoBehaviour
             return;
         }
 
-        var environment = context.Environment;
+        CityEnvironment environment = context.Environment;
         List<AuraCategory> selectedCategories = GetSelectedCategories();
 
         if (selectedCategories.Count == 0)
@@ -171,9 +174,6 @@ public class UIItem_QueryPanel : MonoBehaviour
         var tile3 = TileLib.GetTile(GameTileEnum.Tile_深红色);  // 等级3
 
 
-        Debug.Log(tile1==null);
-        Debug.Log(tile2 == null);
-        Debug.Log(tile3 == null);
 
         // 创建高亮配置
         List<GridSystem.HighlightSpec> highlights = new List<GridSystem.HighlightSpec>();
@@ -227,4 +227,6 @@ public class UIItem_QueryPanel : MonoBehaviour
         if (toggle_医疗 != null) toggle_医疗.onValueChanged.RemoveListener(OnToggleChanged);
         if (toggle_环境 != null) toggle_环境.onValueChanged.RemoveListener(OnToggleChanged);
     }
+
+    */
 }
