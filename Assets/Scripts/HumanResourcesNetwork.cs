@@ -18,11 +18,11 @@ public class HumanResourcesNetwork
     {
         if (!_pop.ContainsKey(building))
         {
-            _pop.Add(building, building.CurrentPopulation);
+            _pop.Add(building, building.Self_CurrentPopulation);
         }
         if (!_work.ContainsKey(building))
         {
-            _work.Add(building,building.CurrentWorkers);
+            _work.Add(building,building.Self_CurrentWorkers);
         }
         building.OnStateChanged += Handle_BuildingStateChange;
         OnHumanResourcesChange?.Invoke();
@@ -50,7 +50,7 @@ public class HumanResourcesNetwork
             case BuildingStateValueType.CurrentPopulation:
                 if (_pop.ContainsKey(building))
                 {
-                    _pop[building] = building.CurrentPopulation;
+                    _pop[building] = building.Self_CurrentPopulation;
                 }
 
                 break;
@@ -58,7 +58,7 @@ public class HumanResourcesNetwork
 
                 if (_work.ContainsKey(building))
                 {
-                    _work[building] = building.CurrentWorkers;
+                    _work[building] = building.Self_CurrentWorkers;
                 }
                 break;
 
@@ -66,5 +66,11 @@ public class HumanResourcesNetwork
         OnHumanResourcesChange?.Invoke();
     }
 
+
+}
+
+[Serializable]
+public class HumanResourcesNetworkSaveData
+{
 
 }

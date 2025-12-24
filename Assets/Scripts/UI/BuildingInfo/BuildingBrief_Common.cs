@@ -20,6 +20,6 @@ public class BuildingBrief_Common : BuildingBriefPanelBase
         {
             buildingIcon.sprite = building.Def.BuildingIcon;
         }
-        buildingName.text = building.Def.DisplayName+" lv"+building.CurrentLevelIndex;
+        buildingName.text = building.Def.DisplayName+" lv"+building.Self_LevelIndex;
     }
 }

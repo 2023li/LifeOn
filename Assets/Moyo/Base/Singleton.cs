@@ -109,7 +109,7 @@ namespace Moyo.Unity
         /// <summary>
         /// 初始化方法（子类可重写）
         /// </summary>
-        protected virtual void Initialize() { Debug.Log($"单例类 {typeof(T).Name}  Initialize"); }
+        protected virtual void Initialize() { Debug.Log($"单例类 {typeof(T).Name}  InitializeByData"); }
 
         public virtual void Awake() { }
         /// <summary>

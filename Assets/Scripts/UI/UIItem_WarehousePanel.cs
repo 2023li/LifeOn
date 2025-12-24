@@ -98,7 +98,7 @@ public class UIItem_WarehousePanel : MonoBehaviour
             var item = LeanPool.Spawn(itemPrefab, itemContainer);
             activeItems.Add(item);
 
-            // 显示名称优先用 DisplayName，没填就用资源名
+            // 显示名称优先用 LevelDisplayName，没填就用资源名
             string resName =
                 string.IsNullOrEmpty(def.DisplayName) ? def.name : def.DisplayName;
 

@@ -161,7 +161,7 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
             if (checkMode == ScopeCheckMode.AnyCellOverlap)
             {
                 // 只要建筑占用的任何一个格子在可达集合里，就是 true
-                foreach (var cell in targetNode.SelfBuilding.CurrentOccupy)
+                foreach (var cell in targetNode.SelfBuilding.Self_CurrentOccupy)
                 {
                     if (reachableSet.Contains(cell))
                     {
@@ -173,7 +173,7 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
             else // CenterOnly
             {
                 // 只有中心点在可达集合里才算
-                CubeCoor center = targetNode.SelfBuilding.CurrentCenterInGrid;
+                CubeCoor center = targetNode.SelfBuilding.Self_CurrentCenterInGrid;
                 if (reachableSet.Contains(center))
                 {
                     isReachable = true;

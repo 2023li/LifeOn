@@ -101,7 +101,7 @@ public class C_工人大于等于 : Condition
 {
     public int Min;
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
-    { why = ""; return self.CurrentWorkers >= Min; }
+    { why = ""; return self.Self_CurrentWorkers >= Min; }
 }
 
 [Serializable]
@@ -109,7 +109,7 @@ public class C_工人少于 : Condition
 {
     public int MaxExclusive;
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
-    { why = ""; return self.CurrentWorkers < MaxExclusive; }
+    { why = ""; return self.Self_CurrentWorkers < MaxExclusive; }
 }
 
 [Serializable]
@@ -117,7 +117,7 @@ public class WorkersEquals : Condition
 {
     public int Count;
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
-    { why = ""; return self.CurrentWorkers == Count; }
+    { why = ""; return self.Self_CurrentWorkers == Count; }
 }
 
 
@@ -130,7 +130,7 @@ public class PopulationLessThan : Condition
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
     {
         why = "";
-        return self.CurrentPopulation < MaxExclusive;
+        return self.Self_CurrentPopulation < MaxExclusive;
     }
 }
 
@@ -141,6 +141,6 @@ public class PopulationAtLeast : Condition
     public override bool Evaluate(BuildingInstance self, IGameContext ctx, out string why)
     {
         why = "";
-        return self.CurrentPopulation >= Min;
+        return self.Self_CurrentPopulation >= Min;
     }
 }

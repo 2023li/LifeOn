@@ -97,7 +97,7 @@ public static class CoordinateCalculator
 
     public static List<CubeCoor> GetReachableCellsByMovePower(BuildingInstance buildingInstance,float movePower)
     {
-        return GetReachableCellsByMovePower(buildingInstance.CurrentOccupy, movePower);
+        return GetReachableCellsByMovePower(buildingInstance.Self_CurrentOccupy, movePower);
     }
     /// <summary>
     /// 获取可到达的格子 (返回 CubeCoor 列表)

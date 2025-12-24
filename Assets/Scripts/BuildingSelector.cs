@@ -39,10 +39,10 @@ public class BuildingSelector : MonoBehaviour
 
         CubeCoor cell = GridSystem.Instance.ScreenToCube(screenPoint);
 
-        if (BuildingInstance.TryGetBuildingAtCell(cell, out BuildingInstance building) && building?.CurrentOccupy?.Length > 0)
+        if (BuildingInstance.TryGetBuildingAtCell(cell, out BuildingInstance building) && building?.Self_CurrentOccupy?.Length > 0)
         {
             _current = building;
-            GridSystem.Instance.SetHighlight(_current.CurrentOccupy,TileLib.GetTile(GameTileEnum.Tile_黄色));
+            GridSystem.Instance.SetHighlight(_current.Self_CurrentOccupy,TileLib.GetTile(GameTileEnum.Tile_黄色));
         }
         else
         {

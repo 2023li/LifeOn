@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using Moyo.Unity;
 using UnityEngine;
+using UnityEngine.Rendering;
+using static TechTreeManager;
 
 public interface IGameContext
 {
@@ -10,7 +12,6 @@ public interface IGameContext
     TechTreeManager TechTree { get; }
     HumanResourcesNetwork HumanResourcesNetwork { get; }
     CityEnvironment Environment { get; }
-
     TurnSystem TurnSystem { get; }
 
 }
@@ -70,6 +71,7 @@ public class GameContext : Singleton<GameContext>, IGameContext
 
         Debug.Log("GameContext初始化完成");
     }
+
 }
 
 

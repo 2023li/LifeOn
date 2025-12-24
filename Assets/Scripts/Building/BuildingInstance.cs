@@ -1,5 +1,6 @@
 /*
- * 建筑实例类中的RO_系列属性可以看作某种意义上的 静态属性 
+ * 建筑实例类中的RO_系列属性 是指可以有其他数据推演
+ * Current系列值属于自身则必须自行保存
  */
 
 
@@ -7,6 +8,11 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using System.Data.SqlTypes;
+using UnityEngine.UI;
+using UnityEngine.Experimental.GlobalIllumination;
+
+
 
 public enum BuildingStateValueType
 {
@@ -107,11 +113,11 @@ public class BuildingInstance : MonoBehaviour
 
     public static IReadOnlyCollection<BuildingInstance> ActiveInstances => _activeInstances;
 
-    private static Dictionary<CubeCoor, BuildingInstance> _occupyMap = new Dictionary<CubeCoor, BuildingInstance>();
+    private static Dictionary<CubeCoor, BuildingInstance> Static_OccupyMap = new Dictionary<CubeCoor, BuildingInstance>();
     // 优化后的 TryGetBuildingAtCell，复杂度从 O(N) 降为 O(1)
     public static bool TryGetBuildingAtCell(CubeCoor cell, out BuildingInstance inst)
     {
-        return _occupyMap.TryGetValue(cell, out inst);
+        return Static_OccupyMap.TryGetValue(cell, out inst);
     }
 
     #endregion
@@ -119,7 +125,7 @@ public class BuildingInstance : MonoBehaviour
 
 
 
-    public event Action<BuildingInstance, BuildingStateValueType> OnStateChanged;
+
 
 
 
@@ -133,34 +139,37 @@ public class BuildingInstance : MonoBehaviour
     [LabelText("实例ID"), ShowInInspector, ReadOnly]
     public string InstanceId { get; private set; } = Guid.NewGuid().ToString("N");
 
-    [ReadOnly, ShowInInspector,LabelText("建筑定义数据")]
+    [ReadOnly, ShowInInspector, LabelText("建筑定义数据")]
     public BuildingArchetype Def { get; set; }
-    public string DisplayName =>Def==null? "未知数据" : Def.DisplayName;
+    public string DisplayName => Def == null ? "未知数据" : Def.DisplayName;
 
+    public event Action<BuildingInstance, BuildingStateValueType> OnStateChanged;
+
+    private BuildingStatModifiers RO_StatModifiers = new BuildingStatModifiers();
 
     //----------------------------等级-----------------------------------
 
 
     [Header("等级"), LabelText("当前等级索引"), ShowInInspector, ReadOnly]
-    private int _currentLevelIndex;
-    public int CurrentLevelIndex
+    private int _selfCurrentLevelIndex;
+    public int Self_LevelIndex
     {
-        get => _currentLevelIndex;
+        get => _selfCurrentLevelIndex;
         private set
         {
-            _currentLevelIndex = value;
+            _selfCurrentLevelIndex = value;
             OnStateChanged?.Invoke(this, BuildingStateValueType.LevelIndex);
         }
     }
 
     [ShowInInspector, ReadOnly, LabelText("当前经验")]
-    private int _currentExp;
-    public int CurrentExp
+    private int _selfCurrentExp;
+    public int Self_CurrentExp
     {
-        get => _currentExp;
+        get => _selfCurrentExp;
         set
         {
-            _currentExp = value;
+            _selfCurrentExp = value;
         }
     }
 
@@ -169,14 +178,14 @@ public class BuildingInstance : MonoBehaviour
     {
         get
         {
-            if (GetLevelData()==null)
+            if (GetLevelData() == null)
             {
-                return 0; 
+                return 0;
             }
             //计算基础值的修正
-            float fBase = (GetLevelData().ExpToNext + statModifiers.Base_ExpToNextAdd) * statModifiers.Base_ExpToNextMul;
-            float fBonus = statModifiers.Bonus_ExpToNextMul * statModifiers.Bonus_ExpToNextAdd;
-            float f = (fBase + fBonus) * statModifiers.Final_ExpToNextMul;
+            float fBase = (GetLevelData().ExpToNext + RO_StatModifiers.Base_ExpToNextAdd) * RO_StatModifiers.Base_ExpToNextMul;
+            float fBonus = RO_StatModifiers.Bonus_ExpToNextMul * RO_StatModifiers.Bonus_ExpToNextAdd;
+            float f = (fBase + fBonus) * RO_StatModifiers.Final_ExpToNextMul;
             return (int)f;
         }
 
@@ -195,18 +204,18 @@ public class BuildingInstance : MonoBehaviour
             }
 
             //计算基础值的修正
-            float fBase = (GetLevelData().BaseMaxPopulation + statModifiers.Base_MaxPopulationAdd) * statModifiers.Base_MaxPopulationMul;
-            float fBonus = statModifiers.Bonus_MaxPopulationAdd * statModifiers.Bonus_MaxPopulationMul;
-            float f = (fBase + fBonus) * statModifiers.Final_MaxPopulationMul;
+            float fBase = (GetLevelData().BaseMaxPopulation + RO_StatModifiers.Base_MaxPopulationAdd) * RO_StatModifiers.Base_MaxPopulationMul;
+            float fBonus = RO_StatModifiers.Bonus_MaxPopulationAdd * RO_StatModifiers.Bonus_MaxPopulationMul;
+            float f = (fBase + fBonus) * RO_StatModifiers.Final_MaxPopulationMul;
             return (int)f;
         }
 
     }
     [ShowInInspector, ReadOnly, LabelText("当前人口")]
-    private int _currentPopulation;
-    public int CurrentPopulation
+    private int _selfCurrentPopulation;
+    public int Self_CurrentPopulation
     {
-        get => _currentPopulation;
+        get => _selfCurrentPopulation;
         set
         {
             // 1. 计算有效最大值（避免 RO_MaxPopulation 为负数的异常情况）
@@ -214,29 +223,29 @@ public class BuildingInstance : MonoBehaviour
             // 2. 钳位 newValue：确保在 [0, maxValid] 范围内（不超上限、不小于0）
             int newValue = Math.Clamp(value, 0, maxValid);
             // 3. 只有值真的变化时，才赋值并触发事件（避免无效调用）
-            if (_currentPopulation != newValue)
+            if (_selfCurrentPopulation != newValue)
             {
-                _currentPopulation = newValue;
+                _selfCurrentPopulation = newValue;
                 OnStateChanged?.Invoke(this, BuildingStateValueType.CurrentPopulation);
             }
 
         }
     }
     [ShowInInspector, ReadOnly, LabelText("当前工人")]
-    private int _currentWorkers;
-    public int CurrentWorkers
+    private int _selfCurrentWorkers;
+    public int Self_CurrentWorkers
     {
 
         set
         {
-            if (value<=Ctx.HumanResourcesNetwork.Unemployed)
+            if (value <= Ctx.HumanResourcesNetwork.Unemployed)
             {
-                _currentWorkers = value;
-                OnStateChanged?.Invoke(this,BuildingStateValueType.CurrentWorkers);
+                _selfCurrentWorkers = value;
+                OnStateChanged?.Invoke(this, BuildingStateValueType.CurrentWorkers);
             }
         }
 
-        get => _currentWorkers;
+        get => _selfCurrentWorkers;
     }
 
     [ShowInInspector, ReadOnly, LabelText("运行时最大工作岗位数")]
@@ -250,9 +259,9 @@ public class BuildingInstance : MonoBehaviour
             }
 
             // 计算基础值的修正（与最大人口数逻辑完全对齐）
-            float fBase = (GetLevelData().BaseMaxJobsPosition + statModifiers.Base_MaxJobsPositionAdd) * statModifiers.Base_MaxJobsPositionMul;
-            float fBonus = statModifiers.Bonus_MaxJobsPositionAdd * statModifiers.Bonus_MaxJobsPositionMul;
-            float f = (fBase + fBonus) * statModifiers.Final_MaxJobsPositionMul;
+            float fBase = (GetLevelData().BaseMaxJobsPosition + RO_StatModifiers.Base_MaxJobsPositionAdd) * RO_StatModifiers.Base_MaxJobsPositionMul;
+            float fBonus = RO_StatModifiers.Bonus_MaxJobsPositionAdd * RO_StatModifiers.Bonus_MaxJobsPositionMul;
+            float f = (fBase + fBonus) * RO_StatModifiers.Final_MaxJobsPositionMul;
             return (int)f;
         }
     }
@@ -269,9 +278,9 @@ public class BuildingInstance : MonoBehaviour
             }
 
             //计算基础值的修正
-            float fBase = (GetLevelData().BaseAttractivenessPerJob + statModifiers.Base_JobAttractivenessAdd) * statModifiers.Base_JobAttractivenessMul;
-            float fBonus = statModifiers.Bonus_JobAttractivenessAdd * statModifiers.Bonus_JobAttractivenessMul;
-            float f = (fBase + fBonus) * statModifiers.Final_JobAttractivenessMul;
+            float fBase = (GetLevelData().BaseAttractivenessPerJob + RO_StatModifiers.Base_JobAttractivenessAdd) * RO_StatModifiers.Base_JobAttractivenessMul;
+            float fBonus = RO_StatModifiers.Bonus_JobAttractivenessAdd * RO_StatModifiers.Bonus_JobAttractivenessMul;
+            float f = (fBase + fBonus) * RO_StatModifiers.Final_JobAttractivenessMul;
             return f;
         }
     }
@@ -289,9 +298,9 @@ public class BuildingInstance : MonoBehaviour
             }
 
             //计算基础值的修正
-            float fBase = (GetLevelData().BaseStorageCapacity + statModifiers.Base_StorageCapacityAdd) * statModifiers.Base_StorageCapacityMul;
-            float fBonus = statModifiers.Bonus_StorageCapacityAdd * statModifiers.Bonus_StorageCapacityMul;
-            float f = (fBase + fBonus) * statModifiers.Final_StorageCapacityMul;
+            float fBase = (GetLevelData().BaseStorageCapacity + RO_StatModifiers.Base_StorageCapacityAdd) * RO_StatModifiers.Base_StorageCapacityMul;
+            float fBonus = RO_StatModifiers.Bonus_StorageCapacityAdd * RO_StatModifiers.Bonus_StorageCapacityMul;
+            float f = (fBase + fBonus) * RO_StatModifiers.Final_StorageCapacityMul;
             return (int)f;
         }
     }
@@ -307,9 +316,9 @@ public class BuildingInstance : MonoBehaviour
             }
 
             // 完全对齐库存容量的计算逻辑，仅替换字段名
-            float fBase = (GetLevelData().BaseTransportRadius + statModifiers.Base_TransportRadiusAdd) * statModifiers.Base_TransportRadiusMul;
-            float fBonus = statModifiers.Bonus_TransportRadiusAdd * statModifiers.Bonus_TransportRadiusMul;
-            float f = (fBase + fBonus) * statModifiers.Final_TransportRadiusMul;
+            float fBase = (GetLevelData().BaseTransportRadius + RO_StatModifiers.Base_TransportRadiusAdd) * RO_StatModifiers.Base_TransportRadiusMul;
+            float fBonus = RO_StatModifiers.Bonus_TransportRadiusAdd * RO_StatModifiers.Bonus_TransportRadiusMul;
+            float f = (fBase + fBonus) * RO_StatModifiers.Final_TransportRadiusMul;
             return f;
         }
     }
@@ -325,9 +334,9 @@ public class BuildingInstance : MonoBehaviour
             }
 
             // 完全对齐库存容量的计算逻辑，仅替换字段名
-            float fBase = (GetLevelData().BaseDistributeRadius + statModifiers.Base_DistributeRadiusAdd) * statModifiers.Base_DistributeRadiusMul;
-            float fBonus = statModifiers.Bonus_DistributeRadiusAdd * statModifiers.Bonus_DistributeRadiusMul;
-            float f = (fBase + fBonus) * statModifiers.Final_DistributeRadiusMul;
+            float fBase = (GetLevelData().BaseDistributeRadius + RO_StatModifiers.Base_DistributeRadiusAdd) * RO_StatModifiers.Base_DistributeRadiusMul;
+            float fBonus = RO_StatModifiers.Bonus_DistributeRadiusAdd * RO_StatModifiers.Bonus_DistributeRadiusMul;
+            float f = (fBase + fBonus) * RO_StatModifiers.Final_DistributeRadiusMul;
             return f;
         }
     }
@@ -342,16 +351,16 @@ public class BuildingInstance : MonoBehaviour
             }
 
             // 完全对齐 RO_DistributeRadius 计算逻辑，仅替换 MaxTraffic 对应字段名
-            float fBase = (GetLevelData().BaseMaxTraffic + statModifiers.Base_MaxTrafficAdd) * statModifiers.Base_MaxTrafficMul;
-            float fBonus = statModifiers.Bonus_MaxTrafficAdd * statModifiers.Bonus_MaxTrafficMul;
-            float f = (fBase + fBonus) * statModifiers.Final_MaxTrafficMul;
+            float fBase = (GetLevelData().BaseMaxTraffic + RO_StatModifiers.Base_MaxTrafficAdd) * RO_StatModifiers.Base_MaxTrafficMul;
+            float fBonus = RO_StatModifiers.Bonus_MaxTrafficAdd * RO_StatModifiers.Bonus_MaxTrafficMul;
+            float f = (fBase + fBonus) * RO_StatModifiers.Final_MaxTrafficMul;
             return f;
         }
     }
 
     private float _currentTraffic;
     [ShowInInspector, ReadOnly, LabelText("当前转运流量")]
-    public float CurrentTraffic
+    public float RO_CurrentTraffic
     {
         get => _currentTraffic;
         set
@@ -368,15 +377,15 @@ public class BuildingInstance : MonoBehaviour
     [ShowInInspector, ReadOnly, LabelText("剩余转运容量")]
     public float SurplusTraffic
     {
-        get => RO_MaxTraffic - CurrentTraffic;
+        get => RO_MaxTraffic - RO_CurrentTraffic;
     }
 
 
 
     [ShowInInspector, ReadOnly, LabelText("参与转运系统")]
-    public bool CurrentTransportationAbility
+    public bool RO_TransportationAbility
     {
-        get => RO_MaxTraffic > 0;      
+        get => RO_MaxTraffic > 0;
     }
 
     [ShowInInspector, ReadOnly, LabelText("转运阻力")]
@@ -389,9 +398,9 @@ public class BuildingInstance : MonoBehaviour
                 return 0;
             }
 
-            float fBase = (GetLevelData().BaseTransportationResistance + statModifiers.Base_TransportationResistanceAdd) * statModifiers.Base_TransportationResistanceMul;
-            float fBonus = statModifiers.Bonus_TransportationResistanceAdd * statModifiers.Bonus_TransportationResistanceMul;
-            float f = (fBase + fBonus) * statModifiers.Final_TransportationResistanceMul;
+            float fBase = (GetLevelData().BaseTransportationResistance + RO_StatModifiers.Base_TransportationResistanceAdd) * RO_StatModifiers.Base_TransportationResistanceMul;
+            float fBonus = RO_StatModifiers.Bonus_TransportationResistanceAdd * RO_StatModifiers.Bonus_TransportationResistanceMul;
+            float f = (fBase + fBonus) * RO_StatModifiers.Final_TransportationResistanceMul;
             return Mathf.Max(0, Mathf.RoundToInt(f));
         }
     }
@@ -399,13 +408,13 @@ public class BuildingInstance : MonoBehaviour
 
 
     [ShowInInspector, ReadOnly, LabelText("产品列表")]
-    public HashSet<SupplyDef> CurrentProductList { get; private set; } = new HashSet<SupplyDef>(0); //目前只是作为产品源头 没有什么其他作用
+    public HashSet<SupplyDef> RO_CurrentProductList { get; private set; } = new HashSet<SupplyDef>(0); //目前只是作为产品源头 没有什么其他作用
 
     public bool AddProduct(SupplyDef product)
     {
         if (product == null) return false;
-        if (CurrentProductList == null) { CurrentProductList = new HashSet<SupplyDef>(); }
-        bool a =  CurrentProductList.Add(product);
+        if (RO_CurrentProductList == null) { RO_CurrentProductList = new HashSet<SupplyDef>(); }
+        bool a = RO_CurrentProductList.Add(product);
         if (a)
         {
             OnStateChanged?.Invoke(this, BuildingStateValueType.产品列表);
@@ -415,9 +424,9 @@ public class BuildingInstance : MonoBehaviour
     public bool RemoveProduct(SupplyDef product)
     {
         if (product == null) return false;
-        if (CurrentProductList == null) return false;
+        if (RO_CurrentProductList == null) return false;
 
-        bool removed = CurrentProductList.Remove(product);
+        bool removed = RO_CurrentProductList.Remove(product);
         if (removed)
         {
             OnStateChanged?.Invoke(this, BuildingStateValueType.产品列表);
@@ -430,68 +439,146 @@ public class BuildingInstance : MonoBehaviour
     //----------------------------地图占用（这些一般不触发状态事件，如需要也可改同样写法）-----------------------------------
 
     [ShowInInspector, ReadOnly, LabelText("占用格子")]
-    public CubeCoor[] CurrentOccupy { get; private set; } = Array.Empty<CubeCoor>();
+    public CubeCoor[] Self_CurrentOccupy { get; private set; } = Array.Empty<CubeCoor>();
 
     [ShowInInspector, ReadOnly, LabelText("中心坐标(网格)")]
-    public CubeCoor CurrentCenterInGrid { get; private set; }
-
-    [ShowInInspector, ReadOnly, LabelText("中心是坐标交点")]
-    public bool CenterIsCorner { get; private set; }
+    public CubeCoor Self_CurrentCenterInGrid { get; private set; }
 
 
-    //----------------------------上下文 & 视图 & 规则------------------------
+
+    //----------------------------上下文 & 运行时缓存数据------------------------
 
     public IGameContext Ctx { get => GameContext.Instance; }
 
-    [ShowInInspector, ReadOnly, LabelText("当前规则列表")]
-    public Dictionary<string, Rule> CurrentRules { get; private set; } = new();
+    private Dictionary<string, int> specificData_int;
+    private Dictionary<string, float> specificData_float;
+    private Dictionary<string, Vector3> specificData_v3;
+    private Dictionary<string, string> specificData_string;
+    // --- Set 方法 (编译时静态绑定，无装箱) ---
+    public void SetData(string key, int value) { if (specificData_int == null) specificData_int = new Dictionary<string, int>(); specificData_int[key] = value; }
+    public void SetData(string key, float value) { if (specificData_float == null) specificData_float = new Dictionary<string, float>();  specificData_float[key] = value; }
+    public void SetData(string key, Vector3 value) { if (specificData_v3 == null) specificData_v3 = new Dictionary<string, Vector3>(); specificData_v3[key] = value; }
+    public void SetData(string key, string value){ if (specificData_string == null) specificData_string = new Dictionary<string, string>(); specificData_string[key] = value; }
+
+    // --- Get 方法 ---
+    public int GetInt(string key) => specificData_int.TryGetValue(key, out var v) ? v : 0;
+    public float GetFloat(string key) => specificData_float.TryGetValue(key, out var v) ? v : 0f;
+    public Vector3 GetVector3(string key) => specificData_v3.TryGetValue(key, out var v) ? v : Vector3.zero;
+    public string GetString(string key) => specificData_string.TryGetValue(key, out var v) ? v : null;
+
+
     #endregion
 
-    private BuildingStatModifiers statModifiers = new BuildingStatModifiers();
 
-    public void AddRule(string name, Rule rule)
+
+
+    #region Rule相关
+
+    [ShowInInspector, ReadOnly, LabelText("当前规则列表")]
+    public List<Rule> CurrentRules { get; private set; } = new List<Rule>();
+    // 缓存待添加/移除的规则，防止遍历时修改集合报错
+    private List<Rule> _pendingToAdd = new List<Rule>();
+    private List<Rule> _pendingToRemove = new List<Rule>();
+
+    public void AddRule(Rule rule)
     {
-        if (string.IsNullOrEmpty(name))
-        {
-            Debug.LogError("[BuildingInstance] AddRule 失败：name 为空", this);
-            return;
-        }
-        if (rule == null)
-        {
-            Debug.LogError($"[BuildingInstance] AddRule 失败：规则对象为空（name={name}）", this);
-            return;
-        }
-        if (CurrentRules.ContainsKey(name))
-        {
-            return;
-        }
+        if (rule == null) return;
 
-        ReadyToAddRule.Add((name, rule));
+        _pendingToAdd.Add(rule);
+
+        // 立即触发 OnAdd (注意：Rule的OnAdd里如果涉及复杂逻辑需确保安全)
         rule.OnAdd(this);
-
     }
-
-
-
-    public void RemoveRule(string name)
+    public void RemoveRule(Rule rule)
     {
+        if (rule == null) return;
 
-        if (CurrentRules.TryGetValue(name, out Rule r))
+        // 如果规则还在生效列表中，触发移除回调并标记删除
+        if (CurrentRules.Contains(rule) || _pendingToAdd.Contains(rule))
         {
-            r.OnRemove(this);
-            ReadyToClearedRule.Add(name);
+            rule.OnRemove(this);
+            _pendingToRemove.Add(rule);
+        }
+    }
+    private void ApplyPendingRuleChanges()
+    {
+        // 1. 处理移除
+        if (_pendingToRemove.Count > 0)
+        {
+            foreach (var rule in _pendingToRemove)
+            {
+                CurrentRules.Remove(rule);
+            }
+            _pendingToRemove.Clear();
         }
 
+        // 2. 处理添加
+        if (_pendingToAdd.Count > 0)
+        {
+            CurrentRules.AddRange(_pendingToAdd);
+            _pendingToAdd.Clear();
+        }
     }
+
+    //执行
     private void ExecutionRules(TurnPhase phase)
     {
-        foreach (var rule in CurrentRules.Values)
+        foreach (var rule in CurrentRules)
         {
             rule.OnUpdate(this, phase);
+            if (phase==TurnPhase.回合结束阶段 && rule.Lifecycle==RuleLifecycle.TimeBased)
+            {
+                rule.RemainingRounds--;
+                if (rule.RemainingRounds <= 0)
+                {
+                    RemoveRule(rule);
+                }
+            }
+        }
+
+       
+    }
+    // [新增] 加载基础规则
+    private void LoadBaseRules()
+    {
+        if (Def?.BaseRules == null) return;
+
+        foreach (var src in Def.BaseRules)
+        {
+            if (src == null) continue;
+            var cloned = src.Clone() as Rule;
+            if (cloned != null)
+            {
+                // 确保基础规则的生命周期正确（通常是 Persistent）
+                cloned.Lifecycle = src.Lifecycle;
+                cloned.RemainingRounds = src.RemainingRounds;
+                AddRule(cloned);
+            }
         }
     }
+    private void LoadLevelRules(int levelIndex)
+    {
+        if (Def?.LevelsList == null || Def.LevelsList.Count == 0) return;
+        int last = Def.LevelsList.Count - 1;
+        var lvl = Def.LevelsList[Mathf.Clamp(levelIndex, 0, last)];
+        var list = lvl?.Rules;
+        if (list == null) return;
 
-  
+        for (int i = 0; i < list.Count; i++)
+        {
+            Rule src = list[i];
+            Rule cloned = src?.Clone() as Rule;
+            if (cloned == null)
+            {
+                Debug.LogWarning($"[BuildingInstance] 等级规则为空或克隆失败（index={i}）", this);
+                continue;
+            }
+          
+            AddRule(cloned);
+        }
+    }
+   
+    #endregion
 
 
     private void OnEnable()
@@ -517,27 +604,87 @@ public class BuildingInstance : MonoBehaviour
 
 
 
-    public void Initialize(BuildingArchetype def, CubeCoor[] occupyCells, CubeCoor center, bool centerIsCorner, int startLevelIndex = 0)
+    public void Initialize(BuildingArchetype def, CubeCoor[] occupyCells, CubeCoor center, int startLevelIndex = 0)
     {
         Def = def;
-        if (Def?.Levels == null || Def.Levels.Count == 0)
+        if (Def?.LevelsList == null || Def.LevelsList.Count == 0)
         {
             Debug.LogError("[BuildingInstance] 建筑定义缺少等级数据", this);
             return;
         }
 
-        CurrentLevelIndex = Mathf.Clamp(startLevelIndex, 0, Def.Levels.Count - 1);
+        Self_LevelIndex = Mathf.Clamp(startLevelIndex, 0, Def.LevelsList.Count - 1);
 
-        CurrentOccupy = occupyCells ?? Array.Empty<CubeCoor>();
-        CurrentCenterInGrid = center;
-        CenterIsCorner = centerIsCorner;
+        Self_CurrentOccupy = occupyCells ?? Array.Empty<CubeCoor>();
+        Self_CurrentCenterInGrid = center;
 
 
-        LoadLevelRules(CurrentLevelIndex);
+        LoadBaseRules();
+        LoadLevelRules(Self_LevelIndex);
         //第一次需要立刻调用一次
-        DelayChangeRuleDic();
+        ApplyPendingRuleChanges();
+    }
+
+    public class BuildingSaveData
+    {
+        //常规数据
+        public string archetypeID;
+        public CubeCoor[] occupyCells;
+        public CubeCoor currentCenterInGrid;
+        public string instanceId;
+        public int level;
+        public int currentEXP;
+        public int currentPopulation;
+        public int currentWorkers;
+
+        //特殊数据
+        public Dictionary<string, string> stringData;
+        public Dictionary<string , int> intData;
+        public Dictionary<string, Vector3> v3Data;
+        public Dictionary<string,float> floatData;
+
+        public static BuildingSaveData GetData(BuildingInstance instance)
+        {
+           return instance.Save();
+        }
+
 
     }
+
+    //需要由BuildingBuilder来建造
+    public void InitializeByData(BuildingSaveData data)
+    {
+        //还原所有的Self值
+                
+
+        //还原所有的Rule
+
+
+        //其余的会有其他系统处理
+
+
+
+    }
+
+    public BuildingSaveData Save()
+    {
+        BuildingSaveData data = new BuildingSaveData();
+        data.archetypeID = Def.Id;
+        data.occupyCells = Self_CurrentOccupy;
+        data.currentCenterInGrid = Self_CurrentCenterInGrid;
+        data.instanceId = InstanceId;
+        data.level = Self_LevelIndex;
+        data.currentEXP = Self_CurrentExp;
+        data.currentPopulation = Self_CurrentPopulation;
+        data.currentWorkers = Self_CurrentWorkers;
+
+        data.intData = specificData_int;
+        data.floatData = specificData_float;
+        data.v3Data = specificData_v3;
+        data.stringData = specificData_string;    
+        return data;
+    }
+
 
     private void RegisterToGame()
     {
@@ -545,7 +692,10 @@ public class BuildingInstance : MonoBehaviour
         Ctx.ResourceNetwork.Register(this);
         TurnSystem.OnTurnPhaseChange += HandleTurnPhase;
 
-        foreach (var pos in CurrentOccupy) _occupyMap[pos] = this;
+        foreach (CubeCoor pos in Self_CurrentOccupy)
+        {
+            Static_OccupyMap[pos] = this;
+        }
 
     }
 
@@ -556,7 +706,7 @@ public class BuildingInstance : MonoBehaviour
         Ctx.ResourceNetwork.UnRegister(this);
         TurnSystem.OnTurnPhaseChange -= HandleTurnPhase;
 
-        foreach (var pos in CurrentOccupy) _occupyMap.Remove(pos);
+        foreach (var pos in Self_CurrentOccupy) Static_OccupyMap.Remove(pos);
     }
 
 
@@ -574,7 +724,7 @@ public class BuildingInstance : MonoBehaviour
                 TryUpgrade();
                 break;
             case TurnPhase.开始准备阶段:
-                DelayChangeRuleDic();
+                ApplyPendingRuleChanges();
                 break;
             default:
                 Debug.Log($"{phase} 未处理");
@@ -588,62 +738,40 @@ public class BuildingInstance : MonoBehaviour
 
     private BuildingLevelDef GetLevelData()
     {
-        if (Def == null || Def.Levels == null || Def.Levels.Count == 0)
+        if (Def == null || Def.LevelsList == null || Def.LevelsList.Count == 0)
             return null;
 
-        return Def.Levels[Mathf.Clamp(CurrentLevelIndex, 0, Def.Levels.Count - 1)];
+        return Def.LevelsList[Mathf.Clamp(Self_LevelIndex, 0, Def.LevelsList.Count - 1)];
     }
 
 
 
 
-    private const string DataRulePrefix = "FromDataRules_";
-
-    private List<string> ReadyToClearedRule = new List<string>();
-    private List<(string, Rule)> ReadyToAddRule = new List<(string, Rule)>();
-    private void DelayChangeRuleDic()
-    {
-        foreach (string key in ReadyToClearedRule)
-        {
-            if (CurrentRules.ContainsKey(key))
-            {
-                CurrentRules.Remove(key);
-            }
-        }
-
-
-        foreach ((string, Rule) item in ReadyToAddRule)
-        {
-            CurrentRules.Add(item.Item1, item.Item2);
-        }
-
-
-        ReadyToAddRule.Clear();
-        ReadyToClearedRule.Clear();
-    }
+  
+    
 
     public bool TryUpgrade()
     {
         // 1) 基础数据校验
-        if (Def?.Levels == null || Def.Levels.Count == 0)
+        if (Def?.LevelsList == null || Def.LevelsList.Count == 0)
             return false;
 
         // 2) 满级判定
-        int lastIndex = Def.Levels.Count - 1;
-        if (CurrentLevelIndex >= lastIndex)
+        int lastIndex = Def.LevelsList.Count - 1;
+        if (Self_LevelIndex >= lastIndex)
             return false;
 
         // 3) 经验是否足够（优先使用运行时计算的 RO_ExpToNext）
         int expToNext = RO_ExpToNext > 0 ? RO_ExpToNext : Mathf.Max(0, GetLevelData()?.ExpToNext ?? 0);
-        if (CurrentExp < expToNext)
+        if (Self_CurrentExp < expToNext)
             return false;
 
         // 4) 升级条件判定（通常使用“当前等级”的允许升级条件；若为空可按需替换为“下一等级解锁条件”）
         var currentLevel = GetLevelData();
-        var nextLevelIndex = CurrentLevelIndex + 1;
-        var nextLevel = Def.Levels[Mathf.Clamp(nextLevelIndex, 0, lastIndex)];
+        var nextLevelIndex = Self_LevelIndex + 1;
+        var nextLevel = Def.LevelsList[Mathf.Clamp(nextLevelIndex, 0, lastIndex)];
 
-        var conditions = currentLevel?.ConditionsForAllowingUpgrades; // 若你希望检查下一等级的解锁条件，可改为：nextLevel?.ConditionsForAllowingUpgrades 或 nextLevel?.UnlockConditions
+        List<Condition> conditions = currentLevel?.ConditionsForAllowingUpgrades; // 若你希望检查下一等级的解锁条件，可改为：nextLevel?.ConditionsForAllowingUpgrades 或 nextLevel?.UnlockConditions
         if (conditions != null && !ConditionUtility.TryEvaluateConditions(conditions, this, Ctx, out string reason))
         {
             Debug.LogWarning($"[BuildingInstance] 建筑 {Def.DisplayName} 无法升级：{reason}", this);
@@ -651,21 +779,22 @@ public class BuildingInstance : MonoBehaviour
         }
 
         // 5) 执行升级（保留多余经验）
-        CurrentLevelIndex = nextLevelIndex;
-        CurrentExp -= expToNext;
-        if (CurrentExp < 0) CurrentExp = 0;
+        Self_LevelIndex = nextLevelIndex;
+        Self_CurrentExp -= expToNext;
+        if (Self_CurrentExp < 0) Self_CurrentExp = 0;
 
-        // 6) 移除旧等级从数据生成的规则
-        foreach (var key in CurrentRules.Keys)
+        // 策略：遍历现有规则，找到 Lifecycle == LevelBase 的全部移除
+        for (int i = 0; i < CurrentRules.Count; i++)
         {
-            if (key.StartsWith(DataRulePrefix, StringComparison.Ordinal))
+            var r = CurrentRules[i];
+            if (r.Lifecycle == RuleLifecycle.LevelBase)
             {
-                RemoveRule(key);
+                RemoveRule(r);
             }
         }
 
-        LoadLevelRules(CurrentLevelIndex);
-
+        LoadLevelRules(Self_LevelIndex);
+        ApplyPendingRuleChanges();
 
         // 8) 通知状态变化（等级变化会影响多项运行时数值，按需补充/裁剪）
         OnStateChanged?.Invoke(this, BuildingStateValueType.LevelIndex);
@@ -675,38 +804,9 @@ public class BuildingInstance : MonoBehaviour
         OnStateChanged?.Invoke(this, BuildingStateValueType.就业吸引力);
 
         return true;
-
-
-
-
-
-
     }
 
-    private void LoadLevelRules(int levelIndex)
-    {
-        if (Def?.Levels == null || Def.Levels.Count == 0) return;
-        int last = Def.Levels.Count - 1;
-        var lvl = Def.Levels[Mathf.Clamp(levelIndex, 0, last)];
-        var list = lvl?.Rules;
-        if (list == null) return;
-
-        for (int i = 0; i < list.Count; i++)
-        {
-            var src = list[i];
-            var cloned = src?.Clone() as Rule;
-            if (cloned == null)
-            {
-                Debug.LogWarning($"[BuildingInstance] 等级规则为空或克隆失败（index={i}）", this);
-                continue;
-            }
-            string key = MakeDataRuleKey(i, levelIndex, src.GetRuleName());
-            AddRule(key, cloned);
-        }
-
-
-        string MakeDataRuleKey(int index, int LevelIndex, string ruleName) { return $"{DataRulePrefix}_{LevelIndex}_{index}_{ruleName}"; }
-    }
+  
 
 
 

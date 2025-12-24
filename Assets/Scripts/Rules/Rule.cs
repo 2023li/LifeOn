@@ -5,9 +5,17 @@ using Sirenix.OdinInspector;
 
 
 
+public enum RuleLifecycle
+{
+    //伴随建筑到销毁
+    Persistent = 0,
+    //持续一定回合数
+    TimeBased = 1,
+    //持续到建筑升级
+    LevelBase = 2,
+}
 
 [Serializable]
-
 public abstract class Rule:ICloneable
 {
     [ShowInInspector, MultiLineProperty(3),PropertyOrder(-1), HideLabel]
@@ -15,14 +23,14 @@ public abstract class Rule:ICloneable
     public string DescriptionDisplay => GetDescription();
     public abstract string GetRuleName();
 
-
+    public RuleLifecycle Lifecycle = RuleLifecycle.Persistent;
+    public int RemainingRounds = -1;
     
 
     public abstract string GetDescription();                  // 规则说明
 
 
     public abstract void OnAdd(BuildingInstance self);
-
 
     public abstract void OnUpdate(BuildingInstance self, TurnPhase phase);
 
@@ -54,12 +62,12 @@ public class R_填充就业 : Rule
         {
             case TurnPhase.回合结束阶段:
                 Debug.Log("执行");
-                if (self.CurrentWorkers<self.RO_MaxJobsPosition)
+                if (self.Self_CurrentWorkers<self.RO_MaxJobsPosition)
                 {
                     Debug.Log("有空位");
                     if(self.Ctx.HumanResourcesNetwork.Unemployed > 0)
                     {
-                        self.CurrentWorkers++;
+                        self.Self_CurrentWorkers++;
 
                         Debug.LogWarning("以后需要优化");
                     }
@@ -112,7 +120,7 @@ public class R_回合结束时获取经验 : Rule
             case TurnPhase.资源生产阶段:
                 break;
             case TurnPhase.回合结束阶段:
-                self.CurrentExp += AddExp;
+                self.Self_CurrentExp += AddExp;
                 break;
             case TurnPhase.开始准备阶段:
                 break;

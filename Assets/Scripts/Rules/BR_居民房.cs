@@ -41,9 +41,9 @@ public class BR_居民房_LV1 : Rule
                 if (self.Ctx.ResourceNetwork.TryConsumeResource(SupplyCategory.一级食物, 2))
                 {
 
-                    if (self.CurrentPopulation < self.RO_MaxPopulation)
+                    if (self.Self_CurrentPopulation < self.RO_MaxPopulation)
                     {
-                        self.CurrentPopulation += 2;
+                        self.Self_CurrentPopulation += 2;
                     }
                 }
                 else

@@ -68,12 +68,12 @@ public class UIItem_TransportPanel : MonoBehaviour
             IconTextButton btnItem = Instantiate(prefab_资源标签预制体, content_物资类型父对象);
 
             // 初始化 图标 + 名称
-            btnItem.SetContent(supplyDef.DisplayName, supplyDef.Icon); // DisplayName & Icon :contentReference[oaicite:1]{index=1}
+            btnItem.SetContent(supplyDef.DisplayName, supplyDef.Icon); // LevelDisplayName & Icon :contentReference[oaicite:1]{index=1}
 
             // 为了避免闭包问题，拷贝一份局部变量
             var def = supplyDef;
 
-            // 设置点击事件 —— 点击时打印 supplyDef.DisplayName
+            // 设置点击事件 —— 点击时打印 supplyDef.LevelDisplayName
             btnItem.SetOnClick(() =>
             {
                 ConnectionManager.Instance.OnSelect(def);

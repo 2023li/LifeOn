@@ -9,7 +9,7 @@ public enum WarehouseProperties
 {
     物资,
     粮食,
-
+    
 }
 
 public enum BuildingClassify
@@ -28,10 +28,13 @@ public class BuildingArchetype : ScriptableObject
 {
     [LabelText("建筑唯一ID")]
     public string Id;                // "residence", "warehouse", "garden"
+
     [LabelText("建筑名称")]
     public string DisplayName;       // "居民房"
+
     [LabelText("建筑尺寸")]
     public int Size;
+
     [LabelText("建筑分类")]
     public BuildingClassify classification = BuildingClassify.基础;
 
@@ -69,8 +72,12 @@ public class BuildingArchetype : ScriptableObject
     [Tooltip("留空则始终允许建造")]
     public List<Condition> AllowConstruction;
 
+    [LabelText("建筑的自带Buff")]
+    [SerializeReference]
+    public List<Rule> BaseRules;
+
     [ListDrawerSettings(ShowFoldout = true, ShowIndexLabels = true, DraggableItems = true)]
-    public List<BuildingLevelDef> Levels = new List<BuildingLevelDef>();
+    public List<BuildingLevelDef> LevelsList = new List<BuildingLevelDef>();
    
 
 }
@@ -78,6 +85,9 @@ public class BuildingArchetype : ScriptableObject
 [Serializable]
 public class BuildingLevelDef
 {
+    [LabelText("建筑名称")]
+    public string LevelDisplayName;       // "居民房"
+
     // —— 基础属性（根据建筑不同使用其子集）——
     [SerializeField,HorizontalGroup("人口"),LabelText("基础最大人口")]
     public int BaseMaxPopulation;   // 人口上限基础值（居民类）
@@ -140,33 +150,3 @@ public class BuildingLevelDef
 
 }
 
-/*
-[Serializable]
-public class BuildingLevelViewConfig
-{
-    [LabelText("默认动画状态")]
-    [Tooltip("调用 ApplyLevelState 时直接播放的 Animator 状态名，用于保持该等级的常态表现。")]
-    public string DefaultAnimatorState;
-
-    [LabelText("默认动画触发器")]
-    [Tooltip("调用 ApplyLevelState 时触发的 Animator Trigger，常用于恢复待机动画。留空表示不触发。")]
-    public string DefaultAnimatorTrigger;
-
-    [LabelText("升级动画触发器")]
-    [Tooltip("升级瞬间触发的 Animator Trigger，PlayUpgrade 会在 from -> to 时调用。留空表示无需额外触发。")]
-    public string UpgradeTrigger;
-
-    [LabelText("常驻粒子预制体")]
-    [Tooltip("该等级常驻的粒子或特效预制体，会被实例化到 BuildingView 的粒子父节点下。留空表示不显示。")]
-    public GameObject PersistentParticlePrefab;
-
-    [LabelText("升级特效预制体")]
-    [Tooltip("升级瞬间播放的一次性特效，PlayUpgrade 会负责实例化。留空表示不播放升级特效。")]
-    public GameObject UpgradeEffectPrefab;
-
-    [LabelText("子级预制体替换")]
-    [Tooltip("用于切换子模型或装饰的预制体，ApplyLevelState 会销毁旧实例并重新生成。留空则沿用上一等级的外观。")]
-    public GameObject ChildPrefab;
-}
-
-*/

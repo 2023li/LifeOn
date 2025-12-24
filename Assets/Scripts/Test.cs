@@ -46,13 +46,32 @@ public class Test : MonoBehaviour
     }
 
     public List<Vector3Int> t;
-   
+
+    [Button]
+    public void SaveApp()
+    {
+        PersistentManager.Instance.SaveAppData();
+    }
+
+    [Button]
+    public void SaveTest(string key="test")
+    {
+      
+        PersistentManager.Instance.SaveGame(GameSaveData.CreateNew(key));
+
+    }
 
 
+    [Button]
+    public void LoadTest()
+    {
+        var d = PersistentManager.Instance.GetAllSaves();
 
-
-   
-
+        foreach (var d2 in d)
+        {
+            Debug.Log(d2.saveName);
+        }
+    }
 
 
 }

@@ -74,9 +74,8 @@ public class ApplyEnvironmentAura : Effect
             return;
         }
 
-        CubeCoor center = self.CurrentCenterInGrid;
-        bool centerIsCorner = self.CenterIsCorner;
-        ctx.Environment.AddAura(self.InstanceId, center, centerIsCorner, Category, Rings);
+        CubeCoor center = self.Self_CurrentCenterInGrid;
+        ctx.Environment.AddAura(self.InstanceId, center,  Category, Rings);
     }
 }
 

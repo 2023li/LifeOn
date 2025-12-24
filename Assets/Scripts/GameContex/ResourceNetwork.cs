@@ -223,7 +223,7 @@ public class ResourceNetwork
             _totalCapacity = 0;
 
         // ---- 运输节点处理 ----
-        bool canTransport = building.CurrentTransportationAbility;
+        bool canTransport = building.RO_TransportationAbility;
        
 
       
@@ -334,7 +334,7 @@ public class ResourceNetwork
             oldSet = EmptyProductSet;
 
         // 当前真实列表（建筑里的 HashSet）
-        var currentList = building.CurrentProductList;
+        var currentList = building.RO_CurrentProductList;
 
         // 拷贝一份作为新的快照，避免直接引用到建筑内部的集合
         var newSet = currentList != null
@@ -446,15 +446,10 @@ public class ResourceNetwork
         Debug.Log("目前是全图可达");
         return true;
     }
+}
 
-   
-  
-
-   
-
-
-   
-
-   
+[Serializable]
+public class ResourceNetworkSaveData
+{
 
 }

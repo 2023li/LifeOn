@@ -141,7 +141,7 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
 
         if (SelfBuilding)
         {
-            SelfBuilding.CurrentTraffic += line.SelfSupply.BaseTrafficOccupancy;
+            SelfBuilding.RO_CurrentTraffic += line.SelfSupply.BaseTrafficOccupancy;
             UpdateBar();
         }
     }
@@ -156,7 +156,7 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
 
         if (SelfBuilding)
         {
-            SelfBuilding.CurrentTraffic -= line.SelfSupply.BaseTrafficOccupancy;
+            SelfBuilding.RO_CurrentTraffic -= line.SelfSupply.BaseTrafficOccupancy;
             UpdateBar();
         }
 
@@ -227,7 +227,7 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
             {
                 return 0f;
             }
-            return SelfBuilding.RO_MaxTraffic - SelfBuilding.CurrentTraffic;
+            return SelfBuilding.RO_MaxTraffic - SelfBuilding.RO_CurrentTraffic;
         }
     }
 
@@ -250,7 +250,7 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     public void Show()
     {
        
-        if (SelfBuilding.CurrentTransportationAbility)
+        if (SelfBuilding.RO_TransportationAbility)
         {
             gameObject.SetActive(true);
         }
@@ -262,13 +262,13 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
     public void Handle_ConnectionManager_OnSelect(SupplyDef def)
     {
         //不是生产者 又 无转运能力
-        if (!SelfBuilding.CurrentProductList.Contains(def)&&!SelfBuilding.CurrentTransportationAbility)
+        if (!SelfBuilding.RO_CurrentProductList.Contains(def)&&!SelfBuilding.RO_TransportationAbility)
         {
             gameObject.SetActive(false);
         }
 
         //所选 类型的生产者
-        if (SelfBuilding.CurrentProductList.Contains(def))
+        if (SelfBuilding.RO_CurrentProductList.Contains(def))
         {
             CurrentActiveSupplyDef = def;
             supplyDefIcon.sprite = def.Icon;
@@ -292,7 +292,7 @@ public class UINode : MonoBehaviour,IBeginDragHandler, IDragHandler, IEndDragHan
             return;
         }
 
-        float percentage = SelfBuilding.CurrentTraffic / SelfBuilding.RO_MaxTraffic;
+        float percentage = SelfBuilding.RO_CurrentTraffic / SelfBuilding.RO_MaxTraffic;
         barFull.fillAmount = percentage;
     }
 

@@ -12,6 +12,7 @@ public enum GameTileEnum
     Tile_深红色 = 4,
     Tile_红色 = 5,
     Tile_黄色 = 6,
+    Tile_边框 = 7,
 }
 
 public class TileLib : ScriptableObject

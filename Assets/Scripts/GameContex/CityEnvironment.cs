@@ -80,7 +80,7 @@ public class CityEnvironment
     /// <summary>
     /// 应用光环，旧数据会被覆盖。
     /// </summary>
-    public void AddAura(string sourceId, CubeCoor center, bool centerIsCorner, AuraCategory category, IReadOnlyList<AuraRing> rings)
+    public void AddAura(string sourceId, CubeCoor center, AuraCategory category, IReadOnlyList<AuraRing> rings)
     {
         if (string.IsNullOrEmpty(sourceId))
         {
@@ -149,7 +149,7 @@ public class CityEnvironment
     public void AddAura(string sourceId, BuildingInstance building,AuraCategory category,params AuraRing[] args )
     {
         IReadOnlyList<AuraRing> rings = args;
-        AddAura(sourceId,building.CurrentCenterInGrid,building.CenterIsCorner,category,rings);
+        AddAura(sourceId,building.Self_CurrentCenterInGrid,category,rings);
     }
 
     /// <summary>

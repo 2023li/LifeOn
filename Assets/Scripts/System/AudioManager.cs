@@ -8,6 +8,10 @@ using Sirenix.OdinInspector;
 public class AudioManager : MonoSingleton<AudioManager>
 {
 
+    public class AudioSaveData
+    {
+
+    }
 
     // VCA引用
     private VCA vcaEnvironment;

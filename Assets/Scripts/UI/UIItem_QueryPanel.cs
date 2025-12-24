@@ -21,10 +21,10 @@ public class UIItem_QueryPanel : MonoBehaviour
     {
 
         Debug.LogWarning("需要完成");
-       // Initialize();
+       // InitializeByData();
     }
     /*
-    private void Initialize()
+    private void InitializeByData()
     {
         if (isInitialized) return;
 

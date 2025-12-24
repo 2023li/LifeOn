@@ -25,7 +25,7 @@ public class BuildingView : MonoBehaviour
 
         foreach (StructKV<int, GameObject> item in levelsModel)
         {
-            item.Value2.gameObject.SetActive(item.Value1 == self.CurrentLevelIndex);
+            item.Value2.gameObject.SetActive(item.Value1 == self.Self_LevelIndex);
         }
         //建筑UI系统
         buildingCanvas = transform.parent.Find("建筑实体uiCanvas").GetComponent<Canvas>();
@@ -59,7 +59,7 @@ public class BuildingView : MonoBehaviour
                 foreach (StructKV<int, GameObject> item in levelsModel)
                 {
 
-                    item.Value2.gameObject.SetActive(item.Value1 == instance.CurrentLevelIndex);
+                    item.Value2.gameObject.SetActive(item.Value1 == instance.Self_LevelIndex);
 
                 }
 

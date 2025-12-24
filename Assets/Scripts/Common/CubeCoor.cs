@@ -40,4 +40,20 @@ public struct CubeCoor : IEquatable<CubeCoor>
     /// 到另一个点的距离
     /// </summary>
     public int DistanceTo(CubeCoor other) => (this - other).Length();
+
+    // ---------------------------------------------------------
+    //  新增：隐式转换到 Vector3Int
+    // ---------------------------------------------------------
+    /// <summary>
+    /// 隐式转换为 Vector3Int (x=q, y=r, z=s)
+    /// </summary>
+    public static implicit operator Vector3Int(CubeCoor c)
+    {
+        return new Vector3Int(c.q, c.r, c.s);
+    }
+    // 如果你也想支持反向转换 (显式转换更安全，因为 Vector3Int 不一定满足 q+r+s=0)
+    public static explicit operator CubeCoor(Vector3Int v)
+    {
+        return new CubeCoor(v.x, v.y, v.z);
+    }
 }

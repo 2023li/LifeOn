@@ -246,7 +246,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>, IBackHandler, IMo
             // 初始化建筑逻辑数据 (传入 CubeCoor)
             // 在六边形网格中，CenterIsCorner 通常为 false，除非你做的是顶点放置游戏
             // CellsInRadius 逻辑下，中心一定是某个格子
-            b.Initialize(currentBuildDef, tempBuildingCells.ToArray(), _currentCenterCube, false);
+            b.Initialize(currentBuildDef, tempBuildingCells.ToArray(), _currentCenterCube);
         }
         else
         {
@@ -299,7 +299,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>, IBackHandler, IMo
 
         // 2. 计算占地 (Radius)
         int radius = Mathf.Max(0, buildingDef.Size - 1);
-        var cells = CoordinateCalculator.CellsInRadius(centerCube, radius);
+        List<CubeCoor> cells = CoordinateCalculator.CellsInRadius(centerCube, radius);
 
         // 3. 占用校验
         if (!ignoreOccupy)
@@ -315,7 +315,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>, IBackHandler, IMo
         }
 
         // 4. 标记占用
-        foreach (var c in cells)
+        foreach (CubeCoor c in cells)
         {
             GridSystem.Instance.SetOccupy(c);
         }
@@ -326,7 +326,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>, IBackHandler, IMo
         go.transform.SetPositionAndRotation(anchorPos, Quaternion.identity);
 
         // 6. 初始化逻辑
-        go.Initialize(buildingDef, cells.ToArray(), centerCube, false);
+        go.Initialize(buildingDef, cells.ToArray(), centerCube);
 
         return true;
     }

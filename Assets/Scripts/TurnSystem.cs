@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Moyo.Unity;
+using Sirenix.OdinInspector.Editor.Drawers;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -11,8 +12,8 @@ public enum TurnPhase
     结束准备阶段,
     资源消耗阶段,
     资源生产阶段,
-    回合结束阶段,
-    开始准备阶段
+    回合结束阶段, //用作数据整理 例如 计数
+    开始准备阶段  //对
 }
 
 [AddComponentMenu("LifeOn/Turn System")]
@@ -154,4 +155,10 @@ public struct TurnBlock
     /// 若有值，则表示在 durationSeconds 秒后自动移除。
     /// </summary>
     public float? durationSeconds;
+}
+
+[Serializable]
+public class TurnSystemSaveData
+{
+
 }
