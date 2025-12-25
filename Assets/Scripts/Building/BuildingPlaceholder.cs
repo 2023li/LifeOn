@@ -7,6 +7,10 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
+/// <summary>
+/// 建筑预放器
+/// </summary>
+
 public class BuildingPlaceholder : MonoBehaviour
 {
 

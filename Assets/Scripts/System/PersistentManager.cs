@@ -32,7 +32,11 @@ public class PersistentManager : Singleton<PersistentManager>
 
     public void SaveAppData()
     {
-        if (appData == null) appData = AppSaveData.GetDef();
+        if (appData == null)
+        {
+            Debug.LogWarning("AppData为空");
+            return;
+        }
 
         // 直接保存在根目录下
         ES3.Save("appData", appData, AppDataFileName);
@@ -44,10 +48,12 @@ public class PersistentManager : Singleton<PersistentManager>
         if (ES3.FileExists(AppDataFileName))
         {
             appData = ES3.Load<AppSaveData>("appData", AppDataFileName);
+            Debug.Log("已加载App数据");
         }
         else
         {
             appData = AppSaveData.GetDef();
+            Debug.Log("已创建默认数据");
             SaveAppData();
         }
     }
@@ -56,6 +62,38 @@ public class PersistentManager : Singleton<PersistentManager>
 
     #region GameData (游戏存档)
 
+    /// <summary>
+    /// 收集游戏数据
+    /// </summary>
+    /// <returns></returns>
+    private GameSaveData CollectCurrentGameSaveData()
+    {
+        if (currentGameData == null){ currentGameData = GameSaveData.CreateNew(); }
+
+        //收集建筑数据
+        List<BuildingInstance.BuildingSaveData> buildingSaveDatas = new();
+        //遍历所有的激活的建筑
+        foreach (var building in BuildingInstance.ActiveInstances)
+        {
+            buildingSaveDatas.Add(building.Save());
+        }
+
+        //游戏上下文数据
+        currentGameData.turnSystemSaveData = TurnSystem.Instance.Save();
+        currentGameData.humanResourcesNetworkSaveData = GameContext.Instance.HumanResourcesNetwork.Save();
+        currentGameData.techTreeSaveData = GameContext.Instance.TechTree.Save();
+        currentGameData.resourceNetworkSaveData = GameContext.Instance.ResourceNetwork.Save();
+        currentGameData.connectionManagerSaveData = ConnectionManager.Instance.Save();
+
+
+        return currentGameData;
+    }
+
+
+    public void SaveGame()
+    {
+        SaveGame(CollectCurrentGameSaveData());
+    }
     /// <summary>
     /// 保存游戏数据
     /// 路径: PersistentDataPath/GameSaves/{saveid}.es3
@@ -73,7 +111,7 @@ public class PersistentManager : Singleton<PersistentManager>
         {
             Directory.CreateDirectory(GameSaveRootPath);
         }
-
+        //检测ID
         if (string.IsNullOrEmpty(data.saveid))
         {
             data.saveid = System.Guid.NewGuid().ToString();
@@ -94,11 +132,23 @@ public class PersistentManager : Singleton<PersistentManager>
         Debug.Log($"[PersistentManager] Game saved: {relativePath} (Name: {data.saveName})");
     }
 
+
+
+    public void LoadGame()
+    {
+
+
+
+
+
+    }
+
+
     /// <summary>
     /// 读取指定 ID 的游戏数据
     /// </summary>
     /// <param name="saveid">存档的唯一ID (对应文件名)</param>
-    public GameSaveData LoadGame(string saveid)
+    public GameSaveData LoadGameData(string saveid)
     {
         // 同样去掉多余的点
         string fileName = $"{saveid}{GameFileExtension}";
@@ -124,6 +174,9 @@ public class PersistentManager : Singleton<PersistentManager>
             return null;
         }
     }
+
+    
+
 
     /// <summary>
     /// 删除指定存档
@@ -201,7 +254,9 @@ public class AppSaveData
         {
             firstStartup = true,
             firstGame = true,
-            language = AppLanguage.简体中文
+            language = AppLanguage.简体中文,
+            audioSaveData = AudioManager.AudioSaveData.GetDef()
+
         };
     }
 }
@@ -220,14 +275,15 @@ public class GameSaveData
     public HumanResourcesNetworkSaveData humanResourcesNetworkSaveData;
     public TechSystemSaveData techTreeSaveData;
     public TurnSystemSaveData turnSystemSaveData;
+    public ConnectionManagerSaveData connectionManagerSaveData;
     public List<BuildingInstance.BuildingSaveData> allBuildingData;
 
+
     // 创建新游戏的工厂方法
-    public static GameSaveData CreateNew(string playerName)
+    public static GameSaveData CreateNew()
     {
         GameSaveData tData = new GameSaveData();
         tData.saveid = System.Guid.NewGuid().ToString(); // 初始化时就生成ID
-        tData.saveName = playerName;
         return tData;
     }
 }

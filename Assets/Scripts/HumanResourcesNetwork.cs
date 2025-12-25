@@ -66,11 +66,16 @@ public class HumanResourcesNetwork
         OnHumanResourcesChange?.Invoke();
     }
 
-
+    internal HumanResourcesNetworkSaveData Save()
+    {
+        //暂时没什么需要存
+        return new HumanResourcesNetworkSaveData();
+    }
 }
 
 [Serializable]
 public class HumanResourcesNetworkSaveData
 {
+
 
 }

@@ -137,6 +137,12 @@ public class TurnSystem : MonoSingleton<TurnSystem>
     }
 
     #endregion
+
+
+    public TurnSystemSaveData Save()
+    {
+        return new TurnSystemSaveData { currentNumberOfRounds = NumberOfRounds };
+    }
 }
 
 /// <summary>
@@ -160,5 +166,5 @@ public struct TurnBlock
 [Serializable]
 public class TurnSystemSaveData
 {
-
+    public int currentNumberOfRounds;
 }

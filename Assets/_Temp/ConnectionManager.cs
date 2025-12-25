@@ -130,7 +130,7 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
         List<CubeCoor> reachableCells = CoordinateCalculator.GetReachableCellsByMovePower(startNode.SelfBuilding, radius);
 
         // 【关键优化Step 1】：设置高亮
-        GridSystem.Instance.SetHighlight(reachableCells);
+        GridSystem.Instance.SetHighlight(reachableCells,TileLib.GetTile(GameTileEnum.Tile_边框),1);
 
         // 【关键优化Step 2】：将列表转为 HashSet，实现 O(1) 快速查询
         HashSet<CubeCoor> reachableSet = new HashSet<CubeCoor>(reachableCells);
@@ -619,4 +619,160 @@ public class ConnectionManager : MonoSingleton<ConnectionManager>
 
     #endregion
 
+
+
+    // 在 ConnectionManager.cs 中添加
+
+    #region 持久化系统 (Save & Load)
+
+    /// <summary>
+    /// 获取所有连线的存档数据
+    /// </summary>
+    public ConnectionManagerSaveData Save()
+    {
+        var saveData = new ConnectionManagerSaveData();
+        foreach (var line in _lines)
+        {
+            if (line != null)
+            {
+                saveData.AllLines.Add(line.GetSaveData());
+            }
+        }
+        return saveData;
+    }
+
+    /// <summary>
+    /// 加载存档：清空当前所有线并根据数据重建
+    /// </summary>
+    public void Load(ConnectionManagerSaveData saveData)
+    {
+        // 1. 清理现有场景
+        ClearAllLines();
+
+        if (saveData == null || saveData.AllLines == null) return;
+
+        // 2. 按保存时的顺序排序，确保渲染层级正确
+        saveData.AllLines.Sort((a, b) => a.CreationOrder.CompareTo(b.CreationOrder));
+
+        // 3. 逐条还原
+        foreach (var lineData in saveData.AllLines)
+        {
+            RestoreSingleLine(lineData);
+        }
+
+        // 4. 全局刷新
+        RecalculateAllLanes();
+        RebuildAllLines();
+    }
+
+    /// <summary>
+    /// 清空当前所有连线
+    /// </summary>
+    public void ClearAllLines()
+    {
+        // 倒序删除避免集合修改错误
+        for (int i = _lines.Count - 1; i >= 0; i--)
+        {
+            var line = _lines[i];
+            if (line != null)
+            {
+                line.DetachAll();
+                Destroy(line.gameObject);
+            }
+        }
+        _lines.Clear();
+        _creationCounter = 0; // 重置计数器
+    }
+
+    /// <summary>
+    /// 核心还原方法：根据数据重建一条线
+    /// </summary>
+    /// <param name="data">单条线的存档数据</param>
+    /// <param name="supplyLookup">回调函数：通过ID查找SupplyDef配置</param>
+    private void RestoreSingleLine(ConnectionLineSaveData data)
+    {
+        if (data == null || data.NodePathCoordinates == null || data.NodePathCoordinates.Count < 2)
+            return;
+
+        // A. 查找物资配置
+        SupplyDef supply = SupplyDef.GetSupplyDef(data.SupplyID);
+        if (supply == null)
+        {
+            Debug.LogError($"[ConnectionManager] Load failed: Cannot find SupplyDef with ID {data.SupplyID}");
+            return;
+        }
+
+        // B. 查找起始节点 (Start Node)
+        UINode startNode = FindNodeByCoordinate(data.NodePathCoordinates[0]);
+        if (startNode == null)
+        {
+            // 如果起点建筑被拆了，这条线就无法恢复
+            return;
+        }
+
+        // C. 创建线条实例
+        ConnectionLine newLine = CreateLineInstance();
+
+        // 恢复计数器，防止新创建的线序号冲突
+        if (data.CreationOrder > _creationCounter) _creationCounter = data.CreationOrder;
+
+        // D. 初始化起点
+        newLine.Init(startNode, supply, lineWidth, data.CreationOrder);
+
+        // E. 追加后续节点
+        for (int i = 1; i < data.NodePathCoordinates.Count; i++)
+        {
+            UINode nextNode = FindNodeByCoordinate(data.NodePathCoordinates[i]);
+
+            if (nextNode != null)
+            {
+                newLine.AppendNode(nextNode);
+            }
+            else
+            {
+                // 如果中间某个节点找不到了（比如建筑被销毁），
+                // 策略：
+                // 1. 直接中断（当前的逻辑）：线断了
+                // 2. 尝试连下一个（如果逻辑允许跳过）
+                // 这里采用中断策略，避免数据错乱
+                Debug.LogWarning($"[ConnectionManager] Line broken at index {i}, node missing.");
+                break;
+            }
+        }
+
+        // F. 加入管理器列表
+        _lines.Add(newLine);
+    }
+
+    /// <summary>
+    /// 辅助方法：通过坐标在 ActiveNodes 中查找对应的 UINode
+    /// </summary>
+    private UINode FindNodeByCoordinate(CubeCoor coor)
+    {
+        // 假设 CubeCoor 重写了 Equals 或 == 
+        foreach (var node in UINode.ActiveNodes)
+        {
+            if (node != null && node.SelfBuilding != null)
+            {
+                if (node.SelfBuilding.Self_CurrentCenterInGrid.Equals(coor))
+                {
+                    return node;
+                }
+            }
+        }
+        return null;
+    }
+
+    #endregion
+
+
+
+}
+
+
+// 对应整个管理器的存档数据
+[Serializable]
+public class ConnectionManagerSaveData
+{
+    public List<ConnectionLineSaveData> AllLines = new List<ConnectionLineSaveData>();
 }

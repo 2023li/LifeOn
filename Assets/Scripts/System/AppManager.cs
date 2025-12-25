@@ -19,25 +19,27 @@ public class AppManager : MonoSingleton<AppManager>
 
     protected override void Awake()
     {
-     base.Awake();   
+        base.Awake();
     }
     // Start is called before the first frame update
     void Start()
     {
+        PersistentManager.Instance.LoadAppData();
+
         uiController = new LOUIController();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
 
     [Button]
-    public void Test()
+    public void TestLoadScene()
     {
-        LoadScene("Start", true,"UIPanel_Main");
+        LoadScene("Start", true, "UIPanel_Main");
     }
 
 
@@ -47,15 +49,15 @@ public class AppManager : MonoSingleton<AppManager>
 
     public string TargetSceneName { get; set; }
     [Button]
-    public void LoadScene(string scenesName, bool transition = true,params string[] address)
+    public void LoadScene(string scenesName, bool transition = true, params string[] address)
     {
-        if (NeedPreloadGameObject==null)
+        if (NeedPreloadGameObject == null)
         {
             NeedPreloadGameObject = new List<string>();
         }
         NeedPreloadGameObject.Clear();
 
-       
+
         TargetSceneName = scenesName;
 
 
@@ -63,7 +65,7 @@ public class AppManager : MonoSingleton<AppManager>
         {
             NeedPreloadGameObject.Add(s);
         }
-       
+
 
 
         if (transition)
@@ -75,5 +77,35 @@ public class AppManager : MonoSingleton<AppManager>
             // 直跳场景：不进过渡页，就只能同步/独立处理预加载了（一般不建议）
             SceneManager.LoadScene(TargetSceneName);
         }
+    }
+}
+
+
+
+
+
+public enum AppState
+{
+
+
+    开始游戏,
+
+    游戏进行中,
+
+    结束游戏
+}
+public struct AppStateEvent
+{
+    public static AppStateEvent args;
+
+
+    
+    public static void Tiggle()
+    {
+
+
+
+
+        MoyoEventManager.TriggerEvent<AppStateEvent>(args);
     }
 }

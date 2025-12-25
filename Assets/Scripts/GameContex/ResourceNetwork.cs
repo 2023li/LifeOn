@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -111,6 +112,9 @@ public class ResourceNetwork
         return true;
     }
 
+    /// <summary>
+    /// 尝试消耗某一个物资
+    /// </summary>
     public bool TryConsumeResource(SupplyDef resource, int amount, out string reason)
     {
         reason = string.Empty;
@@ -139,8 +143,9 @@ public class ResourceNetwork
         if (_usedCapacity < 0) _usedCapacity = 0;
         return true;
     }
-
-
+    /// <summary>
+    /// 尝试消耗某一个种类的物资
+    /// </summary>
     public bool TryConsumeResource(SupplyCategory category, int amount)
     {
         // 基本校验
@@ -446,10 +451,52 @@ public class ResourceNetwork
         Debug.Log("目前是全图可达");
         return true;
     }
+
+    internal ResourceNetworkSaveData Save()
+    {
+        ResourceNetworkSaveData data = new ResourceNetworkSaveData();
+        data.allSupplys =  _resourceAmounts.ToDictionary(
+        kvp => kvp.Key.Id,
+        kvp => kvp.Value);
+
+        return data;
+    }
+    internal void Load(ResourceNetworkSaveData data)
+    {
+        if (data == null) return;
+
+        _resourceAmounts.Clear();
+
+        foreach (var kvp in data.allSupplys)
+        {
+            // 根据 ID 字符串获取对应的 SupplyDef 实例
+            SupplyDef supply = SupplyDef.GetSupplyDef(kvp.Key);
+
+            // 仅当资源定义存在时才还原，防止脏数据导致 NullReference
+            if (supply != null)
+            {
+                //_resourceAmounts[supply] = kvp.Value;
+                if(!TryAddResource(supply, kvp.Value,out string r))
+                {
+                    Debug.LogWarning(r);
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[ResourceManager] 还原失败：找不到 ID 为 {kvp.Key} 的 SupplyDef");
+            }
+        }
+    }
 }
 
 [Serializable]
 public class ResourceNetworkSaveData
 {
+    public Dictionary<string, int> allSupplys;
 
+
+    public ResourceNetworkSaveData()
+    {
+        
+    }
 }

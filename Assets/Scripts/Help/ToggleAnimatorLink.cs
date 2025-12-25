@@ -1,6 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+
+
+/*
+ * 这个脚本用于动画驱动的 UI开关组件
+ */
+
 [RequireComponent(typeof(Toggle))] // 自动添加Toggle组件依赖
 public class ToggleAnimatorLink : MonoBehaviour
 {

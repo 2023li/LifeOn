@@ -8,9 +8,6 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
-using System.Data.SqlTypes;
-using UnityEngine.UI;
-using UnityEngine.Experimental.GlobalIllumination;
 
 
 
@@ -604,7 +601,7 @@ public class BuildingInstance : MonoBehaviour
 
 
 
-    public void Initialize(BuildingArchetype def, CubeCoor[] occupyCells, CubeCoor center, int startLevelIndex = 0)
+    public void Initialize(BuildingArchetype def, CubeCoor[] occupyCells, CubeCoor center, BuildingSaveData data = null)
     {
         Def = def;
         if (Def?.LevelsList == null || Def.LevelsList.Count == 0)
@@ -613,15 +610,40 @@ public class BuildingInstance : MonoBehaviour
             return;
         }
 
-        Self_LevelIndex = Mathf.Clamp(startLevelIndex, 0, Def.LevelsList.Count - 1);
 
         Self_CurrentOccupy = occupyCells ?? Array.Empty<CubeCoor>();
         Self_CurrentCenterInGrid = center;
 
 
-        LoadBaseRules();
-        LoadLevelRules(Self_LevelIndex);
-        //第一次需要立刻调用一次
+        //无数据
+        if (data == null)
+        {
+            LoadBaseRules();
+            LoadLevelRules(0);
+        }
+        else
+        {
+           
+
+            InstanceId = data.instanceId;
+            Self_LevelIndex = data.level;
+            Self_CurrentExp = data.currentEXP;
+            Self_CurrentPopulation = data.currentPopulation;
+            Self_CurrentWorkers = data.currentWorkers;
+
+            specificData_int = data.intData;
+            specificData_float = data.floatData;
+            specificData_v3 = data.v3Data;
+            specificData_string = data.stringData;
+
+            LoadBaseRules();
+            LoadLevelRules(Self_LevelIndex);
+        }
+
+
+
+
+
         ApplyPendingRuleChanges();
     }
 
@@ -651,21 +673,7 @@ public class BuildingInstance : MonoBehaviour
 
     }
 
-    //需要由BuildingBuilder来建造
-    public void InitializeByData(BuildingSaveData data)
-    {
-        //还原所有的Self值
-                
-
-        //还原所有的Rule
-
-
-        //其余的会有其他系统处理
-
-
-
-    }
-
+ 
     public BuildingSaveData Save()
     {
         BuildingSaveData data = new BuildingSaveData();

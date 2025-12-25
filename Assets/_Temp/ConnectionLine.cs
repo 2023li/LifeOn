@@ -212,4 +212,53 @@ public class ConnectionLine : MonoBehaviour
     }
 
     #endregion
+
+
+    public ConnectionLineSaveData GetSaveData()
+    {
+        var data = new ConnectionLineSaveData();
+
+        // 1. 保存物资 ID
+        if (SelfSupply != null)
+        {
+            data.SupplyID = SelfSupply.Id;
+        }
+
+        // 2. 保存创建顺序
+        data.CreationOrder = this.CreationOrder;
+
+        // 3. 保存路径节点坐标
+        data.NodePathCoordinates = new List<CubeCoor>();
+        foreach (var node in nodes)
+        {
+            if (node != null && node.SelfBuilding != null)
+            {
+                // 使用建筑的中心坐标作为查找 Key
+                data.NodePathCoordinates.Add(node.SelfBuilding.Self_CurrentCenterInGrid);
+            }
+        }
+
+        return data;
+    }
+
+}
+
+[Serializable]
+public class ConnectionLineSaveData
+{
+    /// <summary>
+    /// 物资类型的唯一ID
+    /// </summary>
+    public string SupplyID;
+
+    /// <summary>
+    /// 线条的创建顺序 (用于图层覆盖顺序)
+    /// </summary>
+    public int CreationOrder;
+
+    /// <summary>
+    /// 路径上所有节点的坐标列表 (有序：Start -> Middle -> End)
+    /// 假设 CubeCoor 是可序列化的，如果不可序列化，需转换为 Vector3Int 或自定义结构
+    /// </summary>
+    public List<CubeCoor> NodePathCoordinates = new List<CubeCoor>();
 }

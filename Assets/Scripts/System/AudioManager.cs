@@ -10,7 +10,16 @@ public class AudioManager : MonoSingleton<AudioManager>
 
     public class AudioSaveData
     {
+       public float MasterVolume=0.7f;
+       public float EnvironmentVolume=1f;
+       public float MusicVolume =1f;
+       public float SFXVolume = 1f;
+       public float VoiceVolume = 1f;
 
+        internal static AudioSaveData GetDef()
+        {
+            return new AudioSaveData();
+        }
     }
 
     // VCA引用
@@ -251,12 +260,22 @@ public class AudioManager : MonoSingleton<AudioManager>
 
     private void SaveVolumeSettings()
     {
-       
+        var audioSetting = PersistentManager.Instance.appData.audioSaveData;
+        audioSetting.MasterVolume = currentMasterVolume;
+        audioSetting.EnvironmentVolume = currentEnvironmentVolume;
+        audioSetting.VoiceVolume = currentVoiceVolume;
+        audioSetting.MusicVolume = currentMusicVolume;
+        audioSetting.SFXVolume = currentSFXVolume;
     }
 
     private void LoadVolumeSettings()
     {
-       
+        var audioSetting = PersistentManager.Instance.appData.audioSaveData;
+        currentMasterVolume = audioSetting.MasterVolume;
+        currentMusicVolume = audioSetting.MusicVolume;
+        currentSFXVolume = audioSetting.SFXVolume;
+        currentEnvironmentVolume = audioSetting.EnvironmentVolume;
+        currentVoiceVolume = audioSetting.VoiceVolume;
     }
 
     // 重置为默认值

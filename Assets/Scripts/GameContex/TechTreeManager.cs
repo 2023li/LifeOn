@@ -301,7 +301,7 @@ public class TechTreeManager
     /// <summary>
     /// （存档）导出当前状态：已解锁集合 + 正在研究的进度
     /// </summary>
-    public TechSystemSaveData ExportState()
+    public TechSystemSaveData Save()
     {
         var sd = new TechSystemSaveData
         {
@@ -320,7 +320,7 @@ public class TechTreeManager
     /// <summary>
     /// （读档）导入状态：恢复已解锁与在研进度（需在 Init 之后调用）
     /// </summary>
-    public void ImportState(TechSystemSaveData data)
+    public void Load(TechSystemSaveData data)
     {
         if (data == null) return;
 
@@ -439,6 +439,7 @@ public class TechTreeManager
         return string.Empty;
     }
 
+   
     //========================== 内部结构体 & 存档结构 ==========================
 
     private sealed class ResearchProgressSnapshot

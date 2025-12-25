@@ -4,7 +4,9 @@ using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-
+/// <summary>
+/// 物资种类
+/// </summary>
 public enum SupplyCategory
 {
     独特,
@@ -102,6 +104,10 @@ public class SupplyDef : ScriptableObject
     public static SupplyDef GetSupplyDef(SupplyEnum supply)
     {
         return SupplyLib.GetSupplyDef(supply);
+    }
+    public static SupplyDef GetSupplyDef(string supplyid)
+    {
+        return SupplyLib.GetSupplyDef(supplyid);
     }
 
 }
