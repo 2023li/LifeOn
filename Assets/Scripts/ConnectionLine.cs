@@ -170,10 +170,6 @@ public class ConnectionLine : MonoBehaviour
     #endregion
 
     #region 与建筑系统集成
-
-
-
-
     public SupplyDef SelfSupply {  get; private set; }
 
     public List<BuildingInstance> GetBuildingsForLine()
