@@ -385,6 +385,7 @@ GameObject:
   - component: {fileID: 8986474453935398527}
   - component: {fileID: 873446327084042900}
   - component: {fileID: 6790068438061607902}
+  - component: {fileID: 6447695992913786526}
   m_Layer: 0
   m_Name: App
   m_TagString: Untagged
@@ -442,3 +443,32 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bf60fb487aecdce4695fc8765ab41393, type: 2}
   - {fileID: 11400000, guid: 30439583503a75541bd538383c8c43be, type: 2}
   treeAssets: {fileID: 11400000, guid: c6cf630beeb7f3743afdf42a2f12aea7, type: 2}
+--- !u!114 &6447695992913786526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8832982178575566358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1260378c88e80f48b101de73034000d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  appData:
+    firstStartup: 0
+    firstGame: 0
+    language: 0
+  currentGameData:
+    saveid: 
+    saveName: 
+    lastSaveDate: 
+    versionNumber: 
+    techTreeSaveData:
+      unlocked: []
+      researching: []
+      activeResearchId: 
+    turnSystemSaveData:
+      currentNumberOfRounds: 0
+    connectionManagerSaveData:
+      AllLines: []

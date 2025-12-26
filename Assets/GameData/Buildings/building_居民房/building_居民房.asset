@@ -20,30 +20,13 @@ MonoBehaviour:
   BuildingIcon: {fileID: 21300000, guid: 611a59348e01ce54b948fa0cdcb80a1b, type: 3}
   UIPanelPrefab_Brief: {fileID: 0}
   UIPanelPrefab_Detailed: {fileID: 0}
-  Introduction: 
+  Introduction: "\u5C45\u6C11\u623F"
   ShowInBuildPanel: []
   AllowConstruction: []
-  Levels:
-  - BaseMaxPopulation: 0
-    BaseStorageCapacity: 0
-    ExpToNext: 2
-    BaseMaxJobsPosition: 0
-    BaseTransportationResistance: 3
-    BaseTransportRadius: 10
-    BaseDistributeRadius: 5
-    BaseMaxTraffic: 0
-    BaseAttractivenessPerJob: 0
-    ViewConfig:
-      DefaultAnimatorState: 
-      DefaultAnimatorTrigger: 
-      UpgradeTrigger: 
-      PersistentParticlePrefab: {fileID: 0}
-      UpgradeEffectPrefab: {fileID: 0}
-      ChildPrefab: {fileID: 0}
-    ConditionsForAllowingUpgrades: []
-    Rules:
-    - rid: 7980267796626407426
-  - BaseMaxPopulation: 5
+  BaseRules: []
+  LevelsList:
+  - LevelDisplayName: "\u5C45\u6C11\u623Flv0"
+    BaseMaxPopulation: 0
     BaseStorageCapacity: 0
     ExpToNext: 10
     BaseMaxJobsPosition: 0
@@ -52,23 +35,27 @@ MonoBehaviour:
     BaseDistributeRadius: 5
     BaseMaxTraffic: 0
     BaseAttractivenessPerJob: 0
-    ViewConfig:
-      DefaultAnimatorState: 
-      DefaultAnimatorTrigger: 
-      UpgradeTrigger: 
-      PersistentParticlePrefab: {fileID: 0}
-      UpgradeEffectPrefab: {fileID: 0}
-      ChildPrefab: {fileID: 0}
     ConditionsForAllowingUpgrades: []
     Rules:
-    - rid: 7980267866392887296
+    - rid: 1900776930992455682
+  - LevelDisplayName: "\u5C45\u6C11\u623Flv1"
+    BaseMaxPopulation: 5
+    BaseStorageCapacity: 100
+    ExpToNext: -1
+    BaseMaxJobsPosition: 0
+    BaseTransportationResistance: 3
+    BaseTransportRadius: 10
+    BaseDistributeRadius: 5
+    BaseMaxTraffic: 0
+    BaseAttractivenessPerJob: 0
+    ConditionsForAllowingUpgrades: []
+    Rules: []
   references:
     version: 2
     RefIds:
-    - rid: 7980267796626407426
+    - rid: 1900776930992455682
       type: {class: "R_\u56DE\u5408\u7ED3\u675F\u65F6\u83B7\u53D6\u7ECF\u9A8C", ns: , asm: Assembly-CSharp}
       data:
+        Lifecycle: 0
+        RemainingRounds: -1
         AddExp: 1
-    - rid: 7980267866392887296
-      type: {class: "BR_\u5C45\u6C11\u623F_LV1", ns: , asm: Assembly-CSharp}
-      data: 
