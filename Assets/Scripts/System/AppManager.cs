@@ -7,6 +7,7 @@ using Sirenix.OdinInspector;
 using static BuildingConfirmPanel;
 using System;
 using static LOConstant;
+using UnityEditor;
 
 
 public enum AppLanguage
@@ -152,6 +153,20 @@ public class AppManager : MonoSingleton<AppManager>
 
         // 2. 清理请求，防止重复触发
         CurrentRequest = null;
+    }
+
+    internal void ExitApp()
+    {
+        // 1. 编辑器环境：停止游戏运行
+#if UNITY_EDITOR
+        EditorApplication.isPlaying = false;
+#else
+        // 2. 打包后环境（PC/移动端）：调用退出API
+        Application.Quit();
+#endif
+
+        // 可选：打印日志，方便调试
+        Debug.Log("点击退出游戏，当前环境：" + (Application.isEditor ? "编辑器" : "打包程序"));
     }
 }
 

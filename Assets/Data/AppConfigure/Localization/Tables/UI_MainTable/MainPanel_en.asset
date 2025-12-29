@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: MainPanel_en
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: b11dd98109031494780db5f2ab849c76, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 19871363072
+    m_Localized: Exit Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 112536121344
+    m_Localized: Are you sure you want to quit?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 276051062784
+    m_Localized: Confirm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 288059355136
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15998579961856
+    m_Localized: CREATE NEW GAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16115924004864
+    m_Localized: Enter a new game for your game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17094484488192
+    m_Localized: Enter your preferred name...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17865586307072
+    m_Localized: Credits
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17922398154752
+    m_Localized: Quit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17840214962176
+    m_Localized: Load Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17736355606528
+    m_Localized: New Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17732551372800
+    m_Localized: Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34431895924736
+    m_Localized: Choose a language you are familiar with
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

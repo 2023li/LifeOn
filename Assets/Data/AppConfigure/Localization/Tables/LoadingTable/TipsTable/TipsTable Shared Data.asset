@@ -10,27 +10,39 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
-  m_Name: BaseString Shared Data
+  m_Name: TipsTable Shared Data
   m_EditorClassIdentifier: 
-  m_TableCollectionName: BaseString
-  m_TableCollectionNameGuidString: cba349b37f22c4448ac2190ca3a867bb
+  m_TableCollectionName: TipsTable
+  m_TableCollectionNameGuidString: 114f656650187654a89f7ec42d9fe84c
   m_Entries:
-  - m_Id: 70404337664
-    m_Key: SettingPanel_Sound
+  - m_Id: 9666621440
+    m_Key: t0
     m_Metadata:
       m_Items: []
-  - m_Id: 1117889818624
-    m_Key: SettingPanel_Controls
+  - m_Id: 12418084864
+    m_Key: t1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14947250176
+    m_Key: t2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16666914816
+    m_Key: t3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18524991488
+    m_Key: t4
     m_Metadata:
       m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
-    rid: 1900776702674206744
+    rid: 1900776973254787074
   references:
     version: 2
     RefIds:
-    - rid: 1900776702674206744
+    - rid: 1900776973254787074
       type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
       data:
-        m_CustomEpoch: 1765888388346
+        m_CustomEpoch: 1766921522625

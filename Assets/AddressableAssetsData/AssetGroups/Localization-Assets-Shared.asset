@@ -17,6 +17,24 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 213824b08cbdcf84f9a6939c2c9b2c32
   m_SerializeEntries:
+  - m_GUID: 114f656650187654a89f7ec42d9fe84c
+    m_Address: Assets/Data/AppConfigure/Localization/Tables/LoadingTable/TipsTable/TipsTable
+      Shared Data.asset
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b11dd98109031494780db5f2ab849c76
+    m_Address: Assets/Data/AppConfigure/Localization/Tables/LoadingTable/MainPanel
+      Shared Data.asset
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b71ceb7e3ac14da45ad9d75e3e74f7b9
+    m_Address: Assets/Data/AppConfigure/Localization/Tables/LoadingTable/LoadingTable
+      Shared Data.asset
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cba349b37f22c4448ac2190ca3a867bb
     m_Address: Assets/Data/AppConfigure/Localization/BaseString Shared Data.asset
     m_ReadOnly: 1

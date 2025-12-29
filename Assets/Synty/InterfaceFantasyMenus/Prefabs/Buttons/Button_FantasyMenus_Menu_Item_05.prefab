@@ -10389,6 +10389,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Label_Button_Name
       objectReference: {fileID: 0}
+    - target: {fileID: 378538600947842191, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1990594193549166204, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
       propertyPath: m_text
       value: Menu_Item

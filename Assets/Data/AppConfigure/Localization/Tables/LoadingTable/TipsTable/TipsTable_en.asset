@@ -10,20 +10,32 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
-  m_Name: BaseString_en
+  m_Name: TipsTable_en
   m_EditorClassIdentifier: 
   m_LocaleId:
     m_Code: en
-  m_SharedData: {fileID: 11400000, guid: cba349b37f22c4448ac2190ca3a867bb, type: 2}
+  m_SharedData: {fileID: 11400000, guid: 114f656650187654a89f7ec42d9fe84c, type: 2}
   m_Metadata:
     m_Items: []
   m_TableData:
-  - m_Id: 70404337664
-    m_Localized: SOUND
+  - m_Id: 9666621440
+    m_Localized: tips0
     m_Metadata:
       m_Items: []
-  - m_Id: 1117889818624
-    m_Localized: CONTROLS
+  - m_Id: 12418084864
+    m_Localized: tips1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14947250176
+    m_Localized: tips2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16666914816
+    m_Localized: tips3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18524991488
+    m_Localized: tips4
     m_Metadata:
       m_Items: []
   references:

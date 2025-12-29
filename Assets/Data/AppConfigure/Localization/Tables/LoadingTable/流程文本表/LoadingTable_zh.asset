@@ -10,20 +10,32 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
-  m_Name: BaseString_zh
+  m_Name: LoadingTable_zh
   m_EditorClassIdentifier: 
   m_LocaleId:
     m_Code: zh
-  m_SharedData: {fileID: 11400000, guid: cba349b37f22c4448ac2190ca3a867bb, type: 2}
+  m_SharedData: {fileID: 11400000, guid: b71ceb7e3ac14da45ad9d75e3e74f7b9, type: 2}
   m_Metadata:
     m_Items: []
   m_TableData:
-  - m_Id: 70404337664
-    m_Localized: "\u97F3\u91CF"
+  - m_Id: 639362650664960
+    m_Localized: "\u8FDB\u5EA6"
     m_Metadata:
       m_Items: []
-  - m_Id: 1117889818624
-    m_Localized: "\u63A7\u5236"
+  - m_Id: 21419061248
+    m_Localized: "\u8FDB\u5EA61"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24795475968
+    m_Localized: "\u8FDB\u5EA62"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27236560896
+    m_Localized: "\u8FDB\u5EA62"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 646194383351808
+    m_Localized: "\u8FDB\u5EA6"
     m_Metadata:
       m_Items: []
   references:
