@@ -11,15 +11,29 @@ using Sirenix.OdinInspector;
 // 确保引用你的命名空间
 using static TechTreeManager;
 
+
+
+
+
 public class PersistentManager : MonoSingleton<PersistentManager>
 {
     protected PersistentManager() { }
 
     // --- 数据引用 ---
     [ShowInInspector]
-    public AppSaveData appData;
+    private AppSaveData currentAppData;
+
+    public AppSaveData CurrentAppData { get { return currentAppData; } }    
     [ShowInInspector]
-    public GameSaveData currentGameData;
+    private GameSaveData currentGameData;
+    public GameSaveData GetCurrentGameSave()
+    {
+        if (currentGameData == null)
+        {
+            currentGameData = GameSaveData.CreateNew();
+        }
+        return currentGameData;
+    }
 
     // --- 路径与常量定义 ---
     private const string AppDataFileName = "AppData.load";
@@ -39,19 +53,44 @@ public class PersistentManager : MonoSingleton<PersistentManager>
     // ... (保持原有的 SaveAppData 和 LoadAppData 不变) ...
     public void SaveAppData()
     {
-        if (appData == null) return;
-        ES3.Save("appData", appData, AppDataFileName);
+        if (currentAppData == null) return;
+        ES3.Save("currentAppData", currentAppData, AppDataFileName);
     }
+
+    public string GetLastGameSaveId()
+    {
+        if (currentAppData == null)
+        {
+            LoadAppData();
+        }
+        return currentAppData?.lastGameSaveId;
+    }
+    /// <summary>
+    /// [新增] 检查是否有可供“继续游戏”的存档
+    /// </summary>
+    public bool HasLastGameSave()
+    {
+        string id = GetLastGameSaveId();
+        if (string.IsNullOrEmpty(id)) return false;
+
+        // 进一步检查文件实际是否存在，防止玩家手动删除了文件但 AppData 没更新
+        string metaPath = Path.Combine(GameSaveDirName, id + MetaFileExtension);
+        string dataPath = Path.Combine(GameSaveDirName, id + GameFileExtension);
+
+        return ES3.FileExists(metaPath) || ES3.FileExists(dataPath);
+    }
+
+
 
     public void LoadAppData()
     {
         if (ES3.FileExists(AppDataFileName))
         {
-            appData = ES3.Load<AppSaveData>("appData", AppDataFileName);
+            currentAppData = ES3.Load<AppSaveData>("currentAppData", AppDataFileName);
         }
         else
         {
-            appData = AppSaveData.GetDef();
+            currentAppData = AppSaveData.GetDef();
             SaveAppData();
         }
     }
@@ -134,6 +173,14 @@ public class PersistentManager : MonoSingleton<PersistentManager>
         ES3.Save(MetaDataKey, meta, metaPath);
 
         currentGameData = data;
+
+
+        if (currentAppData != null)
+        {
+            currentAppData.lastGameSaveId = data.saveid;
+            SaveAppData(); // 立即保存全局设置，确保记录生效
+        }
+
         Debug.Log($"[PersistentManager] Game saved: {contentPath} & {metaPath}");
     }
 
@@ -150,6 +197,14 @@ public class PersistentManager : MonoSingleton<PersistentManager>
         }
 
         Debug.Log($"[PersistentManager] 开始加载游戏: {data.saveName} ({data.saveid})");
+
+
+        // [新增] 既然加载了这个存档，它就变成了“最后一次游玩的存档”
+        if (currentAppData != null && currentAppData.lastGameSaveId != saveid)
+        {
+            currentAppData.lastGameSaveId = saveid;
+            SaveAppData();
+        }
 
         // 2. 切换到游戏场景 (假设场景名为 "GameMain" 或你定义的常量)
         // 注意：这里借用 AppManager 来开启协程，因为 PersistentManager 可能不是 MonoBehaviour
@@ -406,9 +461,15 @@ public class PersistentManager : MonoSingleton<PersistentManager>
 [Serializable]
 public class AppSaveData
 {
-    public bool firstStartup;
-    public bool firstGame;
-    public AppLanguage language;
+    //第一次启动程序
+    public bool firstStartup = true;
+
+    public bool firstGame = true;
+
+    public string lastGameSaveId;
+
+    public AppLanguage language = AppLanguage.简体中文;
+
     public AudioManager.AudioSaveData audioSaveData;
 
     public static AppSaveData GetDef()
@@ -417,6 +478,7 @@ public class AppSaveData
         {
             firstStartup = true,
             firstGame = true,
+            lastGameSaveId = null,
             language = AppLanguage.简体中文,
             audioSaveData = AudioManager.AudioSaveData.GetDef()
 

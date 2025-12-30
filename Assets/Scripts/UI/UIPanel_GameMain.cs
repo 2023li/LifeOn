@@ -10,6 +10,16 @@ using UnityEngine.UI;
 public class UIPanel_GameMain : PanelBase
 {
 
+    protected override void OnHide()
+    {
+        base.OnHide();
+        _ = UIManager.Instance.ShowPanel<UIPanel_Pause>(UIManager.UILayer.Main);
+    }
+
+
+
+
+
     public Button btn_打开设置面板;
 
 
@@ -59,7 +69,7 @@ public class UIPanel_GameMain : PanelBase
     #endregion
 
 
-    protected override void Awake()
+    protected void Awake()
     {
         this.AutoBindFields();
 
@@ -93,6 +103,9 @@ public class UIPanel_GameMain : PanelBase
 
         OnAwake_建筑信息();
 
+
+
+
     }
 
 
@@ -122,7 +135,7 @@ public class UIPanel_GameMain : PanelBase
         TurnSystem.OnTurnBlockCountChanged -= Handle_TurnBlock;
     }
 
-
+  
     private void Handle_PhaseChange(TurnPhase phase)
     {
         switch (phase)

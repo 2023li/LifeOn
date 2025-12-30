@@ -2,7 +2,7 @@ namespace Moyo.Unity
 {
     public interface IBackHandler
     {
-        short Priority { get; set; }
+        int Priority { get; }
 
         bool TryHandleBack();
     }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Moyo.Unity;
@@ -76,9 +75,8 @@ public class UIPanel_Main : PanelBase
    
 
 
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
         Awake_取名弹窗();
         Awake_确认退出弹窗();
         Awake_语言选择();
@@ -86,10 +84,12 @@ public class UIPanel_Main : PanelBase
 
     private void OnEnable()
     {
-        if (PersistentManager.Instance.GetAllSaves().Count < 1)
+
+        btn_Continue.gameObject.SetActive(PersistentManager.Instance.HasLastGameSave());
+        btn_Continue.onClick.AddListener(() =>
         {
-            btn_Continue.gameObject.SetActive(false);
-        }
+            PersistentManager.Instance.LoadGame(PersistentManager.Instance.GetLastGameSaveId());
+        });
     }
 
 
@@ -108,6 +108,18 @@ public class UIPanel_Main : PanelBase
             Show_确认退出弹窗();
         });
         #endregion
+
+
+        if (PersistentManager.Instance.CurrentAppData.firstStartup)
+        {
+            Debug.Log("第一次启动游戏");
+            Show_语言选择();
+        }
+        else
+        {
+            Debug.Log("不是第一次启动");
+        }
+
     }
 
 
@@ -150,9 +162,26 @@ public class UIPanel_Main : PanelBase
     [FoldoutGroup("取名弹窗"), SerializeField]
     private Button btn_取消名称;
 
+    [FoldoutGroup("取名弹窗"), SerializeField]
+    private TMP_InputField inputField_GameName;
+
     private void Awake_取名弹窗()
     {
-        btn_确认名称.onClick.AddListener(() => { });
+        btn_确认名称.interactable=false;
+
+        inputField_GameName.onValueChanged.AddListener((str) =>
+        {
+            btn_确认名称.interactable = !string.IsNullOrEmpty(str);
+        });
+
+
+        btn_确认名称.onClick.AddListener(() =>
+        {
+            PersistentManager.Instance.GetCurrentGameSave().saveName = inputField_GameName.text;
+
+
+            AppManager.Instance.LoadGameScene();
+        });
 
         btn_取消名称.onClick.AddListener(() => { Hide_取名弹窗(); });
 
@@ -183,7 +212,9 @@ public class UIPanel_Main : PanelBase
     {
         btn_确认语言.onClick.AddListener(() =>
         {
-
+            PersistentManager.Instance.CurrentAppData.firstStartup = false;
+            PersistentManager.Instance.SaveAppData();
+            Hide_语言选择();
         });
 
 
@@ -212,23 +243,45 @@ public class UIPanel_Main : PanelBase
         });
 
     }
-    [Button]
+   
     private void Show_语言选择()
     {
+        ShowPopBG();
         pop_语言选择.gameObject.SetActive(true);
+        pop_语言选择.DOScale(1, 0.5f).From(0).SetEase(Ease.OutBack);
     }
     private void Hide_语言选择()
     {
-
+        HidePopBG();
+        pop_语言选择.gameObject.SetActive(false);
     }
 
     #endregion
 
 
 
+
+
+
+
+
+
+
+
+    /// <summary>
+    /// 2026
+    /// </summary>
+    /// <returns>万事顺遂</returns>
     public static string Hi_2026()
     {
-        return "Happy every day~";
+        return "所求皆如愿~ (☆▽☆)";
     }
+
+
+
+
+
+
+
 
 }

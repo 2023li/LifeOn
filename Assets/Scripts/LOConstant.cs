@@ -21,18 +21,14 @@ public static class LOConstant
     }
     public static class InputPriority
     {
-        //越高越先触发
-        public const int Priority_设置面板 = 17;
-        //
-        public const int Priority_BuildingBuilder = 10;
-        public const int Priority_暂停面板 = 16;
-        public const int Priority_UI控制器 = 15;
-
+      
 
 
 
 
         public const int Priority_相机监听鼠标滚轮 = 20;
+
+        public const int Priority_BuildingBuilder = 10; 
     }
 
     public static class Layer

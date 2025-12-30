@@ -4,7 +4,7 @@ using Moyo.Unity;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIPanel_Pause : PanelBase, IBackHandler
+public class UIPanel_Pause : PanelBase
 {
 
     [SerializeField] private Button btn_Continue;
@@ -13,31 +13,30 @@ public class UIPanel_Pause : PanelBase, IBackHandler
     [SerializeField] private Button btn_Save;
     [SerializeField] private Button Quit;
 
-
-    protected override void Awake()
+  
+    protected  void Awake()
     {
-        base.Awake();
+       
 
-        InputManager.Instance.Register(this);
-    }
+      
 
+        // 绑定按钮关闭自己
+        if (btn_Continue != null)
+            btn_Continue.onClick.AddListener(() => OnHide());
 
-    public short Priority { get ; set; } = LOConstant.InputPriority.Priority_暂停面板;
-
-    public bool TryHandleBack()
-    {
-        if (!UIManager.Instance.IsPanelShowing<UIPanel_Pause>())
+        btn_Save.onClick.AddListener(() =>
         {
-            return false;
-        }
-           
+
+        });
 
 
-        UIManager.Instance.HidePanel<UIPanel_Pause>();
 
-        return true;
+
     }
 
+
+    
+  
 
 
 

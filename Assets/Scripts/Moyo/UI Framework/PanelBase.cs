@@ -5,41 +5,31 @@ namespace Moyo.Unity
 {
     public abstract class PanelBase : MonoBehaviour
     {
-        
-
-        protected Canvas canvas;
-        
-        protected virtual void Awake()
+        public UIManager.UILayer CurrentLayer { get; set; }
+        public virtual void Show(UIManager manager,params object[] args)
         {
-            this.AutoBindFields();
-            canvas = UIManager.Instance.GetMainCanvas();
+            gameObject.SetActive(true);
+            OnShow();
         }
-
-       
+        public virtual void Hide(UIManager manager, params object[] args)
+        {
+            gameObject.SetActive(false);
+            OnHide();
+        }
 
         /// <summary>
-        /// 面板实例化后由UIManager仅调用一次
-        /// 用于一次性初始化设置
+        /// 处理显示
         /// </summary>
-        public virtual void OnPanelCreated(params object[] args) { }
+        protected virtual void OnShow()
+        {
 
-        public virtual void Show(params object[] args)
-        {
-            gameObject.SetActive(true);
         }
-        public virtual void Hide(params object[] args)
+        /// <summary>
+        /// 处理隐藏
+        /// </summary>
+        protected virtual void OnHide()
         {
-            gameObject?.SetActive(false);
-        }
 
-        public virtual void Show()
-        {
-            gameObject.SetActive(true);
         }
-        public virtual void Hide()
-        {
-            gameObject?.SetActive(false);
-        }
-
     }
 }

@@ -260,7 +260,7 @@ public class AudioManager : MonoSingleton<AudioManager>
 
     private void SaveVolumeSettings()
     {
-        var audioSetting = PersistentManager.Instance.appData.audioSaveData;
+        var audioSetting = PersistentManager.Instance.CurrentAppData.audioSaveData;
         audioSetting.MasterVolume = currentMasterVolume;
         audioSetting.EnvironmentVolume = currentEnvironmentVolume;
         audioSetting.VoiceVolume = currentVoiceVolume;
@@ -270,7 +270,7 @@ public class AudioManager : MonoSingleton<AudioManager>
 
     private void LoadVolumeSettings()
     {
-        var audioSetting = PersistentManager.Instance.appData.audioSaveData;
+        var audioSetting = PersistentManager.Instance.CurrentAppData.audioSaveData;
         currentMasterVolume = audioSetting.MasterVolume;
         currentMusicVolume = audioSetting.MusicVolume;
         currentSFXVolume = audioSetting.SFXVolume;

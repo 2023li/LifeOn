@@ -8,7 +8,7 @@ using Moyo.Unity;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 
-public class InputManager : MonoSingleton<InputManager>,IMoyoEventListener<AppStateEvent>
+public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppStateEvent>
 {
     public Camera RealCamera { get; private set; }
     public Vector3 MousePos { get; private set; }
@@ -33,8 +33,8 @@ public class InputManager : MonoSingleton<InputManager>,IMoyoEventListener<AppSt
     private LOControlsMaps inputActionMap;
 
     public bool IsGamePlayActive => inputActionMap != null && inputActionMap.GamePlay.enabled;
-    
-    
+
+
     //标记UI
     private bool _pendingMousePrimaryClick;
     //应用于标记UI的
@@ -83,7 +83,6 @@ public class InputManager : MonoSingleton<InputManager>,IMoyoEventListener<AppSt
             }
         };
 
-
         inputActionMap.Global.MousePrimaryClick.performed += ctx =>
         {
             Vector2 clickPosition = MousePos;
@@ -97,19 +96,36 @@ public class InputManager : MonoSingleton<InputManager>,IMoyoEventListener<AppSt
             _pendingMousePrimaryClick = true;
         };
 
-
-
-
-
-
         inputActionMap.Global.Back.performed += ctx =>
         {
+            // 1. 移除无效的 Handler (比如已销毁的对象)
+            for (int i = _backHandlers.Count - 1; i >= 0; i--)
+            {
+                // 检查是否为 MonoBehaviour 且已销毁，或者接口对象为空
+                if (_backHandlers[i] == null || (_backHandlers[i] is UnityEngine.Object obj && obj == null))
+                {
+                    _backHandlers.RemoveAt(i);
+                }
+            }
+
+            // 2. [关键] 动态重排序
+            // 因为 Panel 的 Priority 属性现在是动态计算的，所以必须实时 Sort
+            _backHandlers.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+
+            // 3. 责任链分发
             foreach (IBackHandler h in _backHandlers)
+            {
+                // 增加一层保护：只有 gameObject 激活时才响应
+                // 如果是纯逻辑类(非Mono)，通常总返回true
+                if (h is MonoBehaviour mb && !mb.gameObject.activeInHierarchy)
+                    continue;
+
                 if (h.TryHandleBack())
                 {
-                    Debug.Log($"返回被 {h.Priority} 消费");
-                    return;
+                    Debug.Log($"返回键被 {h.GetType().Name} (Priority:{h.Priority}) 消费");
+                    return; // 只要有一个处理了，就停止
                 }
+            }
         };
 
 
@@ -158,9 +174,9 @@ public class InputManager : MonoSingleton<InputManager>,IMoyoEventListener<AppSt
 
     private void OnEnable()
     {
-        this.MoyoEventStartListening<AppStateEvent>();    
+        this.MoyoEventStartListening<AppStateEvent>();
     }
-    
+
     private void LateUpdate()
     {
         if (!_pendingMousePrimaryClick)
@@ -203,9 +219,9 @@ public class InputManager : MonoSingleton<InputManager>,IMoyoEventListener<AppSt
                 break;
             case AppState.游戏场景加载完成:
 
-               
-                    RealCamera = Camera.main;
-                
+
+                RealCamera = Camera.main;
+
 
                 break;
             case AppState.开始游戏:
@@ -222,19 +238,26 @@ public class InputManager : MonoSingleton<InputManager>,IMoyoEventListener<AppSt
 
 
     private readonly List<IBackHandler> _backHandlers = new();
+
     public void Register(IBackHandler h)
     {
-        _backHandlers.Add(h);
-        _backHandlers.Sort((a, b) => b.Priority.CompareTo(a.Priority));
-
+        if(!_backHandlers.Contains(h))
+        {
+            _backHandlers.Add(h);
+            // 注册时也可以先排一次，虽然主要依赖运行时排序
+            _backHandlers.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+        }
     }
+
     public void UnRegister(IBackHandler handler)
     {
-        if (handler == null) return;
-        _backHandlers.Remove(handler);
+        if (handler != null  && _backHandlers.Contains(handler))
+        {
+            _backHandlers.Remove(handler);
+        }
     }
-    
-     private readonly List<ISlideHandler> _mouseWheelHandlers = new();
+
+    private readonly List<ISlideHandler> _mouseWheelHandlers = new();
     public void Register(ISlideHandler handler)
     {
         if (handler == null) return;
@@ -249,5 +272,5 @@ public class InputManager : MonoSingleton<InputManager>,IMoyoEventListener<AppSt
         _mouseWheelHandlers.Remove(handler);
     }
 
-   
+
 }

@@ -6,7 +6,8 @@ using UnityEngine.UI;
 using Sirenix.OdinInspector;
 using FMODUnity;
 using Unity.VisualScripting;
-public class UIPanel_Setting : PanelBase,IBackHandler
+using System.Threading.Tasks;
+public class UIPanel_Setting : PanelBase
 {
 
    
@@ -23,17 +24,11 @@ public class UIPanel_Setting : PanelBase,IBackHandler
     [SerializeField, FoldoutGroup("导航栏")] private GameObject go_图像;
     [SerializeField, FoldoutGroup("导航栏")] private GameObject go_辅助功能;
 
-    public short Priority { get; set; } =  LOConstant.InputPriority.Priority_设置面板; 
 
-    public bool TryHandleBack()
-    {
-       gameObject.SetActive(false);
-        return true;
-    }
+  
 
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
         BindToggleEvents();
 
         RefreshPanelState();
@@ -42,20 +37,19 @@ public class UIPanel_Setting : PanelBase,IBackHandler
 
     private void OnEnable()
     {
-        if (InputManager.HasInstance)
-        {
-            InputManager.Instance.Register(this);
-        }
+      
     }
 
     private void OnDestroy()
     {
-        if (InputManager.HasInstance)
-        {
-            InputManager.Instance.UnRegister(this);
-        }
+       
     }
 
+
+    public static async Task ShowSettingPanel()
+    {
+        await UIManager.Instance.ShowPanel<UIPanel_Setting>(UIManager.UILayer.Main);
+    }
 
 
 

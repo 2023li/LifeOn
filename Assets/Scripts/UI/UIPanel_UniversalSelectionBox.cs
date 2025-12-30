@@ -17,9 +17,9 @@ public class UIPanel_UniversalSelectionBox : PanelBase
     private Action _currentConfirmAction;
     private Action _currentCancelAction;
 
-    protected override void Awake()
+    protected  void Awake()
     {
-        base.Awake(); // 保持 PanelBase 的逻辑
+       
 
         // --- 核心修改：只初始化一次监听器 ---
         // 无论面板显示多少次，这里的 AddListener 只运行一次
@@ -77,7 +77,7 @@ public class UIPanel_UniversalSelectionBox : PanelBase
 
     private void ClosePanel()
     {
-        Hide();
+         OnHide();
 
         // 【重要】清理引用，防止内存泄漏
         // 如果面板被缓存而不销毁，由于 Action 可能会引用外部大的对象（闭包），

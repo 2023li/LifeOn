@@ -52,7 +52,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>, IBackHandler, IMo
     private CubeCoor _currentCenterCube; // 记录当前的中心点
     private Vector3 _confirmAnchorWorld;
 
-    public short Priority { get; set; } = LOConstant.InputPriority.Priority_BuildingBuilder;
+    public int Priority { get; set; } = LOConstant.InputPriority.Priority_BuildingBuilder;
 
     #region 生命周期
 

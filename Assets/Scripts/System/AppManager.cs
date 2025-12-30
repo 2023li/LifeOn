@@ -4,7 +4,6 @@ using UnityEngine;
 using Moyo.Unity;
 using UnityEngine.SceneManagement;
 using Sirenix.OdinInspector;
-using static BuildingConfirmPanel;
 using System;
 using static LOConstant;
 using UnityEditor;
@@ -204,3 +203,6 @@ public struct AppStateEvent
         MoyoEventManager.TriggerEvent<AppStateEvent>(eventArg);
     }
 }
+
+
+

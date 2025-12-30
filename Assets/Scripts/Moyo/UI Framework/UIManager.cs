@@ -2,126 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Moyo.Unity;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
-/*
 
-    UILayer各层级应该放置的UI示例：
-
-
-
-    1. Background（背景层）
-
-    - 游戏场景背景图
-
-    - 环境装饰性UI元素
-
-    - 远景UI（如远处的山脉、云层等）
-
-
-
-    2. Scene（场景UI层）
-
-    - 场景中的交互按钮（NPC对话按钮、场景物品交互）
-
-    - 小地图、雷达图
-
-    - 场景任务指引标记
-
-
-
-    3. Normal（普通层）
-
-    - 背包界面
-
-    - 技能面板
-
-    - 设置界面
-
-    - 好友列表
-
-
-
-    4. Main（主界面层）
-
-    - 游戏主HUD（血量条、魔法条、经验条）
-
-    - 角色状态栏
-
-    - 快捷技能栏
-
-    - 任务追踪界面
-
-
-
-    5. Popup（弹窗层）
-
-    - 确认对话框（"是否确认退出？"）
-
-    - 物品详情窗口
-
-    - 商店购买确认窗口
-
-    - 系统设置弹窗
-
-
-
-    6. Guide（引导层）
-
-    - 新手引导箭头和高亮
-
-    - 功能引导提示
-
-    - 操作指引面板
-
-
-
-    7. Notice（通知层）
-
-    - 系统公告面板
-
-    - 活动奖励领取窗口
-
-    - 重要系统消息
-
-
-
-    8. Toast（提示层）
-
-    - 浮动提示信息（"获得金币+100"）
-
-    - 小贴士文字提示
-
-    - 非阻塞性状态提示
-
-
-
-    9. Loading（加载层）
-
-    - 游戏加载界面
-
-    - 场景切换转场效果
-
-    - 资源加载进度条
-
-
-
-    10. DebugInfo（调试层）
-
-    - 帧率显示
-
-    - 调试信息面板
-
-    - 开发者控制台
-
-*/
 namespace Moyo.Unity
 {
-
     public class UIManager : MonoSingleton<UIManager>
     {
+        #region 配置定义
+
         [Serializable]
         public class UILayerConfig
         {
@@ -130,6 +20,9 @@ namespace Moyo.Unity
             public int sortOrder;
             public bool isModal;
             public bool blocksRaycasts;
+
+            [Tooltip("若为false：启用堆栈导航模式。打开新面板时隐藏当前面板；关闭当前面板时自动恢复上一个面板。")]
+            public bool allowMultiPanels = true;
         }
 
         public enum UILayer
@@ -137,50 +30,57 @@ namespace Moyo.Unity
             Background, Scene, Normal, Main, Popup, Guide, Notice, Toast, Loading, DebugInfo
         }
 
+        #endregion
+
+        #region 字段与属性
+
         [SerializeField]
         private UILayerConfig[] layerConfigs = {
-        new UILayerConfig { layerType = UILayer.Background, layerName = "Background", sortOrder = 0, isModal = false, blocksRaycasts = false },
-        new UILayerConfig { layerType = UILayer.Scene, layerName = "Scene", sortOrder = 1, isModal = false, blocksRaycasts = false },
-        new UILayerConfig { layerType = UILayer.Normal, layerName = "Normal", sortOrder = 2, isModal = false, blocksRaycasts = true },
-        new UILayerConfig { layerType = UILayer.Main, layerName = "Main", sortOrder = 3, isModal = false, blocksRaycasts = true },
-        new UILayerConfig { layerType = UILayer.Popup, layerName = "Popup", sortOrder = 4, isModal = true, blocksRaycasts = true },
-        new UILayerConfig { layerType = UILayer.Guide, layerName = "Guide", sortOrder = 5, isModal = true, blocksRaycasts = true },
-        new UILayerConfig { layerType = UILayer.Notice, layerName = "Notice", sortOrder = 6, isModal = true, blocksRaycasts = true },
-        new UILayerConfig { layerType = UILayer.Toast, layerName = "Toast", sortOrder = 7, isModal = false, blocksRaycasts = false },
-        new UILayerConfig { layerType = UILayer.Loading, layerName = "Loading", sortOrder = 8, isModal = true, blocksRaycasts = true },
-        new UILayerConfig { layerType = UILayer.DebugInfo, layerName = "DebugInfo", sortOrder = 9, isModal = false, blocksRaycasts = false }
-    };
-
-        private Dictionary<UILayer, Transform> layerParents = new Dictionary<UILayer, Transform>();
-        private Dictionary<UILayer, CanvasGroup> layerCanvasGroups = new Dictionary<UILayer, CanvasGroup>();
-        private Dictionary<UILayer, List<PanelBase>> activePanels = new Dictionary<UILayer, List<PanelBase>>();
-        private Dictionary<Type, PanelBase> loadedPanels = new Dictionary<Type, PanelBase>();
-        // --- 改进 ---：移除了冗余的`panelGameObjects`字典。我们可以从PanelBase组件获取GameObject。
-
-        private UILayer? currentModalLayer = null;
+            new UILayerConfig { layerType = UILayer.Background, layerName = "Background", sortOrder = 0, isModal = false, blocksRaycasts = false , allowMultiPanels = true},
+            new UILayerConfig { layerType = UILayer.Scene, layerName = "Scene", sortOrder = 1, isModal = false, blocksRaycasts = false , allowMultiPanels = true},
+            new UILayerConfig { layerType = UILayer.Normal, layerName = "Normal", sortOrder = 2, isModal = false, blocksRaycasts = true , allowMultiPanels = true},
+            // Main 层设为 false，实现打开角色面板时隐藏主HUD，关闭后自动恢复
+            new UILayerConfig { layerType = UILayer.Main, layerName = "Main", sortOrder = 3, isModal = false, blocksRaycasts = true, allowMultiPanels = false },
+            new UILayerConfig { layerType = UILayer.Popup, layerName = "Popup", sortOrder = 4, isModal = true, blocksRaycasts = true , allowMultiPanels = true},
+            new UILayerConfig { layerType = UILayer.Guide, layerName = "Guide", sortOrder = 5, isModal = true, blocksRaycasts = true , allowMultiPanels = true},
+            new UILayerConfig { layerType = UILayer.Notice, layerName = "Notice", sortOrder = 6, isModal = true, blocksRaycasts = true , allowMultiPanels = true},
+            new UILayerConfig { layerType = UILayer.Toast, layerName = "Toast", sortOrder = 7, isModal = false, blocksRaycasts = false , allowMultiPanels = true},
+            new UILayerConfig { layerType = UILayer.Loading, layerName = "Loading", sortOrder = 8, isModal = true, blocksRaycasts = true , allowMultiPanels = true},
+            new UILayerConfig { layerType = UILayer.DebugInfo, layerName = "DebugInfo", sortOrder = 9, isModal = false, blocksRaycasts = false , allowMultiPanels = true}
+        };
 
         [LabelText("参考分辨率")]
         [SerializeField] private Vector2 canvasReferenceResolution = new Vector2(1920, 1080);
 
-
-
-        [LabelText("同层仅显示一个面板")]
-        [SerializeField] private bool enforceSinglePanelPerLayer = true;
         private Canvas mainCanvas;
 
-        public Canvas GetMainCanvas()
-        {
-            return mainCanvas;
-        }
+        // 核心数据结构
+        private Dictionary<UILayer, Transform> layerParents = new Dictionary<UILayer, Transform>();
+        private Dictionary<UILayer, CanvasGroup> layerCanvasGroups = new Dictionary<UILayer, CanvasGroup>();
+
+        // activePanels 作为堆栈使用。List 的最后一个元素是当前层级“最上方”的面板。
+        private Dictionary<UILayer, List<PanelBase>> activePanels = new Dictionary<UILayer, List<PanelBase>>();
+
+        // 用于快速查找面板实例
+        private Dictionary<Type, PanelBase> loadedPanels = new Dictionary<Type, PanelBase>();
+
+        // 内部追踪面板属于哪个层，避免修改 PanelBase
+        private Dictionary<PanelBase, UILayer> panelToLayerMap = new Dictionary<PanelBase, UILayer>();
+
+        private UILayer? currentModalLayer = null;
+
+        public Canvas GetMainCanvas() => mainCanvas;
+
+        #endregion
+
+        #region 生命周期
 
         protected override void Awake()
         {
             base.Awake();
             InitializeLayers();
-
         }
 
-        #region 初始化
         private void InitializeLayers()
         {
             SetupMainCanvas();
@@ -189,7 +89,6 @@ namespace Moyo.Unity
             {
                 CreateUILayer(config);
             }
-
         }
 
         private void SetupMainCanvas()
@@ -215,24 +114,28 @@ namespace Moyo.Unity
             layerObj.transform.localPosition = Vector3.zero;
             layerObj.transform.localScale = Vector3.one;
             layerObj.transform.SetSiblingIndex(config.sortOrder);
+
             var rectTransform = layerObj.AddComponent<RectTransform>();
             rectTransform.anchorMin = Vector2.zero;
             rectTransform.anchorMax = Vector2.one;
             rectTransform.sizeDelta = Vector2.zero;
             rectTransform.anchoredPosition = Vector2.zero;
+
             var canvasGroup = layerObj.AddComponent<CanvasGroup>();
             canvasGroup.blocksRaycasts = config.blocksRaycasts;
             canvasGroup.interactable = true;
+
             layerParents[config.layerType] = layerObj.transform;
             layerCanvasGroups[config.layerType] = canvasGroup;
             activePanels[config.layerType] = new List<PanelBase>();
         }
+
         #endregion
 
-        // --- 改进 ---：添加了`args`参数用于向面板传递数据。
+        #region 打开面板 (ShowPanel)
+
         public async Task<T> ShowPanel<T>(UILayer layer, string address = null, params object[] args) where T : PanelBase
         {
-            // 1) 基础校验：目标层必须已初始化
             if (!layerParents.ContainsKey(layer))
             {
                 Debug.LogError($"层级 {layer} 未初始化！");
@@ -240,83 +143,45 @@ namespace Moyo.Unity
             }
 
             Type panelType = typeof(T);
+            PanelBase targetPanel;
 
-            // 2) 面板已加载：复用并切层、传参、显示
+            // 1. 获取或加载面板
             if (loadedPanels.TryGetValue(panelType, out var existingPanel) && existingPanel != null)
             {
-                // 若已加载但父节点不是目标层，先归层
-                if (existingPanel.transform.parent != layerParents[layer])
+                targetPanel = existingPanel;
+                // 确保父节点正确
+                if (targetPanel.transform.parent != layerParents[layer])
                 {
-                    existingPanel.transform.SetParent(layerParents[layer], false);
-                    UpdatePanelLayer(existingPanel, layer);
+                    targetPanel.transform.SetParent(layerParents[layer], false);
                 }
-
-                // 即使已存在也传入最新数据
-                existingPanel.OnPanelCreated(args);
-
-                // 同层只留一个激活面板
-                if (enforceSinglePanelPerLayer)
-                {
-                    EnsureSinglePanelInLayer(layer, existingPanel);
-                }
-                else
-                {
-                    if (!activePanels[layer].Contains(existingPanel))
-                        activePanels[layer].Add(existingPanel);
-                }
-
-                // 显示（携带参数）
-                existingPanel.Show(args);
-
-                
-
-                // 模态层处理
-                if (IsModalLayer(layer))
-                {
-                    SetModalLayer(layer);
-                }
-
-                return existingPanel as T;
             }
-
-            // 3) 面板未加载：异步加载、挂载到层、记录、显示
-            var newPanel = await LoadAndCreatePanel<T>(address, args);
-            if (newPanel != null)
+            else
             {
-                // 设置父节点为目标层
-                newPanel.transform.SetParent(layerParents[layer], false);
+                targetPanel = await LoadAndCreatePanel<T>(address, args);
+                if (targetPanel == null) return null;
 
-                // 同层只留一个激活面板
-                if (enforceSinglePanelPerLayer)
-                {
-                    EnsureSinglePanelInLayer(layer, newPanel);
-                }
-                else
-                {
-                    activePanels[layer].Add(newPanel);
-                }
-
-                // 记录已加载
-                loadedPanels[panelType] = newPanel;
-
-                // 模态层处理
-                if (IsModalLayer(layer))
-                {
-                    SetModalLayer(layer);
-                }
-
-                // 显示（携带参数）
-                newPanel.Show(args);
+                targetPanel.transform.SetParent(layerParents[layer], false);
+                loadedPanels[panelType] = targetPanel;
             }
 
-            return newPanel;
+            // 2. 注册层级关系
+            panelToLayerMap[targetPanel] = layer;
+
+            // 3. 处理堆栈和显示逻辑
+            ProcessPanelShow(layer, targetPanel, args);
+
+            // 4. 处理模态
+            if (IsModalLayer(layer))
+            {
+                SetModalLayer(layer);
+            }
+
+            return targetPanel as T;
         }
 
         private async Task<T> LoadAndCreatePanel<T>(string address = null, params object[] args) where T : PanelBase
         {
             address ??= typeof(T).Name;
-
-
             var panelAsset = await AssetsManager.Instance.LoadAssetAsync<GameObject>(address);
             if (panelAsset == null)
             {
@@ -327,63 +192,192 @@ namespace Moyo.Unity
             panelObj.name = typeof(T).Name;
             var panelComponent = panelObj.GetComponent<T>() ?? panelObj.AddComponent<T>();
 
-            // --- 改进 ---：调用创建生命周期方法。
-            panelComponent.OnPanelCreated(args);
+            // 如果 PanelBase 有初始化方法，可以在此调用
+            // panelComponent.OnInit(args); 
 
             return panelComponent;
-
-
         }
+
+        /// <summary>
+        /// 核心逻辑：处理面板显示的堆栈行为
+        /// </summary>
+        private void ProcessPanelShow(UILayer layer, PanelBase newPanel, object[] args)
+        {
+            UILayerConfig config = GetLayerConfig(layer);
+            List<PanelBase> stack = activePanels[layer];
+
+            // 避免重复添加到列表
+            if (stack.Contains(newPanel))
+            {
+                stack.Remove(newPanel);
+            }
+
+            if (!config.allowMultiPanels)
+            {
+                // 如果堆栈里已有面板（即当前正在显示的），先隐藏它
+                if (stack.Count > 0)
+                {
+                    var currentTop = stack[stack.Count - 1];
+                    if (currentTop != null && currentTop != newPanel)
+                    {
+                        // 仅视觉隐藏，不走 Close 流程，以便后续恢复
+                        currentTop.Hide(this);
+                    }
+                }
+            }
+
+            // 将新面板加入堆栈顶部
+            stack.Add(newPanel);
+
+            // 确保渲染在最前并显示
+            newPanel.transform.SetAsLastSibling();
+            newPanel.Show(this, args);
+        }
+
+        #endregion
+
+        #region 关闭面板 (HidePanel)
 
         public void HidePanel<T>() where T : PanelBase
         {
-            if (loadedPanels.TryGetValue(typeof(T), out var panel) && panel != null && panel.gameObject.activeSelf)
+            if (loadedPanels.TryGetValue(typeof(T), out var panel) && panel != null)
             {
-                panel.Hide();
-                RemovePanelFromActiveList(panel);
-                UpdateModalLayerState();
+                if (panelToLayerMap.TryGetValue(panel, out var layer))
+                {
+                    ProcessPanelHide(layer, panel);
+                }
+                else
+                {
+                    // 异常兜底
+                    panel.Hide(this);
+                }
             }
         }
 
+        // === 新增部分：支持直接通过实例关闭面板 ===
+        public void HidePanel(PanelBase panel)
+        {
+            if (panel == null) return;
 
+            if (panelToLayerMap.TryGetValue(panel, out var layer))
+            {
+                // 只有当面板确实在活跃堆栈中时才处理
+                if (activePanels.ContainsKey(layer) && activePanels[layer].Contains(panel))
+                {
+                    ProcessPanelHide(layer, panel);
+                }
+                else
+                {
+                    // 如果不在堆栈中（可能已经被隐藏或异常），仅确保视觉隐藏
+                    panel.Hide(this);
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"尝试关闭未注册层级的面板: {panel.name}");
+                panel.Hide(this);
+            }
+        }
+        // === 新增部分：关闭最顶层的显示面板（用于返回键/Esc） ===
+        [Button]
+        public void CloseTopPanel()
+        {
+            // 1. 按照渲染层级从高到低遍历 (Popup > Main > Normal ...)
+            // 这样确保优先关闭覆盖在最上面的弹窗
+            var sortedConfigs = layerConfigs.OrderByDescending(c => c.sortOrder);
+
+            foreach (var config in sortedConfigs)
+            {
+                // [可选] 过滤掉不应该被“返回键”关闭的层级
+                // 例如：Loading层、Toast层、DebugInfo层 通常不由玩家手动关闭
+                if (config.layerType == UILayer.Loading ||
+                    config.layerType == UILayer.Toast ||
+                    config.layerType == UILayer.DebugInfo ||
+                    config.layerType == UILayer.Background)
+                {
+                    continue;
+                }
+
+                // 2. 检查该层是否有活跃面板
+                if (activePanels.TryGetValue(config.layerType, out var stack) && stack.Count > 0)
+                {
+                    // 获取栈顶面板（最后加入的）
+                    var topPanel = stack[stack.Count - 1];
+
+                    // 3. 只有当面板当前是“显示中”的状态才关闭
+                    // (在堆栈模式下，栈底的面板可能是隐藏的，不能关闭它们，否则逻辑会乱)
+                    if (topPanel != null && topPanel.gameObject.activeSelf)
+                    {
+                        Debug.Log($"[UIManager] CloseTopPanel 关闭了: {topPanel.name}");
+                        HidePanel(topPanel);
+                        return; // 每次只关闭一个，执行完立即结束
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 核心逻辑：处理面板关闭后的堆栈恢复
+        /// </summary>
+        private void ProcessPanelHide(UILayer layer, PanelBase panelToClose)
+        {
+            var stack = activePanels[layer];
+            var config = GetLayerConfig(layer);
+
+            // 1. 视觉隐藏
+            panelToClose.Hide(this);
+
+            // 2. 从堆栈移除
+            if (stack.Contains(panelToClose))
+            {
+                stack.Remove(panelToClose);
+            }
+
+            // 3. === 恢复逻辑 (allowMultiPanels = false) ===
+            if (!config.allowMultiPanels)
+            {
+                // 如果关闭的是顶层面板，且下面还有被压住的旧面板
+                if (stack.Count > 0)
+                {
+                    var previousPanel = stack[stack.Count - 1];
+
+                    // 如果旧面板目前是隐藏的，则恢复显示
+                    if (previousPanel != null && !previousPanel.gameObject.activeSelf)
+                    {
+                        previousPanel.Show(this); // 恢复显示
+                    }
+                }
+            }
+
+            // 4. 更新模态状态
+            UpdateModalLayerState();
+        }
 
         public void DestroyPanel<T>() where T : PanelBase
         {
             Type panelType = typeof(T);
             if (loadedPanels.TryGetValue(panelType, out var panel) && panel != null)
             {
-                RemovePanelFromActiveList(panel);
+                // 先走正常的隐藏流程以维护堆栈
+                if (panelToLayerMap.TryGetValue(panel, out var layer))
+                {
+                    ProcessPanelHide(layer, panel);
+                }
+
+                // 清理引用
                 loadedPanels.Remove(panelType);
+                panelToLayerMap.Remove(panel);
 
-                // --- 改进 ---：显式释放资源。
-                // 具体实现取决于您的AssetsManager。
-                string address = panel.name; // 假设地址与类名/游戏对象名相同。
-                AssetsManager.Instance.ReleaseAsset(address);
-
+                // 释放资源
+                AssetsManager.Instance.ReleaseAsset(panel.name);
                 Destroy(panel.gameObject);
+
                 UpdateModalLayerState();
             }
         }
 
-        private void RemovePanelFromActiveList(PanelBase panel)
-        {
-            foreach (var layerList in activePanels.Values)
-            {
-                if (layerList.Contains(panel))
-                {
-                    layerList.Remove(panel);
-                    return; // 假设一个面板只能在一个列表中。
-                }
-            }
-        }
+        #endregion
 
-        private void UpdatePanelLayer(PanelBase panel, UILayer newLayer)
-        {
-            RemovePanelFromActiveList(panel);
-            activePanels[newLayer].Add(panel);
-        }
-
-        #region 模态逻辑
+        #region 模态管理
 
         private void SetModalLayer(UILayer modalLayer)
         {
@@ -394,8 +388,7 @@ namespace Moyo.Unity
 
             foreach (var config in layerConfigs)
             {
-                // 当前模态层以下的层级不可交互。
-                // 模态层及以上的层级保持其默认交互性。
+                // 只有层级高于或等于模态层的，才允许交互
                 bool isInteractable = config.sortOrder >= modalSortOrder;
                 SetLayerInteractable(config.layerType, isInteractable);
             }
@@ -403,14 +396,19 @@ namespace Moyo.Unity
 
         private void UpdateModalLayerState()
         {
-            // 查找最高层级的活跃模态层
             UILayer? nextModalLayer = null;
+
+            // 从高到低遍历，找到第一个包含“可见面板”的模态层
             foreach (var config in layerConfigs.OrderByDescending(c => c.sortOrder))
             {
-                if (config.isModal && activePanels.ContainsKey(config.layerType) && activePanels[config.layerType].Count > 0)
+                if (config.isModal && activePanels.ContainsKey(config.layerType))
                 {
-                    nextModalLayer = config.layerType;
-                    break;
+                    // 检查该层是否有任何面板是 activeSelf (可见) 的
+                    if (activePanels[config.layerType].Any(p => p != null && p.gameObject.activeSelf))
+                    {
+                        nextModalLayer = config.layerType;
+                        break;
+                    }
                 }
             }
 
@@ -420,11 +418,11 @@ namespace Moyo.Unity
             }
             else
             {
-                // 没有活跃的模态面板，恢复所有层级的默认状态。
+                // 无模态，恢复所有层
                 currentModalLayer = null;
                 foreach (var config in layerConfigs)
                 {
-                    SetLayerInteractable(config.layerType, true); // 恢复所有层级的潜在交互性
+                    SetLayerInteractable(config.layerType, true);
                 }
             }
         }
@@ -432,20 +430,25 @@ namespace Moyo.Unity
         private void SetLayerInteractable(UILayer layer, bool isPotentiallyInteractable)
         {
             if (layerCanvasGroups.TryGetValue(layer, out var canvasGroup) &&
-                layerConfigs.FirstOrDefault(c => c.layerType == layer) is { } config)
+                GetLayerConfig(layer) is { } config)
             {
-                // --- 改进（BUG修复） ---：图层仅在其本身应阻挡射线检测且模态状态允许的情况下才会阻挡射线检测。
-                // 这保留了Toast和DebugInfo等层级的原始设置。
+                // 恢复时，要尊重该层级原本是否 blocksRaycasts (比如 Toast 层本来就不阻挡)
                 canvasGroup.blocksRaycasts = isPotentiallyInteractable && config.blocksRaycasts;
             }
         }
 
-        private bool IsModalLayer(UILayer layer) => layerConfigs.FirstOrDefault(c => c.layerType == layer)?.isModal ?? false;
-        private int GetLayerSortOrder(UILayer layer) => layerConfigs.FirstOrDefault(c => c.layerType == layer)?.sortOrder ?? 0;
-
         #endregion
 
-        #region 工具方法
+        #region 辅助方法
+
+        private UILayerConfig GetLayerConfig(UILayer layer)
+        {
+            return layerConfigs.FirstOrDefault(c => c.layerType == layer);
+        }
+
+        private bool IsModalLayer(UILayer layer) => GetLayerConfig(layer)?.isModal ?? false;
+
+        private int GetLayerSortOrder(UILayer layer) => GetLayerConfig(layer)?.sortOrder ?? 0;
 
         public T GetPanel<T>() where T : PanelBase
         {
@@ -453,19 +456,19 @@ namespace Moyo.Unity
         }
 
         public bool IsPanelLoaded<T>() where T : PanelBase => loadedPanels.ContainsKey(typeof(T)) && loadedPanels[typeof(T)] != null;
+
         public bool IsPanelShowing<T>() where T : PanelBase => GetPanel<T>()?.gameObject.activeInHierarchy ?? false;
 
-        // ...其他工具方法如DestroyAllPanels、GetCurrentModalLayer等基本保持不变，但已更新以移除panelGameObjects
         public void DestroyAllPanels()
         {
             foreach (var panel in loadedPanels.Values.Where(p => p != null))
             {
-                // 销毁前释放资源
                 AssetsManager.Instance.ReleaseAsset(panel.name);
                 Destroy(panel.gameObject);
             }
 
             loadedPanels.Clear();
+            panelToLayerMap.Clear();
 
             foreach (var layer in layerConfigs)
             {
@@ -473,44 +476,14 @@ namespace Moyo.Unity
                 {
                     activePanels[layer.layerType].Clear();
                 }
-                else
-                {
-                    activePanels[layer.layerType] = new List<PanelBase>();
-                }
             }
 
             currentModalLayer = null;
 
-            // 恢复所有层级的默认交互状态
             foreach (var config in layerConfigs)
             {
                 SetLayerInteractable(config.layerType, true);
             }
-        }
-
-
-
-        /// <summary>
-        /// 确保同一 UILayer 仅保留一个激活面板（keep），其他全部隐藏并从活跃列表移除。
-        /// 不会销毁面板对象，便于之后快速重新显示。
-        /// </summary>
-        private void EnsureSinglePanelInLayer(UILayer layer, PanelBase keep = null)
-        {
-            if (!activePanels.TryGetValue(layer, out var list)) return;
-
-            // 拷贝一份，避免遍历时修改集合
-            var snapshot = list.ToList();
-            foreach (var p in snapshot)
-            {
-                if (p == null) continue;
-                if (p == keep) continue;
-
-                // 隐藏并从该层活跃列表移除
-                p.Hide();
-            }
-
-            list.Clear();
-            if (keep != null) list.Add(keep);
         }
 
         #endregion
