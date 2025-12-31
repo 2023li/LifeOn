@@ -38,7 +38,7 @@ public class AppManager : MonoSingleton<AppManager>
     {
         PersistentManager.Instance.LoadAppData();
 
-        uiController = new LOUIController();
+      
     }
 
     // Update is called once per frame
@@ -94,7 +94,6 @@ public class AppManager : MonoSingleton<AppManager>
 
 
 
-    LOUIController uiController;
 
     public List<string> NeedPreloadGameObject;
 

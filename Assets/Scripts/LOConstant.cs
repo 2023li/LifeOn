@@ -21,9 +21,9 @@ public static class LOConstant
     }
     public static class InputPriority
     {
-      
 
 
+        public const int IBack_UIManager = 100;
 
 
         public const int Priority_相机监听鼠标滚轮 = 20;

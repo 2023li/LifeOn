@@ -5,7 +5,7 @@ using Sirenix.OdinInspector;
 using Moyo.Unity;
 using System.Linq;
 
-public class BuildingBuilder : MonoSingleton<BuildingBuilder>, IBackHandler, IMoyoEventListener<BuildingBuilder.BuildingEvent>
+public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IMoyoEventListener<BuildingBuilder.BuildingEvent>
 {
     public struct BuildingEvent
     {
@@ -55,16 +55,24 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>, IBackHandler, IMo
     public int Priority { get; set; } = LOConstant.InputPriority.Priority_BuildingBuilder;
 
     #region 生命周期
+    IBackRegister.BuidingBackHandle backHandle;
+    protected override void Awake()
+    {
+        base.Awake();
+        backHandle = new();
+    }
 
     private void OnEnable()
     {
         this.MoyoEventStartListening();
         if (InputManager.Instance == null) return;
 
-        InputManager.Instance.Register(this);
+      
         InputManager.Instance.Building_OnChangeCoordinates += Handle_放置;
         InputManager.Instance.Building_OnConfirmPlacement += Handle_确认放置;
         InputManager.Instance.Building_OnConfirmConstruction += Handle_完成建造;
+
+        InputManager.Instance.Register(backHandle);
     }
 
     private void OnDisable()
@@ -75,6 +83,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>, IBackHandler, IMo
         InputManager.Instance.Building_OnChangeCoordinates -= Handle_放置;
         InputManager.Instance.Building_OnConfirmPlacement -= Handle_确认放置;
         InputManager.Instance.Building_OnConfirmConstruction -= Handle_完成建造;
+        InputManager.Instance.UnRegister(backHandle);
     }
 
     #endregion

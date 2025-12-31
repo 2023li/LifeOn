@@ -77,12 +77,14 @@ public class UIPanel_UniversalSelectionBox : PanelBase
 
     private void ClosePanel()
     {
-         OnHide();
+        
 
         // 【重要】清理引用，防止内存泄漏
         // 如果面板被缓存而不销毁，由于 Action 可能会引用外部大的对象（闭包），
         // 不清空会导致外部对象无法被回收。
         _currentConfirmAction = null;
         _currentCancelAction = null;
+
+        UIManager.Instance.HidePanel(this);
     }
 }

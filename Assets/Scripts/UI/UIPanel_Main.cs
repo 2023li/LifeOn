@@ -12,7 +12,16 @@ using UnityEngine.UI;
 public class UIPanel_Main : PanelBase
 {
 
-    [SerializeField] private CanvasGroup _popBG;
+
+    public override bool Back(params object[] args)
+    {
+
+        Debug.Log("被主面板处理了");
+
+        return true;
+    } 
+
+     [SerializeField] private CanvasGroup _popBG;
     private void ShowPopBG()
     {
         // 1. 安全校验：避免空引用报错

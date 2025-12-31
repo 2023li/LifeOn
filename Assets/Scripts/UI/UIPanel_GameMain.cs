@@ -9,15 +9,13 @@ using UnityEngine.UI;
 
 public class UIPanel_GameMain : PanelBase
 {
-
-    protected override void OnHide()
+    public override bool Back(params object[] args)
     {
-        base.OnHide();
-        _ = UIManager.Instance.ShowPanel<UIPanel_Pause>(UIManager.UILayer.Main);
+        base.Back(args);
+        //这个应该由GameManager控制
+        // _ = UIManager.Instance.ShowPanel<UIPanel_Pause>(UIManager.UILayer.Main);
+        return false;
     }
-
-
-
 
 
     public Button btn_打开设置面板;

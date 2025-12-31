@@ -6,30 +6,20 @@ namespace Moyo.Unity
     public abstract class PanelBase : MonoBehaviour
     {
         public UIManager.UILayer CurrentLayer { get; set; }
-        public virtual void Show(UIManager manager,params object[] args)
+        public virtual void Show(params object[] args)
         {
             gameObject.SetActive(true);
-            OnShow();
+          
         }
-        public virtual void Hide(UIManager manager, params object[] args)
+        public virtual void Hide(params object[] args)
         {
             gameObject.SetActive(false);
-            OnHide();
+            
         }
-
-        /// <summary>
-        /// 处理显示
-        /// </summary>
-        protected virtual void OnShow()
+        public virtual bool Back(params object[] args)
         {
-
+            return false;
         }
-        /// <summary>
-        /// 处理隐藏
-        /// </summary>
-        protected virtual void OnHide()
-        {
-
-        }
+       
     }
 }

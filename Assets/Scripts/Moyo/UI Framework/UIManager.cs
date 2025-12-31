@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Moyo.Unity;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
@@ -79,6 +80,23 @@ namespace Moyo.Unity
         {
             base.Awake();
             InitializeLayers();
+            backHandle = new(); 
+        }
+
+        IBackRegister.UIBackHandler backHandle;
+        private void OnEnable()
+        {
+            if (InputManager.HasInstance)
+            {
+                InputManager.Instance.Register(backHandle);
+            }
+        }
+        private void OnDisable()
+        {
+            if (InputManager.HasInstance)
+            {
+                InputManager.Instance.UnRegister(backHandle);
+            }
         }
 
         private void InitializeLayers()
@@ -279,7 +297,6 @@ namespace Moyo.Unity
             }
         }
         // === 新增部分：关闭最顶层的显示面板（用于返回键/Esc） ===
-        [Button]
         public void CloseTopPanel()
         {
             // 1. 按照渲染层级从高到低遍历 (Popup > Main > Normal ...)
@@ -315,6 +332,46 @@ namespace Moyo.Unity
                 }
             }
         }
+
+        /// <summary>
+        /// 触发最顶层面板的 Back 逻辑（通常用于绑定物理返回键/ESC键）
+        /// </summary>
+        public bool BackTopPanel()
+        {
+            // 1. 按照渲染层级从高到低遍历 (Popup > Main > Normal ...)
+            // 这样确保优先响应最上层的面板
+            var sortedConfigs = layerConfigs.OrderByDescending(c => c.sortOrder);
+
+            foreach (var config in sortedConfigs)
+            {
+                // [过滤] 忽略不应该响应返回键的层级
+                // 例如：Loading层通常是强制显示的，Toast 只是提示，Background 是底图
+                if (config.layerType == UILayer.Loading ||
+                    config.layerType == UILayer.Toast ||
+                    config.layerType == UILayer.DebugInfo ||
+                    config.layerType == UILayer.Background)
+                {
+                    continue;
+                }
+
+                if (activePanels.TryGetValue(config.layerType, out var stack) && stack.Count > 0)
+                {
+                    PanelBase topPanel = stack[stack.Count - 1];
+
+                    if (topPanel != null && topPanel.gameObject.activeSelf)
+                    {
+                        // 1. 先询问面板自己想不想处理 (例如：面板内部有二级确认弹窗)
+                        if (topPanel.Back())
+                        {
+                            return true; // 面板处理了，且不希望被直接关闭
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// 核心逻辑：处理面板关闭后的堆栈恢复
         /// </summary>
@@ -488,4 +545,7 @@ namespace Moyo.Unity
 
         #endregion
     }
+
 }
+
+

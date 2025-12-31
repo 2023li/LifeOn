@@ -21,7 +21,7 @@ public class TheGame : MonoSingleton<TheGame>
 
 
     protected override bool IsDontDestroyOnLoad => false;
-
+    IBackRegister.GameBackHandle gameBackHandle;
     protected override void Awake()
     {
         base.Awake ();
@@ -32,21 +32,36 @@ public class TheGame : MonoSingleton<TheGame>
             buildingSelector = GetComponent<BuildingSelector>();
         }
 
+        gameBackHandle = new();
 
     }
+    private void OnEnable()
+    {
+        if (InputManager.HasInstance)
+        {
+            InputManager.Instance.Register(gameBackHandle);
+        }
+    }
+
     public void Start()
     {
        _ = UIManager.Instance.ShowPanel<UIPanel_GameMain>(UIManager.UILayer.Main);
-
-     
-
-
         AppStateEvent.Tiggle(AppState.开始游戏);
         Debug.Log("游戏开始");
 
     }
+    private void OnDisable()
+    {
+        if (InputManager.HasInstance)
+        {
+            InputManager.Instance.UnRegister(gameBackHandle);
+        }
+    }
 
 
-
+    public void Pause()
+    {
+        _ = UIManager.Instance.ShowPanel<UIPanel_Pause>(UIManager.UILayer.Main);
+    }
 
 }

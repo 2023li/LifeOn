@@ -18,7 +18,6 @@ namespace Moyo.Unity
             // 如果需要，可以在这里加 position 等其他参数
         }
 
-        private const float DefaultYOffsetMultiplier = 0.6f;
 
         [Header("UI Components")]
         [SerializeField] private CanvasGroup canvasGroup;
@@ -29,8 +28,7 @@ namespace Moyo.Unity
         private Action onConfirm;
         private Action onCancel;
 
-        // 保存 UIManager 引用以便关闭自己
-        private UIManager uiManager;
+      
 
         protected  void Awake()
         {
@@ -44,10 +42,9 @@ namespace Moyo.Unity
         }
 
         // --- 核心重构：对接 PanelBase 的 Show 方法 ---
-        public override void Show(UIManager manager, params object[] args)
+        public override void Show(params object[] args)
         {
-            // 1. 保存 manager 引用
-            this.uiManager = manager;
+         
 
             // 2. 解析参数
             ApplyArgs(args);
@@ -64,7 +61,7 @@ namespace Moyo.Unity
         }
 
         // --- 核心重构：对接 PanelBase 的 Hide 方法 ---
-        public override void Hide(UIManager manager, params object[] args)
+        public override void Hide(params object[] args)
         {
             // 1. 禁用交互，防止关闭动画过程中被再次点击
             canvasGroup.interactable = false;
@@ -81,7 +78,7 @@ namespace Moyo.Unity
         public void SetWorldAnchor(Vector3 anchorWorldPos)
         {
             // 获取 Canvas：优先尝试 UIManager 的主 Canvas，否则找自身的
-            var targetCanvas = uiManager != null ? uiManager.GetMainCanvas() : GetComponentInParent<Canvas>();
+            var targetCanvas = UIManager.Instance.GetMainCanvas().GetComponentInParent<Canvas>();
 
             if (rectTransform == null || targetCanvas == null) return;
 
@@ -144,31 +141,17 @@ namespace Moyo.Unity
         {
             onConfirm?.Invoke();
 
-            // 点击确认后，通常应该关闭面板
-            CloseSelf();
+            UIManager.Instance.HidePanel(this);
         }
 
         private void OnCancelClicked()
         {
             onCancel?.Invoke();
 
-            // 点击取消后，通常应该关闭面板
-            CloseSelf();
+            UIManager.Instance.HidePanel(this);
         }
 
-        private void CloseSelf()
-        {
-            if (uiManager != null)
-            {
-                // 使用 UIManager 的标准关闭流程，这样可以维护堆栈逻辑
-                uiManager.HidePanel(this);
-            }
-            else
-            {
-                // 兜底
-                gameObject.SetActive(false);
-            }
-        }
+      
 
         #region 初始化辅助
         private void EnsureCanvasGroup()
