@@ -38,7 +38,7 @@ public class BR_居民房_LV1 : Rule
             case TurnPhase.资源消耗阶段:
 
 
-                if (self.Ctx.ResourceNetwork.TryConsumeResource(SupplyCategory.一级食物, 2))
+                if (self.Ctx.ResourceNetwork.TryConsumeResourceByCategoty(SupplyCategory.一级食物, 2))
                 {
 
                     if (self.Self_CurrentPopulation < self.RO_MaxPopulation)

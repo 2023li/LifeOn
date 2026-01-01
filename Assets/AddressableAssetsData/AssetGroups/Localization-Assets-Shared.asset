@@ -23,6 +23,12 @@ MonoBehaviour:
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 53efd6cbe07994f4ea58b6877b221af0
+    m_Address: Assets/Data/AppConfigure/Localization/Tables/UISetingTable/UISettingTable
+      Shared Data.asset
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b11dd98109031494780db5f2ab849c76
     m_Address: Assets/Data/AppConfigure/Localization/Tables/LoadingTable/MainPanel
       Shared Data.asset

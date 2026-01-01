@@ -11,7 +11,8 @@ public class UIPanel_Pause : PanelBase
     [SerializeField] private Button btn_LoadGame;
     [SerializeField] private Button btn_Setting;
     [SerializeField] private Button btn_Save;
-    [SerializeField] private Button Quit;
+    [SerializeField] private Button btn_QuickSave;
+    [SerializeField] private Button btn_Quit;
 
 
     protected void Awake()
@@ -34,6 +35,14 @@ public class UIPanel_Pause : PanelBase
         {
 
         });
+        btn_QuickSave.onClick.AddListener(() =>
+        {
+          
+            PersistentManager.Instance.SaveGame();
+
+
+        });
+
 
     }
 

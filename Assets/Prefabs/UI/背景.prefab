@@ -66,36 +66,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 362348047947800572}
   showCursor: 1
-  _sceneNames:
-  - 00_Demo_FantasyWarrior_Title
-  - 01_Demo_FantasyWarrior_Components_Actionbars-Hotbars
-  - 02_Demo_FantasyWarrior_Components_HPBars_Stats
-  - 03_Demo_FantasyWarrior_Components_Compass-Minimap-CharacterPortraits
-  - 04_Demo_FantasyWarrior_Components_WeaponWheels
-  - 05_Demo_FantasyWarrior_Components_Dialogue
-  - 06_Demo_FantasyWarrior_HUD_Adventure_01
-  - 07_Demo_FantasyWarrior_HUD_Adventure_02
-  - 08_Demo_FantasyWarrior_HUD_ActionRPG_01
-  - 09_Demo_FantasyWarrior_HUD_Survival_01
-  - 10_Demo_FantasyWarrior_Components_Misc_01
-  - 11_Demo_FantasyWarrior_Components_Misc_02
-  - 12_Demo_FantasyWarrior_Other_Reticles
-  - 13_Demo_FantasyWarrior_Other_MasterSprites
-  - 14_Demo_FantasyWarrior_Icons_Misc
-  - 15_Demo_FantasyWarrior_VFX
-  - 16_Demo_FantasyWarrior_Input_Xbox
-  - 17_Demo_FantasyWarrior_Input_PlayStation
-  - 18_Demo_FantasyWarrior_Input_NintendoSwitch
-  - 19_Demo_FantasyWarrior_Input_Keyboard&Mouse
-  - 20_Demo_FantasyWarrior_Input_SteamDeck
-  - 21_Demo_FantasyWarrior_Icons_Weapons_01
-  - 22_Demo_FantasyWarrior_Icons_Weapons_02
-  - 23_Demo_FantasyWarrior_Icons_WeaponsSide_01
-  - 24_Demo_FantasyWarrior_Icons_WeaponsSide_02
-  - 25_Demo_FantasyWarrior_Icons_WeaponsSide_03
-  - 26_Demo_FantasyWarrior_Icons_Resources_01
-  - 27_Demo_FantasyWarrior_Icons_Resources_02
-  - 28_Demo_FantasyWarrior_Icons_Resources_03
+  _sceneNames: []
 --- !u!1001 &5968910414583366309
 PrefabInstance:
   m_ObjectHideFlags: 0

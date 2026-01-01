@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moyo.Unity;
 using Sirenix.OdinInspector;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,30 +48,12 @@ public class Test : MonoBehaviour
 
     public List<Vector3Int> t;
 
+
+    public TMP_Text text;
     [Button]
-    public void SaveApp()
+    public void T()
     {
-        PersistentManager.Instance.SaveAppData();
-    }
-
-    [Button]
-    public void SaveTest(string key="test")
-    {
-      
-      //  PersistentManager.Instance.SaveGame(GameSaveData.CreateNew(key));
-
-    }
-
-
-    [Button]
-    public void LoadTest()
-    {
-        var d = PersistentManager.Instance.GetAllSaves();
-
-        foreach (var d2 in d)
-        {
-            Debug.Log(d2.saveName);
-        }
+        text.DOCounter(0, 100, 1f);
     }
 
 

@@ -7,6 +7,9 @@ using Sirenix.OdinInspector;
 using FMODUnity;
 using Unity.VisualScripting;
 using System.Threading.Tasks;
+using UnityEditor.Localization.Editor;
+using UnityEngine.Localization;
+
 public class UIPanel_Setting : PanelBase
 {
 
@@ -24,9 +27,11 @@ public class UIPanel_Setting : PanelBase
     [SerializeField, FoldoutGroup("导航栏")] private GameObject go_图像;
     [SerializeField, FoldoutGroup("导航栏")] private GameObject go_辅助功能;
 
-
+    [FoldoutGroup("本地化文本"),SerializeField]
+    private LocalizedString localStr_确定保存标题;
+    [FoldoutGroup("本地化文本"),SerializeField]
+    private LocalizedString localStr_确定保存描述;
   
-
     protected void Awake()
     {
         BindToggleEvents();
@@ -37,21 +42,47 @@ public class UIPanel_Setting : PanelBase
 
     private void OnEnable()
     {
-      
+        
+    }
+    private void Start()
+    {
+        
     }
 
     private void OnDestroy()
     {
        
     }
-
-
-    public static async Task ShowSettingPanel()
+    public override void Hide(params object[] args)
     {
-        await UIManager.Instance.ShowPanel<UIPanel_Setting>(UIManager.UILayer.Main);
+        base.Hide(args);
+
     }
+    public override bool Back(params object[] args)
+    {
+        if (!isSave)
+        {
+            string label = localStr_确定保存标题.GetLocalizedString();
+            string des = localStr_确定保存描述.GetLocalizedString();
+            _ = UIPanel_UniversalSelectionBox.ShowBox(label, des,
+                () =>
+                {
+                    PersistentManager.Instance.SaveAppData();
+                    UIManager.Instance.HidePanel(this);
+                },
+
+                () =>
+                {
+                    UIManager.Instance.HidePanel(this);
+                }
+                );
+          return true;
+        }
 
 
+        UIManager.Instance.HidePanel(this);
+        return true;
+    }
 
     private void BindToggleEvents()
     {
@@ -72,5 +103,13 @@ public class UIPanel_Setting : PanelBase
         go_图像.SetActive(toggle_图像.isOn);
         go_辅助功能.SetActive(toggle_辅助功能.isOn);
 
+    }
+
+
+    private bool isSave = false;
+ 
+    public void SetDataDirty()
+    {
+        isSave = false;
     }
 }

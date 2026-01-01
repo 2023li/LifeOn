@@ -22,6 +22,13 @@ public class AudioManager : MonoSingleton<AudioManager>
         }
     }
 
+
+    protected override void Initialize()
+    {
+        base.Initialize();
+        PersistentManager.Instance.OnAppDataLoad += LoadVolumeSettings;
+    }
+
     // VCA引用
     private VCA vcaEnvironment;
     private VCA vcaMusic;
@@ -36,6 +43,17 @@ public class AudioManager : MonoSingleton<AudioManager>
     private float currentMusicVolume;
     private float currentSFXVolume;
     private float currentVoiceVolume;
+    public float GetMasterVolume() => currentMasterVolume;
+    public float GetEnvironmentVolume() => currentEnvironmentVolume;
+    public float GetMusicVolume() => currentMusicVolume;
+    public float GetSFXVolume() => currentSFXVolume;
+    public float GetVoiceVolume() => currentVoiceVolume;
+
+    // 获取实际音量（包含主音量影响）
+    public float GetActualEnvironmentVolume() => currentEnvironmentVolume * currentMasterVolume;
+    public float GetActualMusicVolume() => currentMusicVolume * currentMasterVolume;
+    public float GetActualSFXVolume() => currentSFXVolume * currentMasterVolume;
+    public float GetActualVoiceVolume() => currentVoiceVolume * currentMasterVolume;
 
     // 事件
     public event Action OnVolumeChanged;
@@ -59,9 +77,6 @@ public class AudioManager : MonoSingleton<AudioManager>
 
         // 验证VCA
         ValidateVCAs();
-
-        // 加载保存的设置或使用默认值
-        LoadVolumeSettings();
 
         // 应用初始音量
         ApplyAllVolumes();
@@ -175,22 +190,6 @@ public class AudioManager : MonoSingleton<AudioManager>
     {
         UpdateAndApplyAllVolumes();
     }
-
-    #endregion
-
-    #region 获取音量
-
-    public float GetMasterVolume() => currentMasterVolume;
-    public float GetEnvironmentVolume() => currentEnvironmentVolume;
-    public float GetMusicVolume() => currentMusicVolume;
-    public float GetSFXVolume() => currentSFXVolume;
-    public float GetVoiceVolume() => currentVoiceVolume;
-
-    // 获取实际音量（包含主音量影响）
-    public float GetActualEnvironmentVolume() => currentEnvironmentVolume * currentMasterVolume;
-    public float GetActualMusicVolume() => currentMusicVolume * currentMasterVolume;
-    public float GetActualSFXVolume() => currentSFXVolume * currentMasterVolume;
-    public float GetActualVoiceVolume() => currentVoiceVolume * currentMasterVolume;
 
     #endregion
 

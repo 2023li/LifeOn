@@ -46,7 +46,7 @@ public class AppManager : MonoSingleton<AppManager>
     {
 
     }
-
+    
     protected override void OnDestroy()
     {
         base.OnDestroy();
@@ -175,9 +175,11 @@ public class AppManager : MonoSingleton<AppManager>
 public enum AppState
 {
 
+    APP数据加载完成,
+
     游戏加载完成,
 
-   游戏场景加载完成,
+    游戏场景加载完成,
 
     开始游戏,
 

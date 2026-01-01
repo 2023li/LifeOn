@@ -29,6 +29,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Locale-zh
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5528edcf0f213934d8a230728c56db46
+    m_Address: UISettingTable_zh
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-zh
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e2dee6be479bf8b43938395ad94446d2
     m_Address: LoadingTable_zh
     m_ReadOnly: 1

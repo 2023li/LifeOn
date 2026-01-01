@@ -86,6 +86,16 @@ public class UIPanel_Main : PanelBase
 
     protected void Awake()
     {
+        btn_Continue.onClick.AddListener(() =>
+        {
+            PersistentManager.Instance.LoadGame(PersistentManager.Instance.GetLastGameSaveId());
+        });
+
+        btn_Setting.onClick.AddListener(async () =>
+        {
+            await UIManager.Instance.ShowPanel<UIPanel_Setting>(UIManager.UILayer.Main);
+        });
+
         Awake_取名弹窗();
         Awake_确认退出弹窗();
         Awake_语言选择();
@@ -95,10 +105,9 @@ public class UIPanel_Main : PanelBase
     {
 
         btn_Continue.gameObject.SetActive(PersistentManager.Instance.HasLastGameSave());
-        btn_Continue.onClick.AddListener(() =>
-        {
-            PersistentManager.Instance.LoadGame(PersistentManager.Instance.GetLastGameSaveId());
-        });
+       
+
+
     }
 
 

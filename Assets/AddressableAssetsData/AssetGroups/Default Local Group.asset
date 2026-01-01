@@ -22,6 +22,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 510d1e65ca700a94881c377a0936135e
+    m_Address: UIPanel_SaveSelection
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 842ba94a9701a10439397c1682ffd8e9
     m_Address: TileLib
     m_ReadOnly: 0

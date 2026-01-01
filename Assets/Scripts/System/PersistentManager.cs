@@ -81,7 +81,7 @@ public class PersistentManager : MonoSingleton<PersistentManager>
     }
 
 
-
+    public event Action OnAppDataLoad;
     public void LoadAppData()
     {
         if (ES3.FileExists(AppDataFileName))
@@ -93,19 +93,29 @@ public class PersistentManager : MonoSingleton<PersistentManager>
             currentAppData = AppSaveData.GetDef();
             SaveAppData();
         }
+        OnAppDataLoad?.Invoke();
     }
     #endregion
 
     #region GameData (游戏存档)
 
     // CollectCurrentGameSaveData 方法保持你修复后的样子，这里略去不写
-    private GameSaveData CollectCurrentGameSaveData()
+    private GameSaveData CollectCurrentGameSaveData(string newName = null,bool newGuid = false)
     {
         if (currentGameData == null)
         {
             Debug.Log("自动创建存档");
             currentGameData = GameSaveData.CreateNew();
         }
+        if (newGuid)
+        {
+            currentGameData.SetNewGuid();
+        }
+        if (!string.IsNullOrEmpty(newName))
+        {
+            currentGameData.saveName = newName;
+        }
+
 
         //收集建筑数据
         List<BuildingInstance.BuildingSaveData> buildingSaveDatas = new();
@@ -126,11 +136,11 @@ public class PersistentManager : MonoSingleton<PersistentManager>
 
         return currentGameData;
     }
-    [Button]
-    public void SaveGame()
+    
+    public void SaveGame(string newName = null,bool newGuid = false)
     {
         // 假设你已经修复了 CollectCurrentGameSaveData 中的赋值问题
-        SaveGame(CollectCurrentGameSaveData());
+        SaveGame(CollectCurrentGameSaveData(newName,newGuid));
     }
 
     public void SaveGame(GameSaveData data)
@@ -232,9 +242,8 @@ public class PersistentManager : MonoSingleton<PersistentManager>
         // 4. 执行数据恢复
         RestoreGameState();
     }
-    /// <summary>
-    /// 将内存中的 currentGameData 应用到当前游戏世界
-    /// </summary>
+
+    //恢复游戏状态
     private void RestoreGameState()
     {
         Debug.Log("RestoreGameState...1");
@@ -265,9 +274,7 @@ public class PersistentManager : MonoSingleton<PersistentManager>
 
     }
 
-    /// <summary>
-    /// 根据存档重建场景中的建筑
-    /// </summary>
+    //恢复建筑
     private void ReconstructBuildings()
     {
        
@@ -282,6 +289,7 @@ public class PersistentManager : MonoSingleton<PersistentManager>
         }
     }
 
+    //恢复GameContext
     private void RecoverGameContext()
     {
         // 1. 恢复回合与时间
@@ -305,9 +313,6 @@ public class PersistentManager : MonoSingleton<PersistentManager>
             ConnectionManager.Instance.Load(currentGameData.connectionManagerSaveData);
 
     }
-
-
-
     #endregion
 
 
@@ -442,12 +447,7 @@ public class PersistentManager : MonoSingleton<PersistentManager>
         Debug.Log($"[PersistentManager] Deleted save and metadata: {saveid}");
     }
 
-    // LoadGame() 方法仍然需要你根据之前的建议去实现具体的场景恢复逻辑
-    public void LoadGame()
-    {
-        // 建议流程：
-        // 1. StartCoroutine(LoadGameSequence());
-    }
+   
 
     #endregion
 }
@@ -523,5 +523,11 @@ public class GameSaveData
         GameSaveData tData = new GameSaveData();
         tData.saveid = System.Guid.NewGuid().ToString(); // 初始化时就生成ID
         return tData;
+    }
+
+    public string SetNewGuid()
+    {
+        saveid = System.Guid.NewGuid().ToString();
+        return saveid;
     }
 }

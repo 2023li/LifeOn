@@ -13,6 +13,8 @@ public class ResourceNetwork
     #region 容量系统
     //目前主要用于更新库存容量
     public event Action OnResourceNetworkStateChange;
+    //当资源数量改变
+    public event Action<SupplyDef> OnResourceAmountChange;
     // ========= 基础数据 =========
 
     /// <summary>全局资源库存：按资源类型存储当前数量。</summary>
@@ -39,7 +41,10 @@ public class ResourceNetwork
         if (resource == null) return 0;
         return _resourceAmounts.TryGetValue(resource, out var v) ? v : 0;
     }
-
+    public int GetSupplyAmount(SupplyEnum id)
+    {
+        return GetSupplyAmount(SupplyDef.GetSupplyDef(id));
+    }
     
 
     /// <summary>
@@ -108,6 +113,8 @@ public class ResourceNetwork
         if (_usedCapacity < 0) _usedCapacity = 0;
 
         OnResourceNetworkStateChange?.Invoke();
+        // [新增] 触发资源数量变更事件
+        OnResourceAmountChange?.Invoke(resource);
 
         return true;
     }
@@ -141,12 +148,14 @@ public class ResourceNetwork
         int freed = amount * resource.OccupationUnit;
         _usedCapacity -= freed;
         if (_usedCapacity < 0) _usedCapacity = 0;
+
+        OnResourceAmountChange?.Invoke(resource);
         return true;
     }
     /// <summary>
     /// 尝试消耗某一个种类的物资
     /// </summary>
-    public bool TryConsumeResource(SupplyCategory category, int amount)
+    public bool TryConsumeResourceByCategoty(SupplyCategory category, int amount)
     {
         // 基本校验
         if (amount <= 0)

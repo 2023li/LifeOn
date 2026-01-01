@@ -45,7 +45,7 @@ public class UIPanel_UniversalSelectionBox : PanelBase
     }
 
     // 设置数据
-    private void Setup(string title, string content, Action onConfirm, Action onCancel)
+    public void Setup(string title, string content, Action onConfirm, Action onCancel)
     {
         if (txt_LableText != null) txt_LableText.text = title;
         if (txt_Description != null) txt_Description.text = content;
