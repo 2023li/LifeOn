@@ -33,7 +33,7 @@ public class BuildingArchetype : ScriptableObject
     public string DisplayName;       // "居民房"
 
     [LabelText("建筑尺寸")]
-    public int Size;
+    public int Size = 1;
 
     [LabelText("建筑分类")]
     public BuildingClassify classification = BuildingClassify.基础;
@@ -113,6 +113,7 @@ public class BuildingLevelDef
     public float BaseTransportRadius = 10f;
 
     [LabelText("资源分发范围")]
+    [Tooltip("该建筑作为仓库时，能向周围格子分发物资的范围")]
     public float BaseDistributeRadius = 5f;
 
 

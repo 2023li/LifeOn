@@ -34352,7 +34352,8 @@ MonoBehaviour:
   btn_LoadGame: {fileID: 8947189507924074558}
   btn_Setting: {fileID: 231374603799736891}
   btn_Save: {fileID: 8884571941809760553}
-  Quit: {fileID: 1025209170113793656}
+  btn_QuickSave: {fileID: 5395965267358540303}
+  btn_Quit: {fileID: 1025209170113793656}
 --- !u!1 &4955660415502348489
 GameObject:
   m_ObjectHideFlags: 0

@@ -47,6 +47,11 @@ MonoBehaviour:
     - SingularityGroup.HotReload.Runtime.Public
     - Sirenix.OdinInspector.Modules.Unity.Addressables
     - Sirenix.OdinInspector.Modules.UnityLocalization
+    - UniTask
+    - UniTask.Addressables
+    - UniTask.DOTween
+    - UniTask.Linq
+    - UniTask.TextMeshPro
     showAdvancedSettings: 0
   addMgrToSceneAutomatically: 0
   autoUpdateReferences: 1

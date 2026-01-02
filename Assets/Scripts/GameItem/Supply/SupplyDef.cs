@@ -37,6 +37,7 @@ public class SupplyDef : ScriptableObject
 
 
     [LabelText("仓库显示设置"),BoxGroup("库存属性")]
+    [Tooltip("该物资在仓库中的显示情况")]
     public DisplayOption DisplaySetting = DisplayOption.常规;
 
     [LabelText("占用库存"), BoxGroup("库存属性")]

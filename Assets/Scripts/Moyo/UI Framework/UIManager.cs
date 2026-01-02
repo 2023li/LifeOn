@@ -224,32 +224,38 @@ namespace Moyo.Unity
             UILayerConfig config = GetLayerConfig(layer);
             List<PanelBase> stack = activePanels[layer];
 
-            // 避免重复添加到列表
-            if (stack.Contains(newPanel))
+            // 1. 堆栈维护：如果已在栈中，移到末尾（视为重新聚焦）
+            if
+         (stack.Contains(newPanel))
             {
                 stack.Remove(newPanel);
             }
 
-            if (!config.allowMultiPanels)
+            // 2. 单窗口模式处理：隐藏当前的栈顶面板
+            if (!config.allowMultiPanels && stack.Count > 0
+        )
             {
-                // 如果堆栈里已有面板（即当前正在显示的），先隐藏它
-                if (stack.Count > 0)
+                var currentTop = stack[stack.Count - 1
+        ];
+                // 仅视觉隐藏，不触发出栈逻辑
+                if (currentTop != null
+         && currentTop != newPanel)
                 {
-                    var currentTop = stack[stack.Count - 1];
-                    if (currentTop != null && currentTop != newPanel)
-                    {
-                        // 仅视觉隐藏，不走 Close 流程，以便后续恢复
-                        currentTop.Hide(this);
-                    }
+                    // 注意：这里调用的是 PanelBase.Hide，但不走 UIManager.HidePanel 的逻辑
+                    currentTop.Hide();
                 }
             }
 
-            // 将新面板加入堆栈顶部
+            // 3. 入栈
             stack.Add(newPanel);
 
-            // 确保渲染在最前并显示
+            // 4. 视觉调整
             newPanel.transform.SetAsLastSibling();
-            newPanel.Show(this, args);
+            // 确保渲染在最前
+
+            // 【关键优化】：不再传递 'this' (UIManager)，直接传 args
+            // 这解决了 BuildingConfirmPanel 解析参数时的嵌套数组问题
+            newPanel.Show(args);
         }
 
         #endregion
@@ -377,35 +383,34 @@ namespace Moyo.Unity
         /// </summary>
         private void ProcessPanelHide(UILayer layer, PanelBase panelToClose)
         {
-            var stack = activePanels[layer];
+            // 如果该层级未被跟踪（防御性编程）
+            if (!activePanels.TryGetValue(layer, out var stack)) return;
+
             var config = GetLayerConfig(layer);
 
             // 1. 视觉隐藏
-            panelToClose.Hide(this);
+            // 【关键优化】：不再传递 'this'
+            panelToClose.Hide();
 
-            // 2. 从堆栈移除
+            // 2. 出栈
             if (stack.Contains(panelToClose))
             {
                 stack.Remove(panelToClose);
             }
 
-            // 3. === 恢复逻辑 (allowMultiPanels = false) ===
-            if (!config.allowMultiPanels)
+            // 3. 自动恢复逻辑 (单窗口模式)
+            if (!config.allowMultiPanels && stack.Count > 0)
             {
-                // 如果关闭的是顶层面板，且下面还有被压住的旧面板
-                if (stack.Count > 0)
+                var previousPanel = stack[stack.Count - 1];
+                // 如果前一个面板存在且目前是隐藏的，则恢复显示
+                if (previousPanel != null && !previousPanel.gameObject.activeSelf)
                 {
-                    var previousPanel = stack[stack.Count - 1];
-
-                    // 如果旧面板目前是隐藏的，则恢复显示
-                    if (previousPanel != null && !previousPanel.gameObject.activeSelf)
-                    {
-                        previousPanel.Show(this); // 恢复显示
-                    }
+                    // 恢复显示时通常不需要参数，或者你可以缓存之前的参数
+                    previousPanel.Show();
                 }
             }
 
-            // 4. 更新模态状态
+            // 4. 刷新模态状态（遮罩/点击阻挡）
             UpdateModalLayerState();
         }
 

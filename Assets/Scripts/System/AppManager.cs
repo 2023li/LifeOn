@@ -7,6 +7,9 @@ using Sirenix.OdinInspector;
 using System;
 using static LOConstant;
 using UnityEditor;
+using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
+using System.Threading;
 
 
 public enum AppLanguage
@@ -18,6 +21,17 @@ public enum AppLanguage
 
 public class AppManager : MonoSingleton<AppManager>
 {
+    [Button]
+    public void Test()
+    {
+       _ = WaitRunTask(() =>
+        {
+            Thread.Sleep(3000);
+        });
+    }
+
+
+
     // 存储当前正在进行的加载请求数据
     public class SceneLoadContext
     {
@@ -38,7 +52,7 @@ public class AppManager : MonoSingleton<AppManager>
     {
         PersistentManager.Instance.LoadAppData();
 
-      
+
     }
 
     // Update is called once per frame
@@ -46,7 +60,7 @@ public class AppManager : MonoSingleton<AppManager>
     {
 
     }
-    
+
     protected override void OnDestroy()
     {
         base.OnDestroy();
@@ -63,7 +77,7 @@ public class AppManager : MonoSingleton<AppManager>
             {
                 "UIPanel_Main"
             },
-            OnComplete = async () => {await UIManager.Instance.ShowPanel<UIPanel_Main>(UIManager.UILayer.Main); }
+            OnComplete = async () => { await UIManager.Instance.ShowPanel<UIPanel_Main>(UIManager.UILayer.Main); }
         };
         LoadScene(sc);
     }
@@ -92,8 +106,33 @@ public class AppManager : MonoSingleton<AppManager>
     }
     #endregion
 
+    private void EnterWait()
+    {
+       _ = UIPanel_GeneralNotice.ShowWait();
+    }
+    public async UniTask WaitRunTask(Action action, float minDuration = 0.1f)
+    {
+        // 1. 显示 Loading
+        EnterWait();
 
+        UniTask workTask = UniTask.RunOnThreadPool(action);
 
+        // Task B: 最小等待时间的计时器 (忽略 TimeScale 影响)
+        UniTask delayTask = UniTask.Delay(TimeSpan.FromSeconds(minDuration), ignoreTimeScale: true);
+
+        // 3. 等待两者都完成
+        // 如果 workTask 0.1秒做完，delayTask 会强行等到 0.5秒
+        // 如果 workTask 2.0秒做完，delayTask 早就结束了，整体耗时 2.0秒
+        await UniTask.WhenAll(workTask, delayTask);
+
+        // 4. 无论成功还是报错，最终都会执行这里，确保 Loading 关闭
+        ExitWait();
+
+    }
+    private void ExitWait()
+    {
+        UIPanel_GeneralNotice.HideWait();
+    }
 
     public List<string> NeedPreloadGameObject;
 
@@ -194,7 +233,7 @@ public struct AppStateEvent
     private static AppStateEvent eventArg;
 
     public AppState State;
-    
+
     public static void Tiggle(AppState e)
     {
 

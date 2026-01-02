@@ -581,8 +581,10 @@ public class BuildingInstance : MonoBehaviour
     {
         _activeInstances.Add(this);
 
-
-        RegisterToGame();
+        if (Def != null)
+        {
+            RegisterToGame();
+        }
     }
     private void Start()
     {
@@ -644,6 +646,9 @@ public class BuildingInstance : MonoBehaviour
 
 
         ApplyPendingRuleChanges();
+        // 【修复】数据初始化完毕，现在可以安全注册到 ResourceNetwork 了
+        // 此时 RO_MaxStorageCapacity 能读到正确数值
+        RegisterToGame();
     }
 
     public class BuildingSaveData

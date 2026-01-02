@@ -35,11 +35,10 @@ public class UIPanel_Pause : PanelBase
         {
 
         });
-        btn_QuickSave.onClick.AddListener(() =>
+        btn_QuickSave.onClick.AddListener( async () =>
         {
-          
-            PersistentManager.Instance.SaveGame();
 
+            await AppManager.Instance.WaitRunTask(() => { PersistentManager.Instance.SaveGame(); });
 
         });
 

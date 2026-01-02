@@ -24,7 +24,14 @@ public class ResourceNetwork
     private int _totalCapacity;
     private int _usedCapacity;
 
+    /// <summary>
+    /// 总库存
+    /// </summary>
     public int TotalCapacity { get { return _totalCapacity; } }
+
+    /// <summary>
+    /// 已使用库存
+    /// </summary>
     public int UsedCapacity { get { return _usedCapacity; } }
 
     /// <summary>

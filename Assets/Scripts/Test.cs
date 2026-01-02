@@ -53,7 +53,7 @@ public class Test : MonoBehaviour
     [Button]
     public void T()
     {
-        text.DOCounter(0, 100, 1f);
+       Debug.Log( GameContext.Instance.ResourceNetwork.TotalCapacity);
     }
 
 

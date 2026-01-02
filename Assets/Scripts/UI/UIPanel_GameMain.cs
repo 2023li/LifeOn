@@ -173,28 +173,24 @@ public class UIPanel_GameMain : PanelBase
 
     #region 顶部HUD
 
-    [FoldoutGroup("HUD"),SerializeField,LabelText("文本_回合数")] TMP_Text text_TurnText;
-
-    //[FoldoutGroup("HUD"), SerializeField, LabelText("img_金币")] Image img_金币;
+    [FoldoutGroup("HUD"), SerializeField, LabelText("文本_回合数")] TMP_Text text_TurnText;
     [FoldoutGroup("HUD"), SerializeField, LabelText("txt_金币")] TMP_Text txt_金币;
-
-    //[FoldoutGroup("HUD"), SerializeField, LabelText("img_库存")] Image img_库存;
     [FoldoutGroup("HUD"), SerializeField, LabelText("txt_库存")] TMP_Text txt_库存;
-
-    //[FoldoutGroup("HUD"), SerializeField, LabelText("img_人口")] Image img_人口;
     [FoldoutGroup("HUD"), SerializeField, LabelText("txt_人口")] TMP_Text txt_人口;
 
-    // [新增] 2. 用于记录当前显示数值的变量（用于计算滚动起点）
+    // --- 滚动数值缓存 ---
     private float _display_Gold = 0;
     private float _display_UsedCapacity = 0;
-    private float _display_TotalWorkers = 0;
-    // [新增] 3. 保存Tweener引用，防止快速变化时动画冲突
+    private float _display_EmployedWorkers = 0;
+
+    // --- Tweener 引用 (防止动画冲突) ---
     private Tweener _tween_Gold;
     private Tweener _tween_Inventory;
     private Tweener _tween_Population;
+
     public void Start_顶部HUD()
     {
-        // 监听回合变更 (保持不变)
+        // 1. 回合数监听 (保持不变)
         TurnSystem.OnTurnPhaseChange += (p) =>
         {
             if (p == TurnPhase.开始准备阶段)
@@ -203,89 +199,98 @@ public class UIPanel_GameMain : PanelBase
             }
         };
 
+        // 2. 库存监听
+        // 初始化显示
         _display_UsedCapacity = ctx.ResourceNetwork.UsedCapacity;
-        UpdateInventoryText(_display_UsedCapacity, ctx.ResourceNetwork.TotalCapacity);
+        RefreshInventoryText(_display_UsedCapacity, ctx.ResourceNetwork.TotalCapacity);
 
         GameContext.Instance.ResourceNetwork.OnResourceNetworkStateChange += () =>
         {
-            // 当数据变化时，执行滚动动画
+            // 数据源：已用库存 / 总库存
             Anim_UpdateInventory(ctx.ResourceNetwork.UsedCapacity, ctx.ResourceNetwork.TotalCapacity);
         };
 
-        // --- 人口逻辑修改 ---
-        // 初始化
-        _display_TotalWorkers = ctx.HumanResourcesNetwork.TotalWorkers;
-        UpdatePopulationText(_display_TotalWorkers, ctx.HumanResourcesNetwork.Unemployed);
+        // 3. 人口监听
+        // 初始化显示 (逻辑修正：显示 就业/总人口)
+        _display_EmployedWorkers = ctx.HumanResourcesNetwork.TotalWorkers;
+        RefreshPopulationText(_display_EmployedWorkers, ctx.HumanResourcesNetwork.TotalPopulation);
 
         ctx.HumanResourcesNetwork.OnHumanResourcesChange += () =>
         {
-            // 动画更新
-            Anim_UpdatePopulation(ctx.HumanResourcesNetwork.TotalWorkers, ctx.HumanResourcesNetwork.Unemployed);
+            // 数据源：就业人口 / 总人口
+            Anim_UpdatePopulation(ctx.HumanResourcesNetwork.TotalWorkers, ctx.HumanResourcesNetwork.TotalPopulation);
         };
 
-        // --- 金币逻辑 (假设你有一个获取金币的地方) ---
-        // 你的原始代码中没有金币的事件监听，这里我预留一个方法供你外部调用
-        UpdateGoldUI();
+        // 4. 金币监听
+        UpdateGoldUI(true); // true 表示强制立即刷新，不播动画
         ctx.ResourceNetwork.OnResourceAmountChange += (def) =>
         {
-            if(def.Id == SupplyEnum.SD_金币.ToString())
+            if (def.Id == SupplyEnum.SD_金币.ToString())
             {
-                UpdateGoldUI();
+                UpdateGoldUI(false);
             }
         };
-
     }
-    // [新增] 4. 封装库存更新动画
+
+    // ================= 库存逻辑 =================
+    // 显示格式：已使用库存/总库存
     private void Anim_UpdateInventory(float targetUsed, float targetTotal)
     {
-        // 如果上一个动画还在跑，先杀掉，防止冲突
         _tween_Inventory?.Kill();
 
-        // 从 "当前显示的数值" 滚动到 "目标数值"
+        // 滚动 "已用库存"
         _tween_Inventory = DOVirtual.Float(_display_UsedCapacity, targetUsed, 0.5f, (val) =>
         {
-            _display_UsedCapacity = val; // 更新中间值
-            UpdateInventoryText(val, targetTotal);
-        }).SetEase(Ease.OutQuad); // 使用 OutQuad 让动画在结束时变慢，更有质感
-    }
-
-    // 辅助方法：只负责更新文本字符串
-    private void UpdateInventoryText(float used, float total)
-    {
-        // (int)used 会丢弃小数，只显示整数
-        txt_库存.text = $"库存：{(int)used}/{total}";
-    }
-
-    // [新增] 5. 封装人口更新动画
-    private void Anim_UpdatePopulation(float targetWorkers, float targetUnemployed)
-    {
-        _tween_Population?.Kill();
-
-        // 这里的逻辑是：让"总人口"(分子)滚动，"失业人口"(分母)通常我们直接刷新
-        // 如果你想让分母也滚动，逻辑会复杂一些，通常滚动分子就很有感觉了
-        _tween_Population = DOVirtual.Float(_display_TotalWorkers, targetWorkers, 0.5f, (val) =>
-        {
-            _display_TotalWorkers = val;
-            UpdatePopulationText(val, targetUnemployed);
+            _display_UsedCapacity = val;
+            RefreshInventoryText(val, targetTotal);
         }).SetEase(Ease.OutQuad);
     }
 
-    private void UpdatePopulationText(float workers, float unemployed)
+    private void RefreshInventoryText(float used, float total)
     {
-        txt_人口.text = $"人口：{(int)workers}/{unemployed}";
+        txt_库存.text = $"{(int)used}/{(int)total}";
     }
 
-    // [新增] 6. 金币更新动画 (供外部调用，例如 UpdateGold(100))
-    public void UpdateGoldUI()
+    // ================= 人口逻辑 =================
+    // 显示格式：就业人口/总人口
+    private void Anim_UpdatePopulation(float targetEmployed, float targetTotalPop)
+    {
+        _tween_Population?.Kill();
+
+        // 滚动 "就业人口"
+        _tween_Population = DOVirtual.Float(_display_EmployedWorkers, targetEmployed, 0.5f, (val) =>
+        {
+            _display_EmployedWorkers = val;
+            RefreshPopulationText(val, targetTotalPop);
+        }).SetEase(Ease.OutQuad);
+    }
+
+    private void RefreshPopulationText(float employed, float totalPop)
+    {
+        txt_人口.text = $"{(int)employed}/{(int)totalPop}";
+    }
+
+    // ================= 金币逻辑 =================
+    // 显示格式：金币数量
+    public void UpdateGoldUI(bool immediate = false)
     {
         int targetGold = ctx.ResourceNetwork.GetSupplyAmount(SupplyEnum.SD_金币);
+
         _tween_Gold?.Kill();
 
-        _tween_Gold = DOVirtual.Float(_display_Gold, targetGold, 0.8f, (val) =>
+        if (immediate)
         {
-            _display_Gold = val;
-            txt_金币.text = ((int)val).ToString(); // 或者 $"金币：{(int)val}"
-        }).SetEase(Ease.OutExpo); // 金币通常变化幅度大，用 OutExpo 会更有冲击力
+            _display_Gold = targetGold;
+            txt_金币.text = targetGold.ToString();
+        }
+        else
+        {
+            _tween_Gold = DOVirtual.Float(_display_Gold, targetGold, 0.8f, (val) =>
+            {
+                _display_Gold = val;
+                txt_金币.text = ((int)val).ToString();
+            }).SetEase(Ease.OutExpo);
+        }
     }
 
     #endregion

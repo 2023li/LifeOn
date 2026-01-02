@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee61fcc490adb154f95c02cb2ab70f9a, type: 3}
+  m_Name: "BA_\u884C\u653F\u4E2D\u5FC3"
+  m_EditorClassIdentifier: 
+  Id: "BA_\u884C\u653F\u4E2D\u5FC3"
+  DisplayName: "\u884C\u653F\u4E2D\u5FC3"
+  Size: 2
+  classification: 0
+  BuildingPrefab: {fileID: 3831073936164517814, guid: a216c2a911e01fb47b5f22416267d44b, type: 3}
+  BuildingIcon: {fileID: 0}
+  UIPanelPrefab_Brief: {fileID: 0}
+  UIPanelPrefab_Detailed: {fileID: 0}
+  Introduction: 
+  ShowInBuildPanel: []
+  AllowConstruction: []
+  BaseRules: []
+  LevelsList:
+  - LevelDisplayName: "\u9886\u4E3B\u957F\u5C4B"
+    BaseMaxPopulation: 10
+    BaseStorageCapacity: 100
+    ExpToNext: -1
+    BaseMaxJobsPosition: 0
+    BaseTransportationResistance: 3
+    BaseTransportRadius: 10
+    BaseDistributeRadius: 5
+    BaseMaxTraffic: 0
+    BaseAttractivenessPerJob: 0
+    ConditionsForAllowingUpgrades: []
+    Rules: []
+  references:
+    version: 2
+    RefIds: []

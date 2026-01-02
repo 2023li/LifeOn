@@ -42,7 +42,6 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IMoyoEventListener
     [SerializeField] private TileBase crimson; // 深红：占用
 
     [LabelText("确认面板地址")][SerializeField] private string confirmPanelAddress = "BuildingConfirmPanel";
-    [SerializeField] private UIManager.UILayer confirmPanelLayer = UIManager.UILayer.Popup;
 
     private BuildingConfirmPanel confirmPanelInstance;
     private bool lastPlacementValid;
@@ -224,6 +223,8 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IMoyoEventListener
 
     private void Handle_完成建造()
     {
+        Debug.Log("ok");
+
         if (process != ConstructionProcess.AwaitingConfirmation || currentBuildDef == null) return;
 
         // 1. 二次占用校验
@@ -412,8 +413,8 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IMoyoEventListener
             OnCancel = Handle_取消建造
         };
 
-        var address = string.IsNullOrWhiteSpace(confirmPanelAddress) ? null : confirmPanelAddress;
-        var panel = await UIManager.Instance.ShowPanel<BuildingConfirmPanel>(confirmPanelLayer, address, args);
+        string address = string.IsNullOrWhiteSpace(confirmPanelAddress) ? null : confirmPanelAddress;
+        BuildingConfirmPanel panel = await UIManager.Instance.ShowPanel<BuildingConfirmPanel>(UIManager.UILayer.Popup, address, args);
         if (panel == null) return;
 
         confirmPanelInstance = panel;
