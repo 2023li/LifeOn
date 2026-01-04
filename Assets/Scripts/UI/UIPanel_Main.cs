@@ -13,6 +13,7 @@ public class UIPanel_Main : PanelBase
 {
 
 
+    public override UILayer Layer => UILayer.Main;
     public override bool Back(params object[] args)
     {
 
@@ -90,12 +91,12 @@ public class UIPanel_Main : PanelBase
         });
         btn_LoadGame.onClick.AddListener(async () =>
         {
-           await UIManager.Instance.ShowPanel<UIPanel_SaveSelection>(UIManager.UILayer.Main);
+           await UIManager.Instance.ShowPanel<UIPanel_SaveSelection>();
         });
 
         btn_Setting.onClick.AddListener(async () =>
         {
-            await UIManager.Instance.ShowPanel<UIPanel_Setting>(UIManager.UILayer.Main);
+            await UIManager.Instance.ShowPanel<UIPanel_Setting>();
         });
 
         btn_Quit.onClick.AddListener(() =>
@@ -118,14 +119,6 @@ public class UIPanel_Main : PanelBase
 
     void Start()
     {
-        #region 绑定点击事件
-      
-
-
-     
-        #endregion
-
-
         if (PersistentManager.Instance.CurrentAppData.firstStartup)
         {
             Debug.Log("第一次启动游戏");
@@ -234,6 +227,8 @@ public class UIPanel_Main : PanelBase
 
     [FoldoutGroup("语言选择"), SerializeField]
     private TMP_Dropdown dropDown_语言选择下拉菜单;
+
+
     private void Awake_语言选择()
     {
         btn_确认语言.onClick.AddListener(() =>

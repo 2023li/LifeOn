@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Moyo.Unity;
@@ -6,6 +7,7 @@ using UnityEngine.UI;
 
 public class UIPanel_Pause : PanelBase
 {
+    public override UILayer Layer => UILayer.Popup;
 
     [SerializeField] private Button btn_Continue;
     [SerializeField] private Button btn_LoadGame;
@@ -28,7 +30,7 @@ public class UIPanel_Pause : PanelBase
 
         btn_Setting.onClick.AddListener(async () =>
         {
-            await UIManager.Instance.ShowPanel<UIPanel_Setting>(UIManager.UILayer.Main);
+            await UIManager.Instance.ShowPanel<UIPanel_Setting>();
         });
 
         btn_Save.onClick.AddListener(() =>

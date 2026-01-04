@@ -30,7 +30,7 @@ public class LoadTransition : MonoBehaviour
     private async void Start()
     {
         // 2. 使用 await 替代 .Result，避免死锁
-        uiPanel = await UIManager.Instance.ShowPanel<UIPanel_Load>(UIManager.UILayer.Loading);
+        uiPanel = await UIManager.Instance.ShowPanel<UIPanel_Load>();
 
         // 2. 初始化 UI
         if (uiPanel != null)

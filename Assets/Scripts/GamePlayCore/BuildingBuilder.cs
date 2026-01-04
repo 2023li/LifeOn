@@ -154,8 +154,8 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IMoyoEventListener
         lastPlacementValid = occupied.Count == 0;
 
         // 4. 设置分层高亮
-        // Priority 0: 有效区域 (绿色)
-        // Priority 1: 冲突区域 (深红)，会覆盖在绿色之上
+        // BackPriority 0: 有效区域 (绿色)
+        // BackPriority 1: 冲突区域 (深红)，会覆盖在绿色之上
 
         if (valid.Count > 0)
         {
@@ -414,7 +414,7 @@ public class BuildingBuilder : MonoSingleton<BuildingBuilder>,IMoyoEventListener
         };
 
         string address = string.IsNullOrWhiteSpace(confirmPanelAddress) ? null : confirmPanelAddress;
-        BuildingConfirmPanel panel = await UIManager.Instance.ShowPanel<BuildingConfirmPanel>(UIManager.UILayer.Popup, address, args);
+        BuildingConfirmPanel panel = await UIManager.Instance.ShowPanel<BuildingConfirmPanel>(address, args);
         if (panel == null) return;
 
         confirmPanelInstance = panel;

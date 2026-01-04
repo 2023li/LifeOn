@@ -5,12 +5,17 @@ namespace Moyo.Unity
 {
     public interface IBackHandler
     {
-        int Priority { get; }
+        int BackPriority { get; }
 
         bool TryHandleBack();
     }
 }
-
+public static class BackPrioritySort
+{
+    public const int UIPriority = 100;
+    public const int BuildingBack = 50;
+    public const int GameBack = 20;
+}
 
 
 
@@ -24,7 +29,7 @@ public class IBackRegister
 
     public class UIBackHandler : IBackHandler
     {
-        public int Priority => UIPriority;
+        public int BackPriority => UIPriority;
 
         public bool TryHandleBack()
         {
@@ -34,7 +39,7 @@ public class IBackRegister
 
     public class BuidingBackHandle : IBackHandler
     {
-        public int Priority => BuildingBack;
+        public int BackPriority => BuildingBack;
 
         public bool TryHandleBack()
         {
@@ -44,7 +49,7 @@ public class IBackRegister
 
     public class GameBackHandle : IBackHandler
     {
-        public int Priority => GameBack;
+        public int BackPriority => GameBack;
 
         public bool TryHandleBack()
         {

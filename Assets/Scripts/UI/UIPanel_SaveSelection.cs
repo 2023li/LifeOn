@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic; // 明确引用 Generic
 using Moyo.Unity;
 using Sirenix.OdinInspector;
@@ -5,6 +6,9 @@ using UnityEngine;
 
 public class UIPanel_SaveSelection : PanelBase
 {
+
+    public override UILayer Layer => UILayer.Panel;
+
     [SerializeField, LabelText("存档父对象")]
     private RectTransform rt_saveParents;
 

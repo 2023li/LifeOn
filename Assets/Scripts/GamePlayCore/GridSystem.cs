@@ -178,10 +178,10 @@ public class GridSystem : MonoSingleton<GridSystem>
         _layerMapDict[Layer.障碍].SetTile(offset, visualizationTile);
     }
     // -----------------------------------------------------------------------
-    // 3. 多层 Tilemap 高亮系统 (Int Priority Based)
+    // 3. 多层 Tilemap 高亮系统 (Int BackPriority Based)
     // -----------------------------------------------------------------------
 
-    // 对象池：存储已经生成的 Tilemap 实例 (Key: Priority)
+    // 对象池：存储已经生成的 Tilemap 实例 (Key: BackPriority)
     private Dictionary<int, Tilemap> _layerTilemapInstances;
 
     // 基础 SortingOrder，所有高亮层都会在此基础上叠加
@@ -220,8 +220,8 @@ public class GridSystem : MonoSingleton<GridSystem>
         Tilemap newTilemap = newObj.GetComponent<Tilemap>();
         TilemapRenderer newRenderer = newObj.GetComponent<TilemapRenderer>();
 
-        // 3. 设置排序：BaseOrder + 1 (避免跟原有冲突) + Priority
-        // Priority 越高，SortingOrder 越大，显示在越上层
+        // 3. 设置排序：BaseOrder + 1 (避免跟原有冲突) + BackPriority
+        // BackPriority 越高，SortingOrder 越大，显示在越上层
         if (newRenderer != null)
         {
             newRenderer.sortingOrder = _baseSortingOrder + 1 + priority;

@@ -109,8 +109,8 @@ public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppE
             }
 
             // 2. [关键] 动态重排序
-            // 因为 Panel 的 Priority 属性现在是动态计算的，所以必须实时 Sort
-            _backHandlers.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+            // 因为 Panel 的 BackPriority 属性现在是动态计算的，所以必须实时 Sort
+            _backHandlers.Sort((a, b) => b.BackPriority.CompareTo(a.BackPriority));
 
             // 3. 责任链分发
             foreach (IBackHandler h in _backHandlers)
@@ -122,7 +122,7 @@ public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppE
 
                 if (h.TryHandleBack())
                 {
-                    Debug.Log($"返回键被 {h.GetType().Name} (Priority:{h.Priority}) 消费");
+                    Debug.Log($"返回键被 {h.GetType().Name} (BackPriority:{h.BackPriority}) 消费");
                     return; // 只要有一个处理了，就停止
                 }
             }
@@ -245,7 +245,7 @@ public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppE
         {
             _backHandlers.Add(h);
             // 注册时也可以先排一次，虽然主要依赖运行时排序
-            _backHandlers.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+            _backHandlers.Sort((a, b) => b.BackPriority.CompareTo(a.BackPriority));
         }
     }
 

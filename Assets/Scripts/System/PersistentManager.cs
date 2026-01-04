@@ -233,7 +233,7 @@ public class PersistentManager : MonoSingleton<PersistentManager>
             OnComplete = async () =>
             {
                 // A. 显示游戏主界面 (但在数据恢复前，它可能显示为空数据，所以其实可以放在后面，或者由 Restore 刷新)
-                await UIManager.Instance.ShowPanel<UIPanel_GameMain>(UIManager.UILayer.Main);
+                await UIManager.Instance.ShowPanel<UIPanel_GameMain>();
 
                 // B. 执行数据恢复 (替代原本的 RestoreGameRoutine)
                 // 注意：这里不需要协程等待，因为 OnComplete 触发时，场景已经加载完毕且 Awake/Start 已执行
@@ -241,7 +241,7 @@ public class PersistentManager : MonoSingleton<PersistentManager>
 
                 // C. 触发事件
                 AppEventArgs.Tiggle(AppEventEnum.场景加载完成);
-
+                
                 Debug.Log("[PersistentManager] 存档加载流程全部结束，Loading 界面已关闭。");
             }
         };

@@ -10,6 +10,8 @@ using UnityEngine.UI;
 
 public class UIPanel_GameMain : PanelBase
 {
+
+    public override UILayer Layer => UILayer.Main;
     public override bool Back(params object[] args)
     {
         base.Back(args);
@@ -74,7 +76,7 @@ public class UIPanel_GameMain : PanelBase
 
         btn_打开设置面板.onClick.AddListener(() =>
         {
-           _ = UIManager.Instance.ShowPanel<UIPanel_Setting>(UIManager.UILayer.Main);
+           _ = UIManager.Instance.ShowPanel<UIPanel_Setting>();
         });
 
 

@@ -9,7 +9,22 @@ using UnityEngine.UI;
 
 namespace Moyo.Unity
 {
-    public class UIManager : MonoSingleton<UIManager>
+
+    public enum UILayer
+    {
+        Background = 0, //背景
+        Scene = 1,  //场景中的可点击UI
+        Main = 2,   //每个场景的主UI
+        Panel = 3,  //例如设置界面等全屏页面
+        Popup = 4,  //例如提示框 非全屏界面
+        Guide = 5, //指导
+        Notice = 6, //通知
+        Toast = 7,  //暂时无用
+        Loading = 8,
+        DebugInfo = 9
+    }
+
+    public class UIManager : MonoSingleton<UIManager>, IBackHandler
     {
         #region 配置定义
 
@@ -17,19 +32,23 @@ namespace Moyo.Unity
         public class UILayerConfig
         {
             public UILayer layerType;
+
             public string layerName;
+
             public int sortOrder;
+            //当一个被标记为 isModal = true 的层级上有面板显示时，它会强制屏蔽掉所有“层级更低”的 UI 的点击事件。
             public bool isModal;
+
             public bool blocksRaycasts;
 
             [Tooltip("若为false：启用堆栈导航模式。打开新面板时隐藏当前面板；关闭当前面板时自动恢复上一个面板。")]
             public bool allowMultiPanels = true;
+
+            [Tooltip("是否允许通过 Back 键(Esc)关闭此层级的面板")]
+            public bool canCloseByBack = true;
         }
 
-        public enum UILayer
-        {
-            Background, Scene, Normal, Main, Popup, Guide, Notice, Toast, Loading, DebugInfo
-        }
+
 
         #endregion
 
@@ -37,17 +56,16 @@ namespace Moyo.Unity
 
         [SerializeField]
         private UILayerConfig[] layerConfigs = {
-            new UILayerConfig { layerType = UILayer.Background, layerName = "Background", sortOrder = 0, isModal = false, blocksRaycasts = false , allowMultiPanels = true},
-            new UILayerConfig { layerType = UILayer.Scene, layerName = "Scene", sortOrder = 1, isModal = false, blocksRaycasts = false , allowMultiPanels = true},
-            new UILayerConfig { layerType = UILayer.Normal, layerName = "Normal", sortOrder = 2, isModal = false, blocksRaycasts = true , allowMultiPanels = true},
-            // Main 层设为 false，实现打开角色面板时隐藏主HUD，关闭后自动恢复
-            new UILayerConfig { layerType = UILayer.Main, layerName = "Main", sortOrder = 3, isModal = false, blocksRaycasts = true, allowMultiPanels = false },
-            new UILayerConfig { layerType = UILayer.Popup, layerName = "Popup", sortOrder = 4, isModal = true, blocksRaycasts = true , allowMultiPanels = true},
-            new UILayerConfig { layerType = UILayer.Guide, layerName = "Guide", sortOrder = 5, isModal = true, blocksRaycasts = true , allowMultiPanels = true},
-            new UILayerConfig { layerType = UILayer.Notice, layerName = "Notice", sortOrder = 6, isModal = true, blocksRaycasts = true , allowMultiPanels = true},
-            new UILayerConfig { layerType = UILayer.Toast, layerName = "Toast", sortOrder = 7, isModal = false, blocksRaycasts = false , allowMultiPanels = true},
-            new UILayerConfig { layerType = UILayer.Loading, layerName = "Loading", sortOrder = 8, isModal = true, blocksRaycasts = true , allowMultiPanels = true},
-            new UILayerConfig { layerType = UILayer.DebugInfo, layerName = "DebugInfo", sortOrder = 9, isModal = false, blocksRaycasts = false , allowMultiPanels = true}
+            new UILayerConfig { layerType = UILayer.Background, layerName = "Background", sortOrder = 0, isModal = false, blocksRaycasts = false , allowMultiPanels = true,canCloseByBack = false},
+            new UILayerConfig { layerType = UILayer.Scene, layerName = "Scene", sortOrder = 1, isModal = false, blocksRaycasts = false , allowMultiPanels = true,canCloseByBack = true},
+            new UILayerConfig { layerType = UILayer.Main, layerName = "Main", sortOrder = 2, isModal = false, blocksRaycasts = true, allowMultiPanels = false,canCloseByBack = false },
+            new UILayerConfig { layerType = UILayer.Panel, layerName = "Panel", sortOrder = 3, isModal = true, blocksRaycasts = true , allowMultiPanels = true,canCloseByBack = true},
+            new UILayerConfig { layerType = UILayer.Popup, layerName = "Popup", sortOrder = 4, isModal = true, blocksRaycasts = true , allowMultiPanels = true,canCloseByBack = true},
+            new UILayerConfig { layerType = UILayer.Guide, layerName = "Guide", sortOrder = 5, isModal = true, blocksRaycasts = true , allowMultiPanels = true,canCloseByBack = false},
+            new UILayerConfig { layerType = UILayer.Notice, layerName = "Notice", sortOrder = 6, isModal = true, blocksRaycasts = true , allowMultiPanels = true,canCloseByBack = false},
+            new UILayerConfig { layerType = UILayer.Toast, layerName = "Toast", sortOrder = 7, isModal = false, blocksRaycasts = false , allowMultiPanels = true,canCloseByBack = true},
+            new UILayerConfig { layerType = UILayer.Loading, layerName = "Loading", sortOrder = 8, isModal = true, blocksRaycasts = true , allowMultiPanels = true,canCloseByBack = false},
+            new UILayerConfig { layerType = UILayer.DebugInfo, layerName = "DebugInfo", sortOrder = 9, isModal = false, blocksRaycasts = false , allowMultiPanels = true,canCloseByBack = true}
         };
 
         [LabelText("参考分辨率")]
@@ -70,6 +88,17 @@ namespace Moyo.Unity
 
         private UILayer? currentModalLayer = null;
 
+        public int BackPriority => BackPrioritySort.UIPriority;
+        public bool TryHandleBack()
+        {
+            if (BackTopPanel())
+            {
+                Debug.Log("Back事件UI处理");
+                return true;
+            }
+            Debug.Log("Back事件UI不处理");
+            return false;
+        }
         public Canvas GetMainCanvas() => mainCanvas;
 
         #endregion
@@ -80,24 +109,25 @@ namespace Moyo.Unity
         {
             base.Awake();
             InitializeLayers();
-            backHandle = new(); 
+
         }
 
-        IBackRegister.UIBackHandler backHandle;
         private void OnEnable()
         {
-            if (InputManager.HasInstance)
-            {
-                InputManager.Instance.Register(backHandle);
-            }
+
+            InputManager.Instance.Register(this);
+
         }
         private void OnDisable()
         {
             if (InputManager.HasInstance)
             {
-                InputManager.Instance.UnRegister(backHandle);
+                InputManager.Instance.UnRegister(this);
             }
         }
+
+
+
 
         private void InitializeLayers()
         {
@@ -152,46 +182,52 @@ namespace Moyo.Unity
 
         #region 打开面板 (ShowPanel)
 
-        public async Task<T> ShowPanel<T>(UILayer layer, string address = null, params object[] args) where T : PanelBase
+        public async Task<T> ShowPanel<T>(string address = null, params object[] args) where T : PanelBase
         {
-            if (!layerParents.ContainsKey(layer))
-            {
-                Debug.LogError($"层级 {layer} 未初始化！");
-                return null;
-            }
-
             Type panelType = typeof(T);
             PanelBase targetPanel;
 
-            // 1. 获取或加载面板
+            // 1. 获取或加载面板实例
             if (loadedPanels.TryGetValue(panelType, out var existingPanel) && existingPanel != null)
             {
                 targetPanel = existingPanel;
-                // 确保父节点正确
-                if (targetPanel.transform.parent != layerParents[layer])
-                {
-                    targetPanel.transform.SetParent(layerParents[layer], false);
-                }
             }
             else
             {
+                // 先加载出来，这时候它还在根节点下（或者未激活）
                 targetPanel = await LoadAndCreatePanel<T>(address, args);
                 if (targetPanel == null) return null;
 
-                targetPanel.transform.SetParent(layerParents[layer], false);
                 loadedPanels[panelType] = targetPanel;
             }
 
-            // 2. 注册层级关系
-            panelToLayerMap[targetPanel] = layer;
+            // 2. 【核心修改】从实例中获取目标层级
+            UILayer targetLayer = targetPanel.Layer;
 
-            // 3. 处理堆栈和显示逻辑
-            ProcessPanelShow(layer, targetPanel, args);
-
-            // 4. 处理模态
-            if (IsModalLayer(layer))
+            // 检查层级配置是否存在
+            if (!layerParents.ContainsKey(targetLayer))
             {
-                SetModalLayer(layer);
+                Debug.LogError($"面板 {targetPanel.name} 请求的层级 {targetLayer} 未在 UIManager 中初始化！");
+                return null;
+            }
+
+            // 3. 设置父节点 (挂载到对应层级)
+            // 无论是新加载的还是已存在的，都检查一下父节点是否正确
+            if (targetPanel.transform.parent != layerParents[targetLayer])
+            {
+                targetPanel.transform.SetParent(layerParents[targetLayer], false);
+            }
+
+            // 4. 注册层级关系映射
+            panelToLayerMap[targetPanel] = targetLayer;
+
+            // 5. 处理堆栈和显示逻辑
+            ProcessPanelShow(targetLayer, targetPanel, args);
+
+            // 6. 处理模态
+            if (IsModalLayer(targetLayer))
+            {
+                SetModalLayer(targetLayer);
             }
 
             return targetPanel as T;
@@ -344,41 +380,47 @@ namespace Moyo.Unity
         /// </summary>
         public bool BackTopPanel()
         {
-            // 1. 按照渲染层级从高到低遍历 (Popup > Main > Normal ...)
-            // 这样确保优先响应最上层的面板
+            // 1. 按照渲染层级从高到低遍历
             var sortedConfigs = layerConfigs.OrderByDescending(c => c.sortOrder);
 
             foreach (var config in sortedConfigs)
             {
-                // [过滤] 忽略不应该响应返回键的层级
-                // 例如：Loading层通常是强制显示的，Toast 只是提示，Background 是底图
-                if (config.layerType == UILayer.Loading ||
-                    config.layerType == UILayer.Toast ||
-                    config.layerType == UILayer.DebugInfo ||
-                    config.layerType == UILayer.Background)
+                // 【优化1】使用配置字段判断，而不是硬编码 layerType
+                // 如果你不想改 Config 类，就在这里手动把 UILayer.Main 加进去
+                if (!config.canCloseByBack)
                 {
+                    // 特殊情况：如果这一层是模态层且有显示内容，虽然它不能被关闭，
+                    // 但它作为模态层应该"吞掉"输入，防止穿透到下一层？
+                    // 策略A（简单）：直接跳过，继续找下一层（当前逻辑）
+                    // 策略B（严格）：如果是模态层且可见，直接 return true（拦截），但不执行关闭。
+
+                    // 这里我们采用简单策略，只是跳过 HUD/Background
                     continue;
                 }
 
                 if (activePanels.TryGetValue(config.layerType, out var stack) && stack.Count > 0)
                 {
-                    PanelBase topPanel = stack[stack.Count - 1];
+                    // 获取栈顶面板
+                    var topPanel = stack[stack.Count - 1];
 
                     if (topPanel != null && topPanel.gameObject.activeSelf)
                     {
-                        // 1. 先询问面板自己想不想处理 (例如：面板内部有二级确认弹窗)
+                        // 【优化2】处理面板内部逻辑
                         if (topPanel.Back())
                         {
-                            return true; // 面板处理了，且不希望被直接关闭
+                            return true; // 面板自己处理了（比如弹出了二级确认框）
                         }
-                        else
-                        {
-                            HidePanel(topPanel);
-                        }
+
+                        // 执行关闭
+                        Debug.Log($"[UIManager] BackTopPanel 关闭了: {topPanel.name}");
+                        HidePanel(topPanel);
+                        return true; // 成功关闭一个，拦截输入
                     }
                 }
             }
 
+            // 所有层级都没有可关闭的面板，返回 false
+            // 这样 InputManager 会继续把事件传给 BackPriority 50 (Building) 或 20 (GamePause)
             return false;
         }
 
@@ -551,6 +593,8 @@ namespace Moyo.Unity
                 SetLayerInteractable(config.layerType, true);
             }
         }
+
+
 
         #endregion
     }

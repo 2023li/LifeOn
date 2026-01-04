@@ -13,7 +13,7 @@ using UnityEngine.Localization;
 public class UIPanel_Setting : PanelBase
 {
 
-   
+    public override UILayer Layer => UILayer.Panel;
 
     [SerializeField, FoldoutGroup("导航栏")] private Toggle toggle_声音;
     [SerializeField, FoldoutGroup("导航栏")] private Toggle toggle_控制;

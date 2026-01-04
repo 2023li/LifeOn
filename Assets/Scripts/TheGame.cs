@@ -45,7 +45,7 @@ public class TheGame : MonoSingleton<TheGame>
 
     public void Start()
     {
-       _ = UIManager.Instance.ShowPanel<UIPanel_GameMain>(UIManager.UILayer.Main);
+       _ = UIManager.Instance.ShowPanel<UIPanel_GameMain>();
         AppEventArgs.Tiggle(AppEventEnum.开始游戏);
         Debug.Log("游戏开始");
 
@@ -61,7 +61,7 @@ public class TheGame : MonoSingleton<TheGame>
 
     public void Pause()
     {
-        _ = UIManager.Instance.ShowPanel<UIPanel_Pause>(UIManager.UILayer.Main);
+        _ = UIManager.Instance.ShowPanel<UIPanel_Pause>();
     }
 
 }

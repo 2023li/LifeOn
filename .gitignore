@@ -117,3 +117,14 @@ InitTestScene*.unity*
 # If the source bank files are kept outside of the StreamingAssets folder then these can be ignored.
 # Log files can be ignored.
 fmod_editor.log
+
+
+# 忽略 Unity Version Control (Plastic SCM) 的元数据文件夹
+.plastic/
+.plastic
+
+# 忽略 Unity VCS 的配置文件 (如果你不想在 Git 中同步它)
+ignore.conf
+
+# 忽略 Plastic SCM cache 或相关插件产生的临时文件 (视具体情况而定)
+Assets/Plugins/PlasticSCM/

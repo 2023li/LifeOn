@@ -10,6 +10,8 @@ using UnityEngine;
 public class UIPanel_GeneralNotice : PanelBase
 {
 
+    public override UILayer Layer => UILayer.Notice;
+
     [SerializeField] private GameObject waitIcon;
     [SerializeField] private GameObject autoSave;
     [SerializeField] private GameObject load;
@@ -24,7 +26,7 @@ public class UIPanel_GeneralNotice : PanelBase
 
     public static async Task ShowWait()
     {
-        var ins =  await UIManager.Instance.ShowPanel<UIPanel_GeneralNotice>(UIManager.UILayer.Notice);
+        var ins =  await UIManager.Instance.ShowPanel<UIPanel_GeneralNotice>();
         ins.Clear();
         ins.waitIcon.SetActive(true);
     }

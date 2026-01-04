@@ -111,14 +111,12 @@ $"无法结束回合，阻塞源: {kvp.Key}, 原因: {kvp.Value}"
         if (source == null) return
 ;
 
-        bool
- isNew = !_blockers.ContainsKey(source);
+        bool isNew = !_blockers.ContainsKey(source);
 
         // 字典特性：如果 Key 存在，会自动更新 Value (原因可能改变了)
         _blockers[source] = reason;
 
-        if
- (isNew)
+        if(isNew)
         {
             OnTurnBlockCountChanged?.Invoke(_blockers.Count);
             // Debug.Log($"[Turn] {source} 注册了阻塞: {reason}");
@@ -134,8 +132,7 @@ $"无法结束回合，阻塞源: {kvp.Key}, 原因: {kvp.Value}"
         if (source == null) return
 ;
 
-        if
- (_blockers.Remove(source))
+        if(_blockers.Remove(source))
         {
             OnTurnBlockCountChanged?.Invoke(_blockers.Count);
             // Debug.Log($"[Turn] {source} 移除了阻塞");
@@ -148,8 +145,7 @@ $"无法结束回合，阻塞源: {kvp.Key}, 原因: {kvp.Value}"
     public void AddTimedBlock(float duration, string reason)
     {
         // 创建一个临时的“令牌”对象作为 Key，确保唯一性
-        object token = new object
-();
+        object token = new object();
 
         RegisterBlock(token, reason);
 
@@ -158,8 +154,7 @@ $"无法结束回合，阻塞源: {kvp.Key}, 原因: {kvp.Value}"
 
     private async UniTaskVoid RemoveBlockDelay(object token, float duration)
     {
-        await
- UniTask.Delay(TimeSpan.FromSeconds(duration));
+        await UniTask.Delay(TimeSpan.FromSeconds(duration));
         UnregisterBlock(token);
     }
 
@@ -167,9 +162,7 @@ $"无法结束回合，阻塞源: {kvp.Key}, 原因: {kvp.Value}"
 
     public TurnSystemSaveData Save()
     {
-        return new
- TurnSystemSaveData
-        { currentNumberOfRounds = NumberOfRounds };
+        return new TurnSystemSaveData { currentNumberOfRounds = NumberOfRounds };
     }
 
     public void Load(TurnSystemSaveData data)

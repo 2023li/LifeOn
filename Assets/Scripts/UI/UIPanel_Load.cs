@@ -11,6 +11,9 @@ using Moyo.Unity;
 
 public class UIPanel_Load : PanelBase
 {
+
+    public override UILayer Layer => UILayer.Loading;
+
     [Header("UI Components")]
     [LabelText("进度条")]
     [SerializeField] private Slider progressBar;
@@ -36,6 +39,8 @@ public class UIPanel_Load : PanelBase
 
     // 运行时数据
     private List<string> _activeProcessTexts = new List<string>();
+
+   
 
     public override bool Back(params object[] args)
     {

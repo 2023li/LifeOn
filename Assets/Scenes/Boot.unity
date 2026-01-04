@@ -130,6 +130,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1739658405324209766, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: layerConfigs.Array.data[2].layerName
+      value: Main
+      objectReference: {fileID: 0}
+    - target: {fileID: 1739658405324209766, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: layerConfigs.Array.data[3].layerName
+      value: Panel
+      objectReference: {fileID: 0}
+    - target: {fileID: 1739658405324209766, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: layerConfigs.Array.data[2].allowMultiPanels
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1739658405324209766, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
+      propertyPath: layerConfigs.Array.data[3].allowMultiPanels
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8832982178575566358, guid: 6a92b1eadaa6a1c4caea0a15f4dbf641, type: 3}
       propertyPath: m_Name
       value: App

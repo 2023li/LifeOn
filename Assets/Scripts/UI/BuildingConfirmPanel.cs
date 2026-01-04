@@ -10,6 +10,8 @@ namespace Moyo.Unity
     /// </summary>
     public class BuildingConfirmPanel : PanelBase
     {
+        public override UILayer Layer => UILayer.Popup;
+
         // 定义参数类，方便外部调用时传递强类型数据
         public class Args
         {

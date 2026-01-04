@@ -7,6 +7,10 @@ using UnityEngine.UI;
 
 public class UIPanel_UniversalSelectionBox : PanelBase
 {
+
+
+    public override UILayer Layer => UILayer.Popup;
+
     [Header("UI References")]
     [SerializeField] private Button btn_Confirm;
     [SerializeField] private Button btn_Cancel;
@@ -37,7 +41,7 @@ public class UIPanel_UniversalSelectionBox : PanelBase
     // 静态入口保持不变
     public static async Task ShowBox(string title, string content, Action onConfirm = null, Action onCancel = null)
     {
-        var panel = await UIManager.Instance.ShowPanel<UIPanel_UniversalSelectionBox>(UIManager.UILayer.Popup);
+        var panel = await UIManager.Instance.ShowPanel<UIPanel_UniversalSelectionBox>();
         if (panel != null)
         {
             panel.Setup(title, content, onConfirm, onCancel);

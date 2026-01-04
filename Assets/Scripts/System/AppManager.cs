@@ -60,7 +60,7 @@ public class AppManager : MonoSingleton<AppManager>
             },
             OnComplete = async () =>
             {
-                await UIManager.Instance.ShowPanel<UIPanel_Main>(UIManager.UILayer.Main);
+                await UIManager.Instance.ShowPanel<UIPanel_Main>();
                 AppEventArgs.Tiggle(AppEventEnum.场景加载完成);
             }
         };
@@ -78,7 +78,7 @@ public class AppManager : MonoSingleton<AppManager>
                 PreloadAddresses = new List<string>(){"UIPanel_GameMain"},
                 OnComplete = async () =>
                 {
-                    await UIManager.Instance.ShowPanel<UIPanel_GameMain>(UIManager.UILayer.Main);
+                    await UIManager.Instance.ShowPanel<UIPanel_GameMain>();
 
                     GameContext.Instance.Init();
 
