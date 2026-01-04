@@ -239,7 +239,7 @@ namespace Moyo.Unity
 	/// </summary>
 	public interface IMoyoEventListener<T> : MoyoEventListenerBase
 	{
-		void OnMoyoEvent( T eventType );
+		void OnMoyoEvent( T eventArgs );
 	}
 
 	public class MoyoEventListenerWrapper<TOwner, TTarget, TEvent> : IMoyoEventListener<TEvent>, IDisposable

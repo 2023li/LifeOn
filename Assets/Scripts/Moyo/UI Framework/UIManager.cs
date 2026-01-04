@@ -293,13 +293,13 @@ namespace Moyo.Unity
                 else
                 {
                     // 如果不在堆栈中（可能已经被隐藏或异常），仅确保视觉隐藏
-                    panel.Hide(this);
+                    panel.Hide();
                 }
             }
             else
             {
                 Debug.LogWarning($"尝试关闭未注册层级的面板: {panel.name}");
-                panel.Hide(this);
+                panel.Hide();
             }
         }
         // === 新增部分：关闭最顶层的显示面板（用于返回键/Esc） ===
@@ -370,6 +370,10 @@ namespace Moyo.Unity
                         if (topPanel.Back())
                         {
                             return true; // 面板处理了，且不希望被直接关闭
+                        }
+                        else
+                        {
+                            HidePanel(topPanel);
                         }
                     }
                 }

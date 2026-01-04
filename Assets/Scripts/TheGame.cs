@@ -46,7 +46,7 @@ public class TheGame : MonoSingleton<TheGame>
     public void Start()
     {
        _ = UIManager.Instance.ShowPanel<UIPanel_GameMain>(UIManager.UILayer.Main);
-        AppStateEvent.Tiggle(AppState.开始游戏);
+        AppEventArgs.Tiggle(AppEventEnum.开始游戏);
         Debug.Log("游戏开始");
 
     }

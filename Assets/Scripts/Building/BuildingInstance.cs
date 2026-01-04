@@ -702,7 +702,7 @@ public class BuildingInstance : MonoBehaviour
     {
         Ctx.HumanResourcesNetwork.Register(this);
         Ctx.ResourceNetwork.Register(this);
-        TurnSystem.OnTurnPhaseChange += HandleTurnPhase;
+        Ctx.Turn.OnTurnPhaseChange += HandleTurnPhase;
 
         foreach (CubeCoor pos in Self_CurrentOccupy)
         {
@@ -716,7 +716,7 @@ public class BuildingInstance : MonoBehaviour
     {
         Ctx.HumanResourcesNetwork.UnRegister(this);
         Ctx.ResourceNetwork.UnRegister(this);
-        TurnSystem.OnTurnPhaseChange -= HandleTurnPhase;
+        Ctx.Turn.OnTurnPhaseChange -= HandleTurnPhase;
 
         foreach (var pos in Self_CurrentOccupy) Static_OccupyMap.Remove(pos);
     }

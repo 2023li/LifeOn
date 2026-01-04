@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System;
 
 
-public class ResourceRouting : MonoSingleton<ResourceRouting>,IMoyoEventListener<AppStateEvent>
+public class ResourceRouting : MonoSingleton<ResourceRouting>,IMoyoEventListener<AppEventArgs>
 {
 
 
@@ -36,11 +36,11 @@ public class ResourceRouting : MonoSingleton<ResourceRouting>,IMoyoEventListener
         this?.MoyoEventStopListening();
     }
 
-    public void OnMoyoEvent(AppStateEvent eventType)
+    public void OnMoyoEvent(AppEventArgs eventType)
     {
-        switch (eventType.State)
+        switch (eventType.e)
         {
-            case AppState.开始游戏:
+            case AppEventEnum.开始游戏:
 
                 GameResourcePreloading();
 

@@ -69,8 +69,6 @@ public class UIPanel_Main : PanelBase
     [FoldoutGroup("主菜单按钮")]
     [SerializeField] private Button btn_Continue;
     [FoldoutGroup("主菜单按钮")]
-    [SerializeField] private Button btn_NewGame;
-    [FoldoutGroup("主菜单按钮")]
     [SerializeField] private Button btn_LoadGame;
     [FoldoutGroup("主菜单按钮")]
     [SerializeField] private Button btn_Setting;
@@ -90,10 +88,19 @@ public class UIPanel_Main : PanelBase
         {
             PersistentManager.Instance.LoadGame(PersistentManager.Instance.GetLastGameSaveId());
         });
+        btn_LoadGame.onClick.AddListener(async () =>
+        {
+           await UIManager.Instance.ShowPanel<UIPanel_SaveSelection>(UIManager.UILayer.Main);
+        });
 
         btn_Setting.onClick.AddListener(async () =>
         {
             await UIManager.Instance.ShowPanel<UIPanel_Setting>(UIManager.UILayer.Main);
+        });
+
+        btn_Quit.onClick.AddListener(() =>
+        {
+            Show_确认退出弹窗();
         });
 
         Awake_取名弹窗();
@@ -106,25 +113,16 @@ public class UIPanel_Main : PanelBase
 
         btn_Continue.gameObject.SetActive(PersistentManager.Instance.HasLastGameSave());
        
-
-
     }
 
 
     void Start()
     {
         #region 绑定点击事件
-        btn_NewGame.onClick.AddListener(()=>
-        {
-            Show_取名框();
-        });
+      
 
 
-
-        btn_Quit.onClick.AddListener(() =>
-        {
-            Show_确认退出弹窗();
-        });
+     
         #endregion
 
 
@@ -172,19 +170,29 @@ public class UIPanel_Main : PanelBase
     }
     #endregion
 
-    #region 取名弹窗
-    [FoldoutGroup("取名弹窗"), SerializeField]
+    #region 新建游戏
+    [FoldoutGroup("新建游戏")]
+    [SerializeField] private Button btn_NewGame;
+
+    [FoldoutGroup("新建游戏"), SerializeField]
     private RectTransform pop_取名框;
-    [FoldoutGroup("取名弹窗"), SerializeField]
+    [FoldoutGroup("新建游戏"), SerializeField]
     private Button btn_确认名称;
-    [FoldoutGroup("取名弹窗"), SerializeField]
+    [FoldoutGroup("新建游戏"), SerializeField]
     private Button btn_取消名称;
 
-    [FoldoutGroup("取名弹窗"), SerializeField]
+    [FoldoutGroup("新建游戏"), SerializeField]
     private TMP_InputField inputField_GameName;
 
     private void Awake_取名弹窗()
     {
+
+        btn_NewGame.onClick.AddListener(() =>
+        {
+            Show_取名框();
+        });
+
+
         btn_确认名称.interactable=false;
 
         inputField_GameName.onValueChanged.AddListener((str) =>

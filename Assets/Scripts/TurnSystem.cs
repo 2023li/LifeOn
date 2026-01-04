@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Cysharp.Threading.Tasks;
 using Moyo.Unity;
-using Sirenix.OdinInspector.Editor.Drawers;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public enum TurnPhase
@@ -15,138 +15,168 @@ public enum TurnPhase
     回合结束阶段, //用作数据整理 例如 计数
     开始准备阶段  //对
 }
-
-[AddComponentMenu("LifeOn/Turn System")]
-public class TurnSystem : MonoSingleton<TurnSystem>
+public class TurnSystem
 {
-    public int NumberOfRounds { get; private set; }
-
-    /// <summary>
-    /// 回合阶段切换事件
-    /// </summary>
-    public static event Action<TurnPhase> OnTurnPhaseChange;
-
-    /// <summary>
-    /// 阻塞数量改变事件（参数为当前阻塞总数）
-    /// </summary>
-    public static event Action<int> OnTurnBlockCountChanged;
-
-    private TurnPhase[] _phases;
-
-    // 阻塞列表
-    private readonly List<TurnBlock> _turnBlocks = new List<TurnBlock>(10);
-
-    // 用于给每个阻塞分配唯一 ID
-    private int _nextBlockId = 1;
-
-    /// <summary>
-    /// 当前是否被阻塞
-    /// </summary>
-    public bool IsBlocked => _turnBlocks.Count > 0;
-
-    protected override void Initialize()
+    // --- 纯数据逻辑 ---
+    public int NumberOfRounds
     {
-        base.Initialize();
-        _phases = (TurnPhase[])Enum.GetValues(typeof(TurnPhase));
+        get; private set
+;
     }
 
-    /// <summary>
-    /// 供 UI 或系统调用：结束本回合
-    /// </summary>
+    // 事件
+    public event
+ Action<TurnPhase> OnTurnPhaseChange;
+    // 参数为：当前阻塞的数量
+    public event Action<int
+> OnTurnBlockCountChanged;
+
+    private
+ TurnPhase[] _phases;
+
+    // 【核心修改】使用 Dictionary<object, string>
+    // Key: 谁发起的阻塞 (Source)
+    // Value: 阻塞的原因 (Reason)
+    private readonly Dictionary<object, string> _blockers = new Dictionary<object, string
+>();
+
+    public bool IsBlocked => _blockers.Count > 0
+;
+
+    // 获取当前所有阻塞原因的列表（用于 UI 显示调试信息）
+    public List<string> GetBlockReasons()
+ => _blockers.Values.ToList();
+
+    public TurnSystem()
+    {
+        _phases = (TurnPhase[])Enum.GetValues(
+typeof
+(TurnPhase));
+    }
+
+    public void Reset()
+    {
+        NumberOfRounds =
+0
+;
+        _blockers.Clear();
+        // 重置后记得通知外部，阻塞数变为0
+        OnTurnBlockCountChanged?.Invoke(
+0
+);
+    }
+
     public void EndTurn()
     {
-        // 有任何阻塞都不允许结束回合
-        if (IsBlocked)
+        if
+ (IsBlocked)
         {
-            return;
+            // [可选] 可以在这里打印是谁卡住了回合
+            foreach (var kvp in
+ _blockers)
+                Debug.Log(
+$"无法结束回合，阻塞源: {kvp.Key}, 原因: {kvp.Value}"
+);
+            return
+;
         }
 
-        foreach (TurnPhase phase in _phases)
+        foreach (TurnPhase phase in
+ _phases)
         {
             OnTurnPhaseChange?.Invoke(phase);
 
-            // 在“结束准备阶段”加一个 1 秒的自动阻塞（冷却）
-            if (phase == TurnPhase.结束准备阶段)
+            if
+ (phase == TurnPhase.结束准备阶段)
             {
-                AddTimedTurnBlock("结束准备阶段冷却，防止连续结束回合", 1f);
+                // 这里的 Key 我们使用一个临时的 object，或者使用 string 本身作为 Key (如果能保证唯一)
+                // 推荐使用一个专用的 Token 对象
+                AddTimedBlock(
+1f, "回合间隙冷却"
+);
             }
         }
-
         NumberOfRounds++;
     }
 
     #region 阻塞相关 API
 
     /// <summary>
-    /// 添加一个「定时自动解除」的阻塞，返回阻塞 ID（如果你想手动提前解除也可以用这个 ID 调用 RemoveTurnBlock）
+    /// 注册一个阻塞
     /// </summary>
-    public int AddTimedTurnBlock(string reason, float durationSeconds)
+    /// <param name="source">阻塞源 (通常传 this)</param>
+    /// <param name="reason">原因</param>
+    public void RegisterBlock(object source, string reason)
     {
-        var block = new TurnBlock
+        if (source == null) return
+;
+
+        bool
+ isNew = !_blockers.ContainsKey(source);
+
+        // 字典特性：如果 Key 存在，会自动更新 Value (原因可能改变了)
+        _blockers[source] = reason;
+
+        if
+ (isNew)
         {
-            id = _nextBlockId++,
-            reason = reason,
-            durationSeconds = durationSeconds
-        };
-
-        _turnBlocks.Add(block);
-        OnTurnBlockCountChanged?.Invoke(_turnBlocks.Count);
-
-        // 定时自动移除
-        StartCoroutine(RemoveTurnBlockAfterDelay(block.id, durationSeconds));
-
-        return block.id;
-    }
-
-    /// <summary>
-    /// 添加一个「必须手动解除」的阻塞，返回阻塞 ID
-    /// </summary>
-    public int AddManualTurnBlock(string reason)
-    {
-        var block = new TurnBlock
-        {
-            id = _nextBlockId++,
-            reason = reason,
-            durationSeconds = null   // null == 不自动解除
-        };
-
-        _turnBlocks.Add(block);
-        OnTurnBlockCountChanged?.Invoke(_turnBlocks.Count);
-
-        return block.id;
-    }
-
-    /// <summary>
-    /// 手动移除一个阻塞（定时阻塞到时间后也会走这个函数）
-    /// </summary>
-    public void RemoveTurnBlock(int blockId)
-    {
-        int index = _turnBlocks.FindIndex(b => b.id == blockId);
-        if (index >= 0)
-        {
-            _turnBlocks.RemoveAt(index);
-            OnTurnBlockCountChanged?.Invoke(_turnBlocks.Count);
+            OnTurnBlockCountChanged?.Invoke(_blockers.Count);
+            // Debug.Log($"[Turn] {source} 注册了阻塞: {reason}");
         }
     }
 
-    private IEnumerator RemoveTurnBlockAfterDelay(int blockId, float delay)
+    /// <summary>
+    /// 移除该对象发起的所有阻塞
+    /// </summary>
+    /// <param name="source">阻塞源 (通常传 this)</param>
+    public void UnregisterBlock(object source)
     {
-        yield return new WaitForSeconds(delay);
-        // 可能在这段时间里被手动移除了，所以这里用 ID 再查一遍
-        RemoveTurnBlock(blockId);
+        if (source == null) return
+;
+
+        if
+ (_blockers.Remove(source))
+        {
+            OnTurnBlockCountChanged?.Invoke(_blockers.Count);
+            // Debug.Log($"[Turn] {source} 移除了阻塞");
+        }
+    }
+
+    /// <summary>
+    /// 添加一个定时自动移除的阻塞
+    /// </summary>
+    public void AddTimedBlock(float duration, string reason)
+    {
+        // 创建一个临时的“令牌”对象作为 Key，确保唯一性
+        object token = new object
+();
+
+        RegisterBlock(token, reason);
+
+        RemoveBlockDelay(token, duration).Forget();
+    }
+
+    private async UniTaskVoid RemoveBlockDelay(object token, float duration)
+    {
+        await
+ UniTask.Delay(TimeSpan.FromSeconds(duration));
+        UnregisterBlock(token);
     }
 
     #endregion
 
-
     public TurnSystemSaveData Save()
     {
-        return new TurnSystemSaveData { currentNumberOfRounds = NumberOfRounds };
+        return new
+ TurnSystemSaveData
+        { currentNumberOfRounds = NumberOfRounds };
     }
 
-    internal void Load(TurnSystemSaveData turnSystemSaveData)
+    public void Load(TurnSystemSaveData data)
     {
-        NumberOfRounds = turnSystemSaveData.currentNumberOfRounds;
+        if (data != null
+)
+            NumberOfRounds = data.currentNumberOfRounds;
     }
 }
 

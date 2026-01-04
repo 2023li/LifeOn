@@ -1,0 +1,4 @@
+repository "LifeOn@tj_yundanfengqing1@cloud.cn"
+  path "/"
+    br "/main"
+    co "/main"

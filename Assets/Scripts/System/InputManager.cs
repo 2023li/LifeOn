@@ -8,7 +8,7 @@ using Moyo.Unity;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 
-public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppStateEvent>
+public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppEventArgs>
 {
     public Camera RealCamera { get; private set; }
     public Vector3 MousePos { get; private set; }
@@ -174,7 +174,7 @@ public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppS
 
     private void OnEnable()
     {
-        this.MoyoEventStartListening<AppStateEvent>();
+        this.MoyoEventStartListening<AppEventArgs>();
     }
 
     private void LateUpdate()
@@ -204,31 +204,31 @@ public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppS
 
     private void OnDisable()
     {
-        this.MoyoEventStopListening<AppStateEvent>();
+        this.MoyoEventStopListening<AppEventArgs>();
     }
 
     protected override void OnDestroy()
     {
         base.OnDestroy();
     }
-    public void OnMoyoEvent(AppStateEvent eventType)
+    public void OnMoyoEvent(AppEventArgs eventType)
     {
-        switch (eventType.State)
+        switch (eventType.e)
         {
-            case AppState.游戏加载完成:
+            case AppEventEnum.游戏加载完成:
                 break;
-            case AppState.游戏场景加载完成:
+            case AppEventEnum.场景加载完成:
 
 
                 RealCamera = Camera.main;
 
 
                 break;
-            case AppState.开始游戏:
+            case AppEventEnum.开始游戏:
                 break;
-            case AppState.游戏进行中:
+            case AppEventEnum.游戏进行中:
                 break;
-            case AppState.结束游戏:
+            case AppEventEnum.结束游戏:
                 break;
             default:
                 break;

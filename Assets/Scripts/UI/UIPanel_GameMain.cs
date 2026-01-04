@@ -81,7 +81,7 @@ public class UIPanel_GameMain : PanelBase
         btn_打开建造.onClick.AddListener(() => { item_建造选择.Show(); });
 
 
-        btn_下回合.onClick.AddListener(() => { TurnSystem.Instance.EndTurn(); });
+        btn_下回合.onClick.AddListener(() => { GameContext.Instance.Turn.EndTurn(); });
 
 
         btn_打开科技面板.onClick.AddListener(() =>
@@ -113,8 +113,9 @@ public class UIPanel_GameMain : PanelBase
     {
         OnEnable_建筑信息();
 
-        TurnSystem.OnTurnPhaseChange += Handle_PhaseChange;
-        TurnSystem.OnTurnBlockCountChanged += Handle_TurnBlock;
+
+        GameContext.Instance.Turn.OnTurnPhaseChange += Handle_PhaseChange;
+        GameContext.Instance.Turn.OnTurnBlockCountChanged += Handle_TurnBlock;
     }
 
    
@@ -130,8 +131,8 @@ public class UIPanel_GameMain : PanelBase
     private void OnDisable()
     {
         OnDisable_建筑信息();
-        TurnSystem.OnTurnPhaseChange -= Handle_PhaseChange;
-        TurnSystem.OnTurnBlockCountChanged -= Handle_TurnBlock;
+        GameContext.Instance.Turn.OnTurnPhaseChange -= Handle_PhaseChange;
+        GameContext.Instance.Turn.OnTurnBlockCountChanged -= Handle_TurnBlock;
     }
 
   
@@ -191,11 +192,11 @@ public class UIPanel_GameMain : PanelBase
     public void Start_顶部HUD()
     {
         // 1. 回合数监听 (保持不变)
-        TurnSystem.OnTurnPhaseChange += (p) =>
+        GameContext.Instance.Turn.OnTurnPhaseChange += (p) =>
         {
             if (p == TurnPhase.开始准备阶段)
             {
-                text_TurnText.text = TurnSystem.Instance.NumberOfRounds.ToString();
+                text_TurnText.text = GameContext.Instance.Turn.NumberOfRounds.ToString();
             }
         };
 

@@ -288,6 +288,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8679962761461177815}
   - component: {fileID: 8830402719048578950}
+  - component: {fileID: 4921613154106268306}
   m_Layer: 5
   m_Name: "\u52A0\u8F7D\u754C\u9762"
   m_TagString: Untagged
@@ -337,6 +338,29 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4921613154106268306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7972974810867652038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51cae3f25ff64f46a7125688e553ade, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  progressBar: {fileID: 4197009049934937495}
+  progressText: {fileID: 0}
+  loadingProcessText: {fileID: 5274625367349053053}
+  loadingTipText: {fileID: 379413752255310924}
+  stepsCount: 5
+  processStringTable:
+    m_TableReference:
+      m_TableCollectionName: GUID:b71ceb7e3ac14da45ad9d75e3e74f7b9
+  tipsStringTable:
+    m_TableReference:
+      m_TableCollectionName: GUID:114f656650187654a89f7ec42d9fe84c
 --- !u!1001 &1712837870682344646
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -449,12 +473,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 378538600947842191, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
       propertyPath: m_Name
-      value: Label_Tooltip
+      value: "\u63D0\u793A\u6587\u672C"
       objectReference: {fileID: 0}
     - target: {fileID: 1990594193549166204, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
       propertyPath: m_text
-      value: Short on cash?  Sell your unwanted loot to merchants with unsustainable
-        business models
+      value: "\u7F3A\u94B1\u5417\uFF1F\u628A\u4F60\u4E0D\u9700\u8981\u7684\u6218\u5229\u54C1\u5356\u7ED9\u90A3\u4E9B\u5546\u4E1A\u6A21\u5F0F\u4E0D\u53EF\u6301\u7EED\u7684\u5546\u4EBA"
       objectReference: {fileID: 0}
     - target: {fileID: 1990594193549166204, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
       propertyPath: m_fontSize
@@ -553,6 +576,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
+--- !u!114 &379413752255310924 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1990594193549166204, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
+  m_PrefabInstance: {fileID: 2225886607132027440}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &2821585094881514774 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4164625289371221798, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
@@ -568,7 +602,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 378538600947842191, guid: a42ea268e7c71b648ab01b25f901c71c, type: 3}
       propertyPath: m_Name
-      value: Label_FantasyMenus_Header
+      value: "\u52A0\u8F7D\u6807\u9898"
       objectReference: {fileID: 0}
     - target: {fileID: 378538600947842191, guid: a42ea268e7c71b648ab01b25f901c71c, type: 3}
       propertyPath: m_IsActive
@@ -576,7 +610,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1990594193549166204, guid: a42ea268e7c71b648ab01b25f901c71c, type: 3}
       propertyPath: m_text
-      value: LOADING GAME
+      value: "\u52A0\u8F7D\u6E38\u620F"
       objectReference: {fileID: 0}
     - target: {fileID: 1990594193549166204, guid: a42ea268e7c71b648ab01b25f901c71c, type: 3}
       propertyPath: m_fontSize
@@ -1044,11 +1078,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 378538600947842191, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
       propertyPath: m_Name
-      value: Label_LoadingPercentage
+      value: "\u52A0\u8F7D\u6D41\u7A0B"
       objectReference: {fileID: 0}
     - target: {fileID: 1990594193549166204, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
       propertyPath: m_text
-      value: Scouring furry suits...
+      value: "\u64E6\u6D17\u6BDB\u8338\u8338\u7684\u5957\u88C5..."
       objectReference: {fileID: 0}
     - target: {fileID: 1990594193549166204, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
       propertyPath: m_fontSize
@@ -1163,6 +1197,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
+--- !u!114 &5274625367349053053 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1990594193549166204, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
+  m_PrefabInstance: {fileID: 5950162256496869377}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &7735074947386228519 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4164625289371221798, guid: b69886e01265efe4b94fec2d3d7949a3, type: 3}
@@ -1273,6 +1318,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fdee0d705af7f0340b69b9b5d2a1daff, type: 3}
+--- !u!114 &4197009049934937495 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7156924125190553902, guid: fdee0d705af7f0340b69b9b5d2a1daff, type: 3}
+  m_PrefabInstance: {fileID: 6443602047346457785}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &7109331988041461958 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4306899379183733887, guid: fdee0d705af7f0340b69b9b5d2a1daff, type: 3}

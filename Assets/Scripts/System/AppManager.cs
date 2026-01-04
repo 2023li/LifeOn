@@ -21,30 +21,13 @@ public enum AppLanguage
 
 public class AppManager : MonoSingleton<AppManager>
 {
-    [Button]
-    public void Test()
-    {
-       _ = WaitRunTask(() =>
-        {
-            Thread.Sleep(3000);
-        });
-    }
 
-
-
-    // 存储当前正在进行的加载请求数据
-    public class SceneLoadContext
-    {
-        public string TargetSceneName;
-        public List<string> PreloadAddresses;
-        public Action OnComplete; // 核心：加载完成后的回调
-        public bool UseTransition = true;
-    }
-    public SceneLoadContext CurrentRequest { get; private set; }
+  
 
     protected override void Awake()
     {
         base.Awake();
+        AppStateEventHandler.Instance.Awake();
         SceneManager.sceneLoaded += HandleSceneLoaded;
     }
     // Start is called before the first frame update
@@ -53,13 +36,11 @@ public class AppManager : MonoSingleton<AppManager>
         PersistentManager.Instance.LoadAppData();
 
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
+        
 
     }
+
+   
 
     protected override void OnDestroy()
     {
@@ -77,38 +58,43 @@ public class AppManager : MonoSingleton<AppManager>
             {
                 "UIPanel_Main"
             },
-            OnComplete = async () => { await UIManager.Instance.ShowPanel<UIPanel_Main>(UIManager.UILayer.Main); }
+            OnComplete = async () =>
+            {
+                await UIManager.Instance.ShowPanel<UIPanel_Main>(UIManager.UILayer.Main);
+                AppEventArgs.Tiggle(AppEventEnum.场景加载完成);
+            }
         };
         LoadScene(sc);
     }
     [Button]
-    public void LoadGameScene()
+    public void LoadGameScene(SceneLoadContext context = null)
     {
-        // LoadScene("Game", true, "UIPanel_GameMain");
-        SceneLoadContext sc = new SceneLoadContext()
+
+        if (context == null)
         {
-            TargetSceneName = LOConstant.SceneName.Game,
-            PreloadAddresses = new List<string>()
+            context = new SceneLoadContext()
             {
-                "UIPanel_GameMain"
-            },
-            OnComplete = async () =>
-            {
-                await UIManager.Instance.ShowPanel<UIPanel_GameMain>(UIManager.UILayer.Main);
+                TargetSceneName = LOConstant.SceneName.Game,
+                PreloadAddresses = new List<string>(){"UIPanel_GameMain"},
+                OnComplete = async () =>
+                {
+                    await UIManager.Instance.ShowPanel<UIPanel_GameMain>(UIManager.UILayer.Main);
 
-                GameContext.Instance.Init();
+                    GameContext.Instance.Init();
 
-                AppStateEvent.Tiggle(AppState.游戏场景加载完成);
+                    AppEventArgs.Tiggle(AppEventEnum.场景加载完成);
 
-            }
-        };
-        LoadScene(sc);
+
+                }
+            };
+        }
+        LoadScene(context);
     }
     #endregion
 
     private void EnterWait()
     {
-       _ = UIPanel_GeneralNotice.ShowWait();
+        _ = UIPanel_GeneralNotice.ShowWait();
     }
     public async UniTask WaitRunTask(Action action, float minDuration = 0.1f)
     {
@@ -134,9 +120,18 @@ public class AppManager : MonoSingleton<AppManager>
         UIPanel_GeneralNotice.HideWait();
     }
 
-    public List<string> NeedPreloadGameObject;
 
-    public string TargetSceneName { get; set; }
+
+    public class SceneLoadContext
+    {
+        public string TargetSceneName;
+        public List<string> PreloadAddresses;
+        public Action OnComplete; // 核心：加载完成后的回调
+        public bool UseTransition = true;
+    }
+    public SceneLoadContext CurrentRequest { get; private set; }
+
+
     /// <summary>
     /// 加载场景的统一入口
     /// </summary>
@@ -207,18 +202,14 @@ public class AppManager : MonoSingleton<AppManager>
     }
 }
 
-
-
-
-
-public enum AppState
+public enum AppEventEnum
 {
 
     APP数据加载完成,
 
     游戏加载完成,
 
-    游戏场景加载完成,
+    场景加载完成,
 
     开始游戏,
 
@@ -228,21 +219,59 @@ public enum AppState
 
 
 }
-public struct AppStateEvent
+public struct AppEventArgs
 {
-    private static AppStateEvent eventArg;
+    private static AppEventArgs eventArg;
 
-    public AppState State;
+    public AppEventEnum e;
 
-    public static void Tiggle(AppState e)
+    public static void Tiggle(AppEventEnum e)
     {
 
-        eventArg.State = e;
+        eventArg.e = e;
 
 
-        MoyoEventManager.TriggerEvent<AppStateEvent>(eventArg);
+        MoyoEventManager.TriggerEvent<AppEventArgs>(eventArg);
     }
 }
 
+public class AppStateEventHandler:Singleton<AppStateEventHandler>,IMoyoEventListener<AppEventArgs>
+{
+
+    protected AppStateEventHandler()
+    {
+        this.MoyoEventStartListening();
+    }
+    ~AppStateEventHandler()
+    {
+        this.MoyoEventStopListening();
+    }
+
+
+
+    public void OnMoyoEvent(AppEventArgs eventArgs)
+    {
+        switch (eventArgs.e)
+        {
+            case AppEventEnum.APP数据加载完成:
+                break;
+            case AppEventEnum.游戏加载完成:
+                break;
+            case AppEventEnum.场景加载完成:
+                UIManager.Instance.HidePanel<UIPanel_Load>();
+                break;
+            case AppEventEnum.开始游戏:
+                break;
+            case AppEventEnum.游戏进行中:
+                break;
+            case AppEventEnum.结束游戏:
+                break;
+        }
+
+    }
+
+
+
+}
 
 

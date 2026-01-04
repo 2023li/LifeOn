@@ -14,7 +14,7 @@ public class BootScenes : MonoBehaviour
 {
 
 
-
+    private bool isLoaded = false;
     public TMP_Text t;
     
     // Start is called before the first frame update
@@ -30,16 +30,18 @@ public class BootScenes : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        time -= Time.deltaTime;
+        // 如果已经触发加载，就不再执行倒计时逻辑
+        if (isLoaded) return;
 
-        t.text = time.ToString();
+        time -= Time.deltaTime;
+        t.text = time.ToString("F1"); // 建议保留一位小数
 
         if (time < 0)
         {
+            isLoaded = true; // 锁定，防止下一帧再次调用
             AppManager.Instance.LoadStartScene();
         }
 
-      
 
     }
     [Button]
