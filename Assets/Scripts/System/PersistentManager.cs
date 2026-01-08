@@ -220,7 +220,7 @@ public class PersistentManager : MonoSingleton<PersistentManager>
         }
 
         // 3. 构建加载上下文，完全接管加载流程
-        // 我们不再使用 AppManager.Instance.LoadGameScene()，因为它包含默认的 Init 逻辑
+        // 我们不再使用 AppManager.Instance.LoadGameScene()，因为它包含默认的 Clear 逻辑
         var loadContext = new AppManager.SceneLoadContext()
         {
             TargetSceneName = LOConstant.SceneName.Game,
@@ -266,6 +266,7 @@ public class PersistentManager : MonoSingleton<PersistentManager>
 
         try
         {
+            GameContext.Instance.Clear();
             // 1. 重建建筑
             ReconstructBuildings();
 
@@ -292,15 +293,12 @@ public class PersistentManager : MonoSingleton<PersistentManager>
         foreach (BuildingInstance.BuildingSaveData bData in currentGameData.allBuildingData)
         {
             BuildingBuilder.Instance.TryCreateBuildingByData(bData,out BuildingInstance ins);
-            
         }
     }
 
     //恢复GameContext
     private void RecoverGameContext()
     {
-        GameContext.Instance.Init();
-
         // 1. 恢复回合与时间
         if (GameContext.Instance.Turn != null && currentGameData.turnSystemSaveData != null)
             GameContext.Instance.Turn.Load(currentGameData.turnSystemSaveData);

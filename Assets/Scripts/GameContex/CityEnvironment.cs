@@ -374,6 +374,11 @@ public class CityEnvironment
             }
         }
     }
+
+    internal void Clear()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 

@@ -70,6 +70,9 @@ public class AppManager : MonoSingleton<AppManager>
     public void LoadGameScene(SceneLoadContext context = null)
     {
 
+    
+
+        //如果空的代表开始新游戏
         if (context == null)
         {
             context = new SceneLoadContext()
@@ -79,15 +82,15 @@ public class AppManager : MonoSingleton<AppManager>
                 OnComplete = async () =>
                 {
                     await UIManager.Instance.ShowPanel<UIPanel_GameMain>();
-
-                    GameContext.Instance.Init();
-
+                    GameContext.Instance.Clear();
                     AppEventArgs.Tiggle(AppEventEnum.场景加载完成);
 
 
                 }
             };
         }
+
+
         LoadScene(context);
     }
     #endregion

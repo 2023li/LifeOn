@@ -24,6 +24,19 @@ public class ResourceNetwork
     private int _totalCapacity;
     private int _usedCapacity;
 
+
+    internal void Clear()
+    {
+        OnResourceNetworkStateChange = null;
+        OnResourceAmountChange = null;
+        _totalCapacity = 0; ;
+        _usedCapacity = 0;
+        _resourceAmounts.Clear();
+        _capacityProviders.Clear();
+        _buildingProductSnapshot.Clear();
+        _producibleCounts.Clear();
+        CurrentProducibleMaterialEnums.Clear();
+    }
     /// <summary>
     /// 总库存
     /// </summary>
@@ -503,6 +516,8 @@ public class ResourceNetwork
             }
         }
     }
+
+    
 }
 
 [Serializable]

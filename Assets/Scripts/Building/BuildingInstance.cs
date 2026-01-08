@@ -8,6 +8,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using System.Linq;
 
 
 
@@ -136,7 +137,7 @@ public class BuildingInstance : MonoBehaviour
 
     //----------------------------基础信息-----------------------------------
 
-
+    #region 实例信息
     [LabelText("实例ID"), ShowInInspector, ReadOnly]
     public string InstanceId { get; private set; } = Guid.NewGuid().ToString("N");
 
@@ -146,10 +147,10 @@ public class BuildingInstance : MonoBehaviour
 
     public event Action<BuildingInstance, BuildingStateValueType> OnStateChanged;
 
-    private BuildingStatModifiers RO_StatModifiers = new BuildingStatModifiers();
-
+    public  BuildingStatModifiers RO_StatModifiers = new BuildingStatModifiers();
+    #endregion
     //----------------------------等级-----------------------------------
-
+    #region 等级
 
     [Header("等级"), LabelText("当前等级索引"), ShowInInspector, ReadOnly]
     private int _selfCurrentLevelIndex;
@@ -191,9 +192,10 @@ public class BuildingInstance : MonoBehaviour
         }
 
     }
-
+    #endregion
 
     //----------------------------人口 & 就业-----------------------------------
+    #region 人口
     [ShowInInspector, ReadOnly, LabelText("运行时最大人口")]
     public int RO_MaxPopulation
     {
@@ -283,9 +285,10 @@ public class BuildingInstance : MonoBehaviour
             return f;
         }
     }
-
+    #endregion
 
     //----------------------------库存与运力-----------------------------------
+    #region 库存&运力
     [ShowInInspector, ReadOnly, LabelText("运行时库存容量")]
     public int RO_MaxStorageCapacity
     {
@@ -433,20 +436,20 @@ public class BuildingInstance : MonoBehaviour
 
         return removed;
     }
-
+    #endregion
 
     //----------------------------地图占用（这些一般不触发状态事件，如需要也可改同样写法）-----------------------------------
-
+    #region 地图占用
     [ShowInInspector, ReadOnly, LabelText("占用格子")]
     public CubeCoor[] Self_CurrentOccupy { get; private set; } = Array.Empty<CubeCoor>();
 
     [ShowInInspector, ReadOnly, LabelText("中心坐标(网格)")]
     public CubeCoor Self_CurrentCenterInGrid { get; private set; }
-
+    #endregion
 
 
     //----------------------------上下文 & 运行时缓存数据------------------------
-
+    #region 上下文 & 运行时缓存数据
     public IGameContext Ctx { get => GameContext.Instance; }
 
     private Dictionary<string, int> specificData_int;
@@ -464,11 +467,11 @@ public class BuildingInstance : MonoBehaviour
     public float GetFloat(string key) => specificData_float.TryGetValue(key, out var v) ? v : 0f;
     public Vector3 GetVector3(string key) => specificData_v3.TryGetValue(key, out var v) ? v : Vector3.zero;
     public string GetString(string key) => specificData_string.TryGetValue(key, out var v) ? v : null;
-
+    #endregion
 
     #endregion
 
-    #region Rule相关
+    #region Rule相关&Buff
 
     [ShowInInspector, ReadOnly, LabelText("当前规则列表")]
     public List<Rule> CurrentRules { get; private set; } = new List<Rule>();
@@ -482,8 +485,6 @@ public class BuildingInstance : MonoBehaviour
 
         _pendingToAdd.Add(rule);
 
-        // 立即触发 OnAdd (注意：Rule的OnAdd里如果涉及复杂逻辑需确保安全)
-        rule.OnAdd(this);
     }
     public void RemoveRule(Rule rule)
     {
@@ -512,8 +513,16 @@ public class BuildingInstance : MonoBehaviour
         if (_pendingToAdd.Count > 0)
         {
             CurrentRules.AddRange(_pendingToAdd);
+
+            foreach (var rule in _pendingToAdd)
+            {
+                rule.OnAdd(this);
+            }
+
             _pendingToAdd.Clear();
         }
+
+
     }
 
     //执行
@@ -539,10 +548,10 @@ public class BuildingInstance : MonoBehaviour
     {
         if (Def?.BaseRules == null) return;
 
-        foreach (var src in Def.BaseRules)
+        foreach (Rule src in Def.BaseRules)
         {
             if (src == null) continue;
-            var cloned = src.Clone() as Rule;
+            Rule cloned = src.Clone() as Rule;
             if (cloned != null)
             {
                 // 确保基础规则的生命周期正确（通常是 Persistent）
@@ -573,6 +582,57 @@ public class BuildingInstance : MonoBehaviour
             AddRule(cloned);
         }
     }
+
+
+
+    // 记录当前已经生效的 Buff 及其对应的 Rule 实例
+    // Key: Buff原始数据对象, Value: 克隆后实际运行在身上的 Rule 实例
+    private Dictionary<Buff, Rule> _appliedBuffMap = new Dictionary<Buff, Rule>();
+
+    /// <summary>
+    /// 同步外部 Buff (核心 Diff 算法)
+    /// </summary>
+    public void SyncExternalBuffs()
+    {
+        if (BuildingManager.Instance == null) return
+;
+
+        // 1. 获取当前理论上应该拥有的所有 Buff
+        List<Buff> incomingBuffs = BuildingManager.Instance.GetBuffsForBuilding(this);
+
+        // 2.找出 [需要移除] 的 (当前有，但 incoming 里没有)
+        // 使用 ToList() 复制一份 keys 以便在遍历时修改字典
+        var currentBuffs = _appliedBuffMap.Keys.ToList();
+
+        foreach (var existingBuff in currentBuffs)
+        {
+            if(!incomingBuffs.Contains(existingBuff))
+            {
+                // 执行移除
+                Rule ruleInstance = _appliedBuffMap[existingBuff];
+                RemoveRule(ruleInstance);
+                // 走标准的移除流程，触发 OnRemove
+                _appliedBuffMap.Remove(existingBuff);
+            }
+        }
+
+        // 3. 找出 [需要添加] 的 (incoming 里有，但当前没有)
+        foreach (var newBuff in incomingBuffs)
+        {
+            if(!_appliedBuffMap.ContainsKey(newBuff))
+            {
+                // [关键修复] 必须 Clone，否则所有建筑共享同一个 Rule 对象
+                Rule ruleInstance = newBuff.EffectRule.Clone() as Rule;
+               
+                //ruleInstance.Lifecycle = RuleLifecycle.Persistent; //有什么情况不是持久的吗？
+                // 执行添加
+                AddRule(ruleInstance);
+                // 记录映射关系
+                _appliedBuffMap.Add(newBuff, ruleInstance);
+            }
+        }
+    }
+
 
     #endregion
 
@@ -624,8 +684,7 @@ public class BuildingInstance : MonoBehaviour
         }
         else
         {
-
-
+            //实例id
             InstanceId = data.instanceId;
             Self_LevelIndex = data.level;
             Self_CurrentExp = data.currentEXP;
@@ -649,6 +708,7 @@ public class BuildingInstance : MonoBehaviour
         // 【修复】数据初始化完毕，现在可以安全注册到 ResourceNetwork 了
         // 此时 RO_MaxStorageCapacity 能读到正确数值
         RegisterToGame();
+        SyncExternalBuffs();
     }
 
     public class BuildingSaveData
@@ -727,6 +787,7 @@ public class BuildingInstance : MonoBehaviour
         switch (phase)
         {
             case TurnPhase.结束准备阶段:
+                ApplyPendingRuleChanges();
                 break;
             case TurnPhase.资源消耗阶段:
                 break;
@@ -736,7 +797,6 @@ public class BuildingInstance : MonoBehaviour
                 TryUpgrade();
                 break;
             case TurnPhase.开始准备阶段:
-                ApplyPendingRuleChanges();
                 break;
             default:
                 Debug.Log($"{phase} 未处理");
@@ -824,14 +884,18 @@ public class BuildingInstance : MonoBehaviour
 
 
 
-    public void DestroyBuilding()
-    {
-        Destroy(gameObject);
-    }
     public void Remove()
     {
-        Destroy(gameObject);
 
+        // [新增] 告诉管理器我没了，撤销我发出的所有 Buff
+        if (BuildingManager.Instance != null)
+        {
+            BuildingManager.Instance.UnregisterBuffsFromProvider(this);
+        }
+        // 原有逻辑
+        UnRegisterToGame();
+        // 你的代码里有这个，注意调用顺序
+        Destroy(gameObject);
     }
 
 

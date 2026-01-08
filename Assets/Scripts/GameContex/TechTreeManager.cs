@@ -318,7 +318,7 @@ public class TechTreeManager
     }
 
     /// <summary>
-    /// （读档）导入状态：恢复已解锁与在研进度（需在 Init 之后调用）
+    /// （读档）导入状态：恢复已解锁与在研进度（需在 Clear 之后调用）
     /// </summary>
     public void Load(TechSystemSaveData data)
     {
@@ -425,7 +425,7 @@ public class TechTreeManager
     {
         _treeAssets = ResourceRouting.Instance.treeAssets;
         if (_treeAssets == null)
-            throw new InvalidOperationException($"{nameof(TechTreeManager)} 还未 Init，请先调用 Init(TechTreeAssets ...)。");
+            throw new InvalidOperationException($"{nameof(TechTreeManager)} 还未 Clear，请先调用 Clear(TechTreeAssets ...)。");
     }
 
     private string FindFirstRootId()
@@ -439,7 +439,12 @@ public class TechTreeManager
         return string.Empty;
     }
 
-   
+    internal void Clear()
+    {
+        throw new NotImplementedException();
+    }
+
+
     //========================== 内部结构体 & 存档结构 ==========================
 
     private sealed class ResearchProgressSnapshot

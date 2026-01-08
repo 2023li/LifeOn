@@ -66,9 +66,9 @@ public static class CoordinateCalculator
     /// <summary>
     /// 获取以 center 为中心，radius 为半径的区域
     /// </summary>
-    public static List<CubeCoor> CellsInRadius(CubeCoor center, int radius, bool includeEdge = true)
+    public static List<CubeCoor> CellsInRadius(CubeCoor center, int radius)
     {
-        var result = new List<CubeCoor>();
+        List<CubeCoor> result = new List<CubeCoor>();
         if (radius < 0) return result;
 
         for (int q = -radius; q <= radius; q++)
@@ -82,7 +82,9 @@ public static class CoordinateCalculator
                 CubeCoor offset = new CubeCoor(q, r, s);
                 CubeCoor current = center + offset;
 
-                if (includeEdge || offset.Length() < radius)
+                // 固定筛选逻辑：仅保留距离中心小于radius的单元格（排除边缘）
+                // radius=1时，仅offset.Length()=0（中心）满足条件
+                if (offset.Length() < radius)
                 {
                     result.Add(current);
                 }
@@ -90,6 +92,7 @@ public static class CoordinateCalculator
         }
         return result;
     }
+
 
     // ---------------------------------------------------------
     // 4. 寻路与移动 (A* / Dijkstra)
@@ -208,10 +211,12 @@ public static class CoordinateCalculator
         return totalPath;
     }
 
-    // ---------------------------------------------------------
-    // 5. 辅助功能
-    // ---------------------------------------------------------
-
+    /// <summary>
+    /// 方向
+    /// </summary>
+    /// <param name="from"></param>
+    /// <param name="to"></param>
+    /// <returns></returns>
     public static GridDirection GetDirection(CubeCoor from, CubeCoor to)
     {
         CubeCoor diff = to - from;
@@ -234,5 +239,12 @@ public static class CoordinateCalculator
             case 5: return GridDirection.NorthWest;
             default: return GridDirection.None;
         }
+    }
+
+    public static int GetDistance(CubeCoor a, CubeCoor b)
+    {
+        // 复用差值计算 + Length() 逻辑，保证和实例方法逻辑一致
+        CubeCoor diff = a - b;
+        return diff.Length();
     }
 }

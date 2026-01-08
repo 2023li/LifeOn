@@ -38,11 +38,15 @@ public class GridSystem : MonoSingleton<GridSystem>
     [FoldoutGroup("可视化瓦片"), LabelText("黄色选择")]
     public Tile tile_Yellow;
 
+
+    public event Action<CubeCoor> OnMapChange;
     // -------------------------------------------------
     // 数据存储
     // -------------------------------------------------
     // 核心数据源仍需以 Offset (Vector3Int) 存储，因为这是 Tilemap 的底层索引方式
     private Dictionary<Vector3Int, CellData> _cellDataDict;
+
+
     private Dictionary<Layer, Tilemap> _layerMapDict;
 
     protected override void Awake()
@@ -176,10 +180,11 @@ public class GridSystem : MonoSingleton<GridSystem>
     {
         Vector3Int offset = CoordinateCalculator.CubeToOffset(cube);
         _layerMapDict[Layer.障碍].SetTile(offset, visualizationTile);
+        OnMapChange?.Invoke(cube);
     }
-    // -----------------------------------------------------------------------
-    // 3. 多层 Tilemap 高亮系统 (Int BackPriority Based)
-    // -----------------------------------------------------------------------
+   
+    //------------------------------高亮系统------------------------------------
+    #region 高亮
 
     // 对象池：存储已经生成的 Tilemap 实例 (Key: BackPriority)
     private Dictionary<int, Tilemap> _layerTilemapInstances;
@@ -302,6 +307,7 @@ public class GridSystem : MonoSingleton<GridSystem>
             }
         }
     }
+    #endregion
 }
 
 // -------------------------------------------------

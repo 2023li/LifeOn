@@ -31,7 +31,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3205758315673454232}
   - {fileID: 9027066868325386660}
   - {fileID: 6592622187886793781}
   - {fileID: 2151342260005833351}
@@ -4148,50 +4147,6 @@ TilemapRenderer:
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
---- !u!1 &4993352034440423634
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3205758315673454232}
-  - component: {fileID: 1418746841969414432}
-  m_Layer: 0
-  m_Name: "\u56DE\u5408\u7CFB\u7EDF"
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3205758315673454232
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4993352034440423634}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 8123488984481321654}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1418746841969414432
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4993352034440423634}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d97dddd62e7ad24da1b444d8c70f46f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &5565217799084616734
 GameObject:
   m_ObjectHideFlags: 0
@@ -4551,4 +4506,3 @@ MonoBehaviour:
   red: {fileID: 11400000, guid: 5b40995331adc894991ab6d5625399e6, type: 2}
   crimson: {fileID: 11400000, guid: f20102417d3d6ab4fa3b0dd4549464c6, type: 2}
   confirmPanelAddress: BuildingConfirmPanel
-  confirmPanelLayer: 4

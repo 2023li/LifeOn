@@ -76,6 +76,11 @@ public class HumanResourcesNetwork
     {
         Debug.LogWarning("暂时不需要回复什么");
     }
+
+    internal void Clear()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 [Serializable]

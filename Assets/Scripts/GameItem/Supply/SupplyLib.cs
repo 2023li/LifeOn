@@ -12,7 +12,7 @@ using UnityEditor;
 
 
 /// <summary>
-/// 运行时：通过 Init() 加载并构建字典；
+/// 运行时：通过 Clear() 加载并构建字典；
 /// 编辑器未运行：GetSupplyDef() 可自动扫描 SupplyDef 并缓存；
 /// 现在新增 CollectAllSupplyDefs()：一键把 SupplyDef 收集到 allSupply（默认扫描 Assets/GameData/Supplies，或全局扫描）。
 /// </summary>
@@ -81,13 +81,13 @@ public class SupplyLib : ScriptableObject
 
     /// <summary>
     /// 通用入口：编辑器/运行时均可使用。
-    /// 运行时：依赖 Init()；编辑器未播放：自动扫描项目构建缓存。
+    /// 运行时：依赖 Clear()；编辑器未播放：自动扫描项目构建缓存。
     /// 用法：var def = SupplyLib.GetSupplyDef("food_lv1");
     /// </summary>
     public static SupplyDef GetSupplyDef(string id, bool editorFallback = true)
     {
 #if UNITY_EDITOR
-        // 在编辑器且未播放：自动扫描一次资产作为兜底（不要求先 Init）
+        // 在编辑器且未播放：自动扫描一次资产作为兜底（不要求先 Clear）
         if (!Application.isPlaying && editorFallback)
         {
             EnsureEditorCache(); // 内部复用 CollectAllSupplyDefs()
@@ -99,10 +99,10 @@ public class SupplyLib : ScriptableObject
             return null;
         }
 #endif
-        // 运行时/播放模式：依赖 Init()
+        // 运行时/播放模式：依赖 Clear()
         if (Ins == null || Ins.dic_ID_SupplyDef == null)
         {
-            Debug.LogWarning("[SupplyLib] 运行时访问：请先调用 SupplyLib.Init() 再使用 GetSupplyDef。");
+            Debug.LogWarning("[SupplyLib] 运行时访问：请先调用 SupplyLib.Clear() 再使用 GetSupplyDef。");
             return null;
         }
         if (Ins.dic_ID_SupplyDef.TryGetValue(id, out var def))

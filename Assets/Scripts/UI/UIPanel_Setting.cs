@@ -56,11 +56,10 @@ public class UIPanel_Setting : PanelBase
     public override void Hide(params object[] args)
     {
         base.Hide(args);
-
     }
     public override bool Back(params object[] args)
     {
-        if (!isSave)
+        if (!saveTo)
         {
             string label = localStr_确定保存标题.GetLocalizedString();
             string des = localStr_确定保存描述.GetLocalizedString();
@@ -68,6 +67,7 @@ public class UIPanel_Setting : PanelBase
                 () =>
                 {
                     PersistentManager.Instance.SaveAppData();
+                    saveTo = true;
                     UIManager.Instance.HidePanel(this);
                 },
 
@@ -106,10 +106,10 @@ public class UIPanel_Setting : PanelBase
     }
 
 
-    private bool isSave = false;
+    private bool saveTo = true;
  
     public void SetDataDirty()
     {
-        isSave = false;
+        saveTo = false;
     }
 }

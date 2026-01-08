@@ -171,6 +171,11 @@ $"无法结束回合，阻塞源: {kvp.Key}, 原因: {kvp.Value}"
 )
             NumberOfRounds = data.currentNumberOfRounds;
     }
+
+    internal void Clear()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 /// <summary>

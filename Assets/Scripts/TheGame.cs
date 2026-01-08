@@ -25,7 +25,7 @@ public class TheGame : MonoSingleton<TheGame>
     protected override void Awake()
     {
         base.Awake ();
-        GameContext.Instance.Init();
+        GameContext.Instance.Clear();
 
         if (buildingSelector == null)
         {

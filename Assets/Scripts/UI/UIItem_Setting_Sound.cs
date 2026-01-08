@@ -8,6 +8,9 @@ using UnityEngine.UI;
 
 public class UIItem_Setting_Sound : MonoBehaviour
 {
+
+    private UIPanel_Setting settingPanel;
+
     [Header("UI 组件绑定")]
     [SerializeField] private Slider sld_主音量;
     [SerializeField] private TMP_Text txt_主音量;
@@ -25,6 +28,11 @@ public class UIItem_Setting_Sound : MonoBehaviour
     [SerializeField] private TMP_Text txt_语言音量;
     private void Start()
     {
+        if (settingPanel == null)
+        {
+            settingPanel = UIManager.Instance.GetPanel<UIPanel_Setting>();
+        }
+
         // 1. 初始化显示：从 Manager 获取当前存储的数值
         RefreshVolumeUI();
 
@@ -88,6 +96,7 @@ public class UIItem_Setting_Sound : MonoBehaviour
             {
                 AudioManager.Instance.SetMasterVolume(val);
                 UpdateVolumeText(sld_主音量, txt_主音量);
+                settingPanel.SetDataDirty();
             });
 
         // SFX音量
@@ -96,6 +105,7 @@ public class UIItem_Setting_Sound : MonoBehaviour
             {
                 AudioManager.Instance.SetSFXVolume(val);
                 UpdateVolumeText(sld_SFX音量, txt_SFX音量);
+                settingPanel.SetDataDirty();
             });
 
         // BGM音量
@@ -104,6 +114,7 @@ public class UIItem_Setting_Sound : MonoBehaviour
             {
                 AudioManager.Instance.SetMusicVolume(val);
                 UpdateVolumeText(sld_BGM音量, txt_BGM音量);
+                settingPanel.SetDataDirty();
             });
 
         // 环境音量
@@ -112,6 +123,7 @@ public class UIItem_Setting_Sound : MonoBehaviour
             {
                 AudioManager.Instance.SetEnvironmentVolume(val);
                 UpdateVolumeText(sld_环境音量, txt_环境音量);
+                settingPanel.SetDataDirty();
             });
 
         // 语言音量
@@ -120,6 +132,7 @@ public class UIItem_Setting_Sound : MonoBehaviour
             {
                 AudioManager.Instance.SetVoiceVolume(val);
                 UpdateVolumeText(sld_语言音量, txt_语言音量);
+                settingPanel.SetDataDirty();
             });
     }
 
@@ -137,6 +150,8 @@ public class UIItem_Setting_Sound : MonoBehaviour
         // 将0~1的滑块值转为0~100的百分比，保留0位小数（如需小数可改为"F1"）
         float volumePercent = slider.value * 100;
         text.text = volumePercent.ToString("F0"); // F0 = 无小数位，F1 = 1位小数，依需求调整
+
+      
     }
 
   
