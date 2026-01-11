@@ -5,6 +5,7 @@ namespace Moyo.Unity
 {
     public abstract class PanelBase : MonoBehaviour
     {
+        public virtual bool SingletonPanel => true;
         public abstract UILayer Layer { get; }
         public virtual void Show(params object[] args)
         {

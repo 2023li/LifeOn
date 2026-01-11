@@ -245,22 +245,7 @@ public class UIPanel_Main : PanelBase
         dropDown_语言选择下拉菜单.onValueChanged.AddListener((index) =>
         {
             AppLanguage current = (AppLanguage)index;
-            UnityEngine.Localization.Locale targetLocale = null;
-            switch (current)
-            {
-                case AppLanguage.简体中文:
-                    targetLocale = Locale.CreateLocale("zh"); // 同步创建Locale
-                    break;
-                case AppLanguage.English:
-                    targetLocale = Locale.CreateLocale("en");
-                    break;
-            }
-
-            if (targetLocale != null)
-            {
-                LocalizationSettings.Instance.SetSelectedLocale(targetLocale);
-            }
-
+            LocalizationManager.Instance.SelectLanguage(current);
         });
 
     }

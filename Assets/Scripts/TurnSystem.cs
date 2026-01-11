@@ -174,7 +174,7 @@ $"无法结束回合，阻塞源: {kvp.Key}, 原因: {kvp.Value}"
 
     internal void Clear()
     {
-        throw new NotImplementedException();
+        Debug.Log("未实现");
     }
 }
 

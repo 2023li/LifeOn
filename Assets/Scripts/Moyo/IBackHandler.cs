@@ -27,15 +27,7 @@ public class IBackRegister
     public const int BuildingBack = 50;
     public const int GameBack = 20;
 
-    public class UIBackHandler : IBackHandler
-    {
-        public int BackPriority => UIPriority;
-
-        public bool TryHandleBack()
-        {
-            return UIManager.Instance.BackTopPanel();
-        }
-    }
+  
 
     public class BuidingBackHandle : IBackHandler
     {
@@ -47,15 +39,6 @@ public class IBackRegister
         }
     }
 
-    public class GameBackHandle : IBackHandler
-    {
-        public int BackPriority => GameBack;
-
-        public bool TryHandleBack()
-        {
-            TheGame.Instance.Pause();
-            return true;
-        }
-    }
+    
 
 }

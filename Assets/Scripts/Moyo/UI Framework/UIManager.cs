@@ -182,49 +182,60 @@ namespace Moyo.Unity
 
         #region 打开面板 (ShowPanel)
 
+        // 在 UIManager.cs 中替换原有的 ShowPanel<T> 方法
+
         public async Task<T> ShowPanel<T>(string address = null, params object[] args) where T : PanelBase
         {
             Type panelType = typeof(T);
-            PanelBase targetPanel;
+            PanelBase targetPanel = null;
 
-            // 1. 获取或加载面板实例
+            // 1. 尝试从单例缓存中获取
+            // 只有单例面板会被存入 loadedPanels，所以这里取到的肯定是可以复用的
             if (loadedPanels.TryGetValue(panelType, out var existingPanel) && existingPanel != null)
             {
                 targetPanel = existingPanel;
             }
             else
             {
-                // 先加载出来，这时候它还在根节点下（或者未激活）
+                // 2. 加载并创建新实例
                 targetPanel = await LoadAndCreatePanel<T>(address, args);
                 if (targetPanel == null) return null;
 
-                loadedPanels[panelType] = targetPanel;
+                // 【适配修改点】：只有标记为单例的面板，才加入缓存字典
+                if (targetPanel.SingletonPanel)
+                {
+                    // 如果同类型的单例已经存在（极端并发情况），则销毁新建的，使用旧的
+                    if (loadedPanels.ContainsKey(panelType))
+                    {
+                        Destroy(targetPanel.gameObject);
+                        targetPanel = loadedPanels[panelType];
+                    }
+                    else
+                    {
+                        loadedPanels[panelType] = targetPanel;
+                    }
+                }
             }
 
-            // 2. 【核心修改】从实例中获取目标层级
+            // 3. 后续逻辑保持不变（设置父节点、层级、堆栈处理）
             UILayer targetLayer = targetPanel.Layer;
 
-            // 检查层级配置是否存在
             if (!layerParents.ContainsKey(targetLayer))
             {
                 Debug.LogError($"面板 {targetPanel.name} 请求的层级 {targetLayer} 未在 UIManager 中初始化！");
                 return null;
             }
 
-            // 3. 设置父节点 (挂载到对应层级)
-            // 无论是新加载的还是已存在的，都检查一下父节点是否正确
             if (targetPanel.transform.parent != layerParents[targetLayer])
             {
                 targetPanel.transform.SetParent(layerParents[targetLayer], false);
             }
 
-            // 4. 注册层级关系映射
+            // 这里需要注意：如果是多实例面板，多个实例都会映射到同一个 layer，这是正确的
             panelToLayerMap[targetPanel] = targetLayer;
 
-            // 5. 处理堆栈和显示逻辑
             ProcessPanelShow(targetLayer, targetPanel, args);
 
-            // 6. 处理模态
             if (IsModalLayer(targetLayer))
             {
                 SetModalLayer(targetLayer);
@@ -297,20 +308,25 @@ namespace Moyo.Unity
         #endregion
 
         #region 关闭面板 (HidePanel)
-
         public void HidePanel<T>() where T : PanelBase
         {
-            if (loadedPanels.TryGetValue(typeof(T), out var panel) && panel != null)
+            Type panelType = typeof(T);
+
+            // 1. 尝试从单例字典中查找
+            if (loadedPanels.TryGetValue(panelType, out var panel) && panel != null)
             {
-                if (panelToLayerMap.TryGetValue(panel, out var layer))
-                {
-                    ProcessPanelHide(layer, panel);
-                }
-                else
-                {
-                    // 异常兜底
-                    panel.Hide(this);
-                }
+                HidePanel(panel); // 调用基于实例的重载
+            }
+            else
+            {
+                // 【适配说明】
+                // 如果是多实例面板（SingletonPanel = false），它不会在 loadedPanels 里。
+                // 所以 HidePanel<T>() 对多实例面板无效。
+                // 开发者必须持有该面板的实例引用，调用 HidePanel(instance)。
+                Debug.LogWarning($"HidePanel<{panelType.Name}> 无法找到单例实例。如果是多实例面板，请使用 HidePanel(instance) 直接关闭特定对象。");
+
+                // 可选：如果你希望 HidePanel<T> 暴力关闭所有该类型的面板，可以遍历 activePanels
+                // 但这通常不符合预期，建议保持上述 Warning。
             }
         }
 
@@ -458,31 +474,56 @@ namespace Moyo.Unity
 
             // 4. 刷新模态状态（遮罩/点击阻挡）
             UpdateModalLayerState();
-        }
 
-        public void DestroyPanel<T>() where T : PanelBase
-        {
-            Type panelType = typeof(T);
-            if (loadedPanels.TryGetValue(panelType, out var panel) && panel != null)
+
+            // 【新增建议】：如果是非单例面板，关闭即销毁
+            // 这样避免生成了 100 个 Toast 也就是隐藏在 Hierarchy 里占内存
+            if(!panelToClose.SingletonPanel)
             {
-                // 先走正常的隐藏流程以维护堆栈
-                if (panelToLayerMap.TryGetValue(panel, out var layer))
-                {
-                    ProcessPanelHide(layer, panel);
-                }
-
-                // 清理引用
-                loadedPanels.Remove(panelType);
-                panelToLayerMap.Remove(panel);
-
-                // 释放资源
-                AssetsManager.Instance.ReleaseAsset(panel.name);
-                Destroy(panel.gameObject);
-
-                UpdateModalLayerState();
+                // 延迟一帧或直接销毁，取决于你的动画逻辑
+                // 建议调用 DestroyPanel(panelToClose) 来彻底清理
+                // 但要注意不要在遍历 activePanels 时直接 Modify 集合，上面逻辑已经 Remove 了，所以这里是安全的
+                DestroyPanel(panelToClose);
             }
         }
 
+        public void DestroyPanel(PanelBase panel)
+        {
+            if (panel == null) return;
+
+            // 1. 先从 UI 堆栈中移除
+            if (panelToLayerMap.TryGetValue(panel, out var layer))
+            {
+                ProcessPanelHide(layer, panel);
+                panelToLayerMap.Remove(panel);
+            }
+
+            // 2. 【适配修改点】如果是单例，从缓存字典中移除
+            Type t = panel.GetType();
+            if (loadedPanels.TryGetValue(t, out var cachedPanel) && cachedPanel == panel)
+            {
+                loadedPanels.Remove(t);
+            }
+
+            // 3. 销毁物体
+            // 注意：如果是 Addressables 加载，AssetsManager.ReleaseAsset 可能需要具体的 handle 或地址
+            // 假设你的 AssetsManager 可以通过 name 或其他方式处理引用计数
+            AssetsManager.Instance.ReleaseAsset(panel.name);
+            Destroy(panel.gameObject);
+
+            UpdateModalLayerState();
+        }
+
+        // 修改原有的泛型版本
+        public void DestroyPanel<T>() where T : PanelBase
+        {
+            // 只处理单例
+            if (loadedPanels.TryGetValue(typeof(T), out var panel))
+            {
+                DestroyPanel(panel);
+            }
+        }
+      
         #endregion
 
         #region 模态管理

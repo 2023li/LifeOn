@@ -64,7 +64,7 @@ public class LoadTransition : MonoBehaviour
 
         // --- 阶段 2: 资产预加载 ---
         Task preloadTask = Task.CompletedTask;
-        if (request.PreloadAddresses != null && request.PreloadAddresses.Count > 0)
+        if (request.PreloadAddresses != null)
         {
             var tasks = new List<Task>();
             foreach (var addr in request.PreloadAddresses)

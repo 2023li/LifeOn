@@ -12,17 +12,12 @@ using System.Threading.Tasks;
 using System.Threading;
 
 
-public enum AppLanguage
-{
-    简体中文,
-    English,
 
-}
 
 public class AppManager : MonoSingleton<AppManager>
 {
 
-  
+
 
     protected override void Awake()
     {
@@ -36,11 +31,20 @@ public class AppManager : MonoSingleton<AppManager>
         PersistentManager.Instance.LoadAppData();
 
 
-        
+
 
     }
 
-   
+
+    public readonly string[] Scenes_Game_PreloadAddresses = new string[]
+    {
+        //UI游戏界面
+        "UIPanel_Main",
+        LOConstant.AssetsKey.Address_SupplyLib
+
+    };
+
+
 
     protected override void OnDestroy()
     {
@@ -67,58 +71,86 @@ public class AppManager : MonoSingleton<AppManager>
         LoadScene(sc);
     }
     [Button]
-    public void LoadGameScene(SceneLoadContext context = null)
+    public void LoadGameScene(Action call = null)
     {
-
-    
-
-        //如果空的代表开始新游戏
-        if (context == null)
+        var context = new SceneLoadContext()
         {
-            context = new SceneLoadContext()
+            TargetSceneName = LOConstant.SceneName.Game,
+
+            PreloadAddresses = Scenes_Game_PreloadAddresses,
+            OnComplete = async () =>
             {
-                TargetSceneName = LOConstant.SceneName.Game,
-                PreloadAddresses = new List<string>(){"UIPanel_GameMain"},
-                OnComplete = async () =>
-                {
-                    await UIManager.Instance.ShowPanel<UIPanel_GameMain>();
-                    GameContext.Instance.Clear();
-                    AppEventArgs.Tiggle(AppEventEnum.场景加载完成);
+                await TheGame.Instance.InitGame();
 
-
-                }
-            };
-        }
-
-
+                call?.Invoke();
+                AppEventArgs.Tiggle(AppEventEnum.场景加载完成);
+                Debug.Log("场景加载完成");
+            }
+        };
         LoadScene(context);
     }
     #endregion
 
-    private void EnterWait()
+    public async UniTask EnterWait()
     {
-        _ = UIPanel_GeneralNotice.ShowWait();
+        await UIPanel_GeneralNotice.ShowWait();
     }
-    public async UniTask WaitRunTask(Action action, float minDuration = 0.1f)
+
+    public async UniTask WaitRunTaskMainThread(Action action, float minDuration = 0.5f)
     {
         // 1. 显示 Loading
-        EnterWait();
+        await EnterWait();
+
+
+        // Task B: 最小等待时间的计时器 (忽略 TimeScale 影响)
+        UniTask delayTask = UniTask.Delay(TimeSpan.FromSeconds(minDuration), ignoreTimeScale: true);
+
+        action?.Invoke();
+
+
+        // 3. 等待两者都完成
+        await delayTask;
+
+        Debug.Log("主线程任务完成");
+        // 4. 无论成功还是报错，最终都会执行这里，确保 Loading 关闭
+        ExitWait();
+
+    }
+
+    public async UniTask WaitRunTask(Action action, float minDuration = 0.5f)
+    {
+        // 1. 显示 Loading
+        await EnterWait();
 
         UniTask workTask = UniTask.RunOnThreadPool(action);
+
 
         // Task B: 最小等待时间的计时器 (忽略 TimeScale 影响)
         UniTask delayTask = UniTask.Delay(TimeSpan.FromSeconds(minDuration), ignoreTimeScale: true);
 
         // 3. 等待两者都完成
-        // 如果 workTask 0.1秒做完，delayTask 会强行等到 0.5秒
-        // 如果 workTask 2.0秒做完，delayTask 早就结束了，整体耗时 2.0秒
-        await UniTask.WhenAll(workTask, delayTask);
+        await UniTask.WhenAll(workTask,delayTask);
 
+        Debug.Log("任务完成");
         // 4. 无论成功还是报错，最终都会执行这里，确保 Loading 关闭
         ExitWait();
 
     }
-    private void ExitWait()
+    public async UniTask BGRunTask(Func<UniTask> action,Action callBack = null)
+    {
+
+
+        if (action != null)
+        {
+            await action.Invoke();
+        }
+
+        callBack?.Invoke();
+        Debug.Log("异步任务完成");
+
+    }
+
+    public void ExitWait()
     {
         UIPanel_GeneralNotice.HideWait();
     }
@@ -128,7 +160,7 @@ public class AppManager : MonoSingleton<AppManager>
     public class SceneLoadContext
     {
         public string TargetSceneName;
-        public List<string> PreloadAddresses;
+        public IEnumerable<string> PreloadAddresses;
         public Action OnComplete; // 核心：加载完成后的回调
         public bool UseTransition = true;
     }
@@ -238,7 +270,7 @@ public struct AppEventArgs
     }
 }
 
-public class AppStateEventHandler:Singleton<AppStateEventHandler>,IMoyoEventListener<AppEventArgs>
+public class AppStateEventHandler : Singleton<AppStateEventHandler>, IMoyoEventListener<AppEventArgs>
 {
 
     protected AppStateEventHandler()

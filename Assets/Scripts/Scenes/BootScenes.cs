@@ -20,12 +20,12 @@ public class BootScenes : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("do some");
+        Debug.Log("模拟闪屏2秒");
 
 
     }
 
-    float time = 2f;
+    public float time = 2f;
 
     // Update is called once per frame
     void Update()

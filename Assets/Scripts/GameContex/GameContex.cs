@@ -54,13 +54,11 @@ public class GameContext : Singleton<GameContext>, IGameContext
     public void Clear()
     {
         resourceNetwork.Clear();
-
         techTree.Clear();
         environment.Clear();
         humanResourcesNetwork.Clear();
         turnSystem.Clear();
         buildings.Clear();
-
     }
 
 }

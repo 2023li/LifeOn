@@ -23,11 +23,6 @@ public class SupplyLib : ScriptableObject
 
     public static SupplyLib Ins;
 
-#if UNITY_EDITOR
-    private const string DefaultSuppliesFolder = "Assets/GameData/Supplies";
-    private static bool s_EditorCacheReady = false;
-#endif
-
     /// <summary>
     /// 运行时初始化：从你的资源系统加载 SupplyLib（Addressables/自研资源管理等）并构建字典。
     /// </summary>
@@ -36,7 +31,6 @@ public class SupplyLib : ScriptableObject
         if (Ins != null && Ins.dic_ID_SupplyDef != null && Ins.dic_ID_SupplyDef.Count > 0)
             return;
 
-        // 按你的工程加载方式替换这里
         Ins = await AssetsManager.Instance.LoadAssetAsync<SupplyLib>(LOConstant.AssetsKey.Address_SupplyLib);
         if (Ins == null)
         {
@@ -102,7 +96,8 @@ public class SupplyLib : ScriptableObject
         // 运行时/播放模式：依赖 Clear()
         if (Ins == null || Ins.dic_ID_SupplyDef == null)
         {
-            Debug.LogWarning("[SupplyLib] 运行时访问：请先调用 SupplyLib.Clear() 再使用 GetSupplyDef。");
+            Debug.LogWarning("未初始化");
+
             return null;
         }
         if (Ins.dic_ID_SupplyDef.TryGetValue(id, out var def))
@@ -122,6 +117,9 @@ public class SupplyLib : ScriptableObject
 
 
 #if UNITY_EDITOR
+
+    private const string DefaultSuppliesFolder = "Assets/GameData/Supplies";
+    private static bool s_EditorCacheReady = false;
     /// <summary>
     /// （新增）自动收集所有 SupplyDef 到 allSupply。
     /// 默认仅扫描目录 Assets/GameData/Supplies；传入 globalScan=true 时改为全局扫描。

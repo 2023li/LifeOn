@@ -377,7 +377,7 @@ public class CityEnvironment
 
     internal void Clear()
     {
-        throw new NotImplementedException();
+        Debug.LogError("未实现");
     }
 }
 

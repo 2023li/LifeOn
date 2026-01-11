@@ -219,44 +219,15 @@ public class PersistentManager : MonoSingleton<PersistentManager>
             SaveAppData();
         }
 
-        // 3. 构建加载上下文，完全接管加载流程
-        // 我们不再使用 AppManager.Instance.LoadGameScene()，因为它包含默认的 Clear 逻辑
-        var loadContext = new AppManager.SceneLoadContext()
-        {
-            TargetSceneName = LOConstant.SceneName.Game,
-            UseTransition = true, // 使用过渡场景
-            PreloadAddresses = new List<string>()
-            {
-                "UIPanel_GameMain" // 预加载游戏主界面资源
-            },
-            // 【核心修复】：所有的逻辑都在这个回调中顺序执行
-            OnComplete = async () =>
-            {
-                // A. 显示游戏主界面 (但在数据恢复前，它可能显示为空数据，所以其实可以放在后面，或者由 Restore 刷新)
-                await UIManager.Instance.ShowPanel<UIPanel_GameMain>();
+      
+        AppManager.Instance.LoadGameScene(RestoreGameState); // true 表示使用过渡页
 
-                // B. 执行数据恢复 (替代原本的 RestoreGameRoutine)
-                // 注意：这里不需要协程等待，因为 OnComplete 触发时，场景已经加载完毕且 Awake/Start 已执行
-                RestoreGameState();
-
-                // C. 触发事件
-                AppEventArgs.Tiggle(AppEventEnum.场景加载完成);
-                
-                Debug.Log("[PersistentManager] 存档加载流程全部结束，Loading 界面已关闭。");
-            }
-        };
-
-
-        AppManager.Instance.LoadGameScene(loadContext); // true 表示使用过渡页
-
-        // 3. 开启协程等待场景加载完成，然后恢复数据
     }
 
 
     //恢复游戏状态
     private void RestoreGameState()
     {
-        Debug.Log("RestoreGameState...开始恢复数据");
 
         if (currentGameData == null)
         {
@@ -266,7 +237,6 @@ public class PersistentManager : MonoSingleton<PersistentManager>
 
         try
         {
-            GameContext.Instance.Clear();
             // 1. 重建建筑
             ReconstructBuildings();
 

@@ -441,7 +441,7 @@ public class TechTreeManager
 
     internal void Clear()
     {
-        throw new NotImplementedException();
+        Debug.LogError("未实现");
     }
 
 

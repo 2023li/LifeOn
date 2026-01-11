@@ -34,6 +34,31 @@ MonoBehaviour:
     m_Localized: Language
     m_Metadata:
       m_Items: []
+  - m_Id: 9429051713056768
+    m_Localized: Return to Main Menu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9429491997536256
+    m_Localized: Are you sure you want to return to the main menu? Any unsaved progress
+      will be lost.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9490175695319040
+    m_Localized: Yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9490220373045248
+    m_Localized: No
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9490247103344640
+    m_Localized: Confirm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9490296151535616
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

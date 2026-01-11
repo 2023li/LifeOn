@@ -79,7 +79,7 @@ public class HumanResourcesNetwork
 
     internal void Clear()
     {
-        throw new NotImplementedException();
+        Debug.LogError("未实现");
     }
 }
 

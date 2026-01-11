@@ -31,7 +31,11 @@ public class UIPanel_Setting : PanelBase
     private LocalizedString localStr_确定保存标题;
     [FoldoutGroup("本地化文本"),SerializeField]
     private LocalizedString localStr_确定保存描述;
-  
+
+    
+
+
+
     protected void Awake()
     {
         BindToggleEvents();
@@ -63,19 +67,27 @@ public class UIPanel_Setting : PanelBase
         {
             string label = localStr_确定保存标题.GetLocalizedString();
             string des = localStr_确定保存描述.GetLocalizedString();
-            _ = UIPanel_UniversalSelectionBox.ShowBox(label, des,
-                () =>
-                {
-                    PersistentManager.Instance.SaveAppData();
-                    saveTo = true;
-                    UIManager.Instance.HidePanel(this);
-                },
 
-                () =>
-                {
-                    UIManager.Instance.HidePanel(this);
-                }
-                );
+
+            UIPanel_UniversalSelectionBox.BtnData btn2 = new UIPanel_UniversalSelectionBox.BtnData();
+            btn2.btnName = LocalStr.Instance.Base_否;
+            btn2.btnCall = () =>
+            {
+                saveTo = true;
+                UIManager.Instance.HidePanel(this);
+            };
+
+
+            UIPanel_UniversalSelectionBox.BtnData btn1 = new UIPanel_UniversalSelectionBox.BtnData();
+            btn1.btnName = LocalStr.Instance.Base_是;
+            btn1.btnCall = () =>
+            {
+                PersistentManager.Instance.SaveAppData();
+                saveTo = true;
+                UIManager.Instance.HidePanel(this);
+            };
+            _ = UIPanel_UniversalSelectionBox.ShowBox(label, des,btn1,btn2);
+
           return true;
         }
 

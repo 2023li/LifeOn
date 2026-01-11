@@ -10,7 +10,19 @@ using Sirenix.OdinInspector;
 
 public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppEventArgs>
 {
-    public Camera RealCamera { get; private set; }
+
+    public Camera mainCamera;
+    public Camera RealCamera
+    {
+        get
+        {
+            if (mainCamera == null)
+            {
+                mainCamera = Camera.main;
+            }
+            return mainCamera;
+        }
+    }
     public Vector3 MousePos { get; private set; }
     public Vector2 MouseWheelDelta { get; private set; }
 
@@ -44,7 +56,6 @@ public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppE
     protected override void Initialize()
     {
         base.Initialize();
-        RealCamera = Camera.main;
 
         inputActionMap = new LOControlsMaps();
 
@@ -220,7 +231,6 @@ public class InputManager : MonoSingleton<InputManager>, IMoyoEventListener<AppE
             case AppEventEnum.场景加载完成:
 
 
-                RealCamera = Camera.main;
 
 
                 break;

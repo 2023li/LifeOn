@@ -16,7 +16,7 @@ public class UIPanel_GeneralNotice : PanelBase
     [SerializeField] private GameObject autoSave;
     [SerializeField] private GameObject load;
 
-
+    static UIPanel_GeneralNotice ins;
     private void Clear()
     {
         waitIcon.SetActive(false);
@@ -26,7 +26,9 @@ public class UIPanel_GeneralNotice : PanelBase
 
     public static async Task ShowWait()
     {
-        var ins =  await UIManager.Instance.ShowPanel<UIPanel_GeneralNotice>();
+        
+        ins =await UIManager.Instance.ShowPanel<UIPanel_GeneralNotice>();
+       
         ins.Clear();
         ins.waitIcon.SetActive(true);
     }

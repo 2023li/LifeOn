@@ -121,60 +121,70 @@ MonoBehaviour:
     isModal: 0
     blocksRaycasts: 0
     allowMultiPanels: 1
+    canCloseByBack: 0
   - layerType: 1
     layerName: Scene
     sortOrder: 1
     isModal: 0
     blocksRaycasts: 0
     allowMultiPanels: 1
+    canCloseByBack: 1
   - layerType: 2
-    layerName: Normal
+    layerName: Main
     sortOrder: 2
     isModal: 0
     blocksRaycasts: 1
-    allowMultiPanels: 1
+    allowMultiPanels: 0
+    canCloseByBack: 0
   - layerType: 3
-    layerName: Main
+    layerName: Panel
     sortOrder: 3
     isModal: 0
     blocksRaycasts: 1
-    allowMultiPanels: 0
+    allowMultiPanels: 1
+    canCloseByBack: 1
   - layerType: 4
     layerName: Popup
     sortOrder: 4
     isModal: 1
     blocksRaycasts: 1
     allowMultiPanels: 1
+    canCloseByBack: 1
   - layerType: 5
     layerName: Guide
     sortOrder: 5
     isModal: 1
     blocksRaycasts: 1
     allowMultiPanels: 1
+    canCloseByBack: 0
   - layerType: 6
     layerName: Notice
     sortOrder: 6
     isModal: 1
     blocksRaycasts: 1
     allowMultiPanels: 1
+    canCloseByBack: 0
   - layerType: 7
     layerName: Toast
     sortOrder: 7
     isModal: 0
     blocksRaycasts: 0
     allowMultiPanels: 1
+    canCloseByBack: 1
   - layerType: 8
     layerName: Loading
     sortOrder: 8
     isModal: 1
     blocksRaycasts: 1
     allowMultiPanels: 1
+    canCloseByBack: 0
   - layerType: 9
     layerName: DebugInfo
     sortOrder: 9
     isModal: 0
     blocksRaycasts: 0
     allowMultiPanels: 1
+    canCloseByBack: 1
   canvasReferenceResolution: {x: 1920, y: 1080}
 --- !u!1 &4539684391954363698
 GameObject:
@@ -299,6 +309,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89e47685ceaa48f4992b8d23774561b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCamera: {fileID: 0}
 --- !u!1 &8642055841643760645
 GameObject:
   m_ObjectHideFlags: 0
@@ -395,6 +406,7 @@ GameObject:
   - component: {fileID: 873446327084042900}
   - component: {fileID: 6790068438061607902}
   - component: {fileID: 6447695992913786526}
+  - component: {fileID: 7875103700140198622}
   m_Layer: 0
   m_Name: App
   m_TagString: Untagged
@@ -433,7 +445,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0d8a2a780db17c4981ea2d672caa99e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NeedPreloadGameObject: []
 --- !u!114 &6790068438061607902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -463,5 +474,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1260378c88e80f48b101de73034000d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7875103700140198622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8832982178575566358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74500d963f84222439064b5a8ba45552, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
